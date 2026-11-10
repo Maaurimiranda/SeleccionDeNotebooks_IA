@@ -50,7 +50,7 @@
 | SM1 | Interpretación del requerimiento: perfiles de uso con grado, presupuesto, requisitos explícitos e institucionales, `necesita_virtualizacion`, preguntas pendientes | Olea, F. | `[DOC]` |
 | **SM2** | **Evaluación de rendimiento y capacidad (CPU, RAM, almacenamiento)** | **Miranda, M.** | `[DOC]` |
 | SM3 | Evaluación gráfica y de movilidad (GPU, pantalla, peso, autonomía) | de Coninck, R. | `[DOC]` |
-| SM4 | Integración y recomendación (combina grados de SM2/SM3 con prioridades, aplica excluyentes con MIN) | Luconi Furque, M. `[DED]` por la cita de referencias de PI4 | `[DOC]` |
+| SM4 | Integración y recomendación (combina grados de SM2/SM3 con prioridades, aplica excluyentes con MIN) | Luconi Furque, M. (48889; confirmado en PG1 y PG2) | `[DOC]` |
 
 ### 2.2 Línea de tiempo de entregas
 
@@ -60,8 +60,8 @@
 | PI1 | Tarea experta, procesos, cuaderno de conocimiento (v1.0, 18/09/2026) | Entregado y corregido (riesgo **amarillo**) |
 | PI2 | Redes semánticas, frames, reglas (cuaderno v1.1, 03/10/2026) | Entregado y corregido |
 | PI3 | Lógica difusa (variables, gaussianas, FZ-R1..R7) | Entregado y corregido («modelo cerrado») |
-| PG1 | Integración conceptual y consolidación del conocimiento (grupo) | No disponible aquí |
-| PG2 | Implementación de la base de conocimiento en Neo4j (grupo; `Grupo_2_PG2_U1.cypher`) | No disponible aquí |
+| PG1 | Integración conceptual y consolidación del conocimiento (grupo) | Ver `Contexto_PG1_PG2_Grupo_para_PG3.md` |
+| PG2 | Implementación de la base de conocimiento en Neo4j (grupo; `Grupo_2_PG2_U1.cypher`) | Ver `Contexto_PG1_PG2_Grupo_para_PG3.md` |
 | PI4 | Integración LLM + Neo4j (individual) | Entregado y corregido |
 | **PG3** | **Orquestación final, pruebas y carpeta (grupo)** | **Próxima actividad** |
 
@@ -70,7 +70,7 @@
 | Prefijo | Significado | Ejemplos |
 | --- | --- | --- |
 | `INT-R` | Reglas de SM1 (interpretación) | INT-R3 (`necesita_virtualizacion`), INT-R5 (umbral 0,4 para imponer requisitos), INT-R13 (perfil indeterminado → pregunta pendiente) |
-| `REN-R` | Reglas de SM2 (evaluación de rendimiento) | REN-R1 a REN-R15 (REN-R16 es otra regla de PG1: «Ampliabilidad» alta/media/baja de RAM y slot M.2, que SM4 usa para desempatar `[?]`) |
+| `REN-R` | Reglas de SM2 (evaluación de rendimiento) | REN-R1 a REN-R15 (REN-R16 es otra regla de PG1: «Ampliabilidad» alta/media/baja de RAM y slot M.2, que SM4 usa para desempatar; está cargada en el grafo de PG2) |
 | `GM-R` / `GM-RD` | Reglas de SM3 (gráfica y movilidad) | GM-R10 (inferencia TSK), GM-R15 (consume el aviso de canal simple), GM-RD1, GM-RD2 |
 | `REC-R` / `REC-RD` | Reglas de SM4 (recomendación) | REC-R3 (operador MIN para excluyentes), REC-R11 (plantilla fija / rango), REC-R15 (recomendación condicionada con rango), REC-RD1 |
 | `FZ-R` | Reglas difusas de SM2 (PI3) | FZ-R1 a FZ-R7 |
@@ -273,13 +273,13 @@ En el grafo: 3 variables y **10 etiquetas** de SM2 (4 + 3 + 3), todas `sin valid
 Mejor caso (a = 1): 49,6 medio. Peor caso (a = 0): **81,1 alto** (0,578 sobre medio 0,116) → FZ-R7 emite alerta. Se informa **rango [49,6 ; 81,1]** y alerta. Para la Notebook G, el grafo de PG2 informa **[49,58 ; 81,46]** `[?]` (ver 14, ítem C).
 
 ### 7.5 Limitaciones reconocidas
-Anchos σ, pesos de a y consecuentes son decisión del grupo; **B y K casi iguales** (B: 16 GB soldada, ρ = 1,0, a = 0 → 50,00; K: 8 GB ampliable → 49,55) aunque B no puede corregirse y K sí; el centroide solo recorre ≈ 14,3 a ≈ 83,5, por eso se lee por etiqueta; SM2 usa Mamdani y SM3 usa TSK (GM-R10): unificar criterio.
+Anchos σ, pesos de a y consecuentes son decisión del grupo; **B y K casi iguales** (B: 16 GB soldada, ρ = 1,0, a = 0 → 50,00; K: 8 GB ampliable → 49,55) aunque B no puede corregirse y K sí; el centroide solo recorre ≈ 14,3 a ≈ 83,5, por eso se lee por etiqueta; SM2 usa Mamdani y SM3 usaba TSK (GM-R10): **resuelto en PG2**, los cuatro submódulos usan Mamdani.
 
 ---
 
 ## 8. Modelo de datos del grafo Neo4j `[DED]`
 
-> **Deducido de las consultas Cypher del `.py`.** La fuente real es `Grupo_2_PG2_U1.cypher` (bloques 7, 9, 10, 11, 13). Confirmar etiquetas, propiedades y relaciones contra ese archivo antes de escribir Cypher nuevo.
+> **Reemplazada por `Contexto_PG1_PG2_Grupo_para_PG3.md` §8** (leído contra el `.cypher`). Se conserva solo como referencia de lo que usan las consultas del `.py`. **Deducido de las consultas Cypher del `.py`.** La fuente real es `Grupo_2_PG2_U1.cypher` (bloques 7, 9, 10, 11, 13). Confirmar etiquetas, propiedades y relaciones contra ese archivo antes de escribir Cypher nuevo.
 
 **Nodos y propiedades usadas:**
 
@@ -345,7 +345,7 @@ Anchos σ, pesos de a y consecuentes son decisión del grupo; **B y K casi igual
 **E** no soporta → «Descartada (REN-R1 + REC-R3)». **G** no informa → «Indeterminada: completar información». Las otras 7 cumplen. Alertas de G: REN-R13 («Información incompleta»), REN-R10 («Ampliabilidad no verificada»), FZ-R7 («Riesgo de obsolescencia alto»).
 
 ### 9.4 Otros datos
-Notebook A en req_01: recomendada, grado 0,785, «Alta» (CP1). Reglas activadas de A (L3): FZ-R4 (0,458), GM-RD1 (0,41), GM-RD2 (0,46), REC-RD1 (fuerza reportada 0,863 en la respuesta de PI4; coherencia entre 0,785 y 0,863 `[?]`).
+Notebook A en req_01: recomendada, grado 0,785, «Alta» (CP1). Reglas activadas de A (L3): FZ-R4 (0,458), GM-RD1 (0,41), GM-RD2 (0,46), REC-RD1 (0,863 es la fuerza de REC-RD1; 0,785 es el grado de recomendación: magnitudes distintas).
 
 ---
 
@@ -523,8 +523,8 @@ Python plano en vez de LangChain (por ahora); Ollama local (costo, privacidad, r
 | --- | --- | --- | --- |
 | **A** | **Versión del código** | El `.py` adjunto parece **anterior** al descrito en el informe PI4. El informe cuenta cosas que **no están** en el archivo: descartar modelo/pedido que el usuario no escribió; exigir respaldo textual para cada filtro; verificación **por párrafo** y de «fuerza» citada; rechazo de «la regla que más pesó» sin reglas; campo `ampliabilidad_de_la_ram`; omitir reglas de fuerza < 0,10; resumen de L4 **aparte** (en el `.py` la fila de resumen va dentro de `resultados`, lo que reproduce el bug «10 sobre 11»); reglas 10–14 del prompt de explicación (el `.py` tiene 9 reglas y una regla 4/5 menos detalladas); ejemplos extra del prompt de extracción. Los tests son 27 en el archivo vs 49 en el informe | Confirmar con Mauricio cuál es la versión final; si no existe, **re-implementar** esas guardas (están descritas en el informe §g y §h) |
 | **B** | Archivos ausentes | `Grupo_2_PG2_U1.cypher`, informes PG0/PG1/PG2 y PI de SM1, SM3 y SM4 no están disponibles aquí | Adjuntarlos; hasta entonces, la sección 8 es deducción |
-| **C** | Cifras del peor caso | PI3 informa **81,1** (K con a = 0) y PG2/PI4 informan **81,46** para G (misma ρ = 0,5 y a = 0). Y 49,6 (PI3) vs 49,55 (K en grafo) y 49,58 (G mejor caso). Causa probable: discretización del centroide en el grafo `[?]` | Verificar en el Cypher de PG2 y unificar la cifra citada en el informe final |
-| **D** | Reglas activadas de A | La respuesta de PI4 caso 6 dice REC-RD1 con fuerza 0,863; el resultado esperado de CP1 es 0,785 (grado de recomendación). Pueden ser magnitudes distintas (fuerza de regla vs grado) `[?]` | Confirmar en L3 |
+| **C** | Cifras del peor caso | PI3 informa **81,1** (K con a = 0) y PG2/PI4 informan **81,46** para G (misma ρ = 0,5 y a = 0). Y 49,6 (PI3) vs 49,55 (K en grafo) y 49,58 (G mejor caso). Causa probable: discretización del centroide en el grafo `[?]` | **Resuelto** (`Contexto_PG1_PG2_Grupo_para_PG3.md` §15.2): vale **[49,58 ; 81,46]**; el 81,1 de PI3 no se reproduce con la discretización del grafo |
+| **D** | Reglas activadas de A | La respuesta de PI4 caso 6 dice REC-RD1 con fuerza 0,863; el resultado esperado de CP1 es 0,785 (grado de recomendación). Pueden ser magnitudes distintas (fuerza de regla vs grado) `[?]` | **Resuelto** (`Contexto_PG1_PG2_Grupo_para_PG3.md` §15.3): 0,863 es la fuerza de REC-RD1 y 0,785 el grado desborrosificado; no es contradicción |
 | **E** | Letra única por notebook | `normalizar_modelo` solo admite una letra; el catálogo real prevé 30 modelos | Cambiar normalización y prompt antes de cargar el catálogo completo |
 | **F** | Validaciones pendientes | No consta que se hayan hecho la consulta al técnico (16/10) ni la calibración con 30 modelos (30/10) | Tratar todos los parámetros como sin validar |
 | **G** | Notebook K con `max_gb = 32` | Es un **supuesto de instanciación** de PI2 (no un dato real de ficha) | No presentarlo como dato |

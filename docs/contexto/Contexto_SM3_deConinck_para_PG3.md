@@ -14,7 +14,7 @@
 ### 1.1 ¿Qué resuelve SM3?
 El Submódulo 3 (SM3) evalúa la **capacidad gráfica y la movilidad física** de cada notebook frente a los requerimientos del comprador. Resuelve tres problemas críticos que no se desprenden de una simple lectura de la ficha técnica:
 1. **Efecto TGP en GPU dedicada:** Dos notebooks con el mismo chip gráfico (ej. RTX 4060) rinden de forma muy diferente según los Watts asignados por el fabricante (TGP de 35 W a 115 W). SM3 evalúa la potencia térmica real mediante lógica difusa.
-2. **Optimismo en la autonomía declarada:** La cifra comercial suele ser un 30% a 40% superior a la real. SM3 prioriza mediciones de laboratorio (`autonomia_medida_h`), penaliza cifras del fabricante mediante la regla `GM-R12` ($0.7 	imes 	ext{declarada}$) guardando el valor en `autonomia_usada_h`, y trata los datos faltantes como incertidumbre epistémica (intervalo $[0.0, 1.0]$ sin inventar valores).
+2. **Optimismo en la autonomía declarada:** La cifra comercial suele ser un 30% a 40% superior a la real. SM3 prioriza mediciones de laboratorio (`autonomia_medida_h`), penaliza cifras del fabricante mediante la regla `GM-R12` ($0.7 \times \text{declarada}$) guardando el valor en `autonomia_usada_h`, y trata los datos faltantes como incertidumbre epistémica (intervalo $[0.0, 1.0]$ sin inventar valores).
 3. **Movilidad no compensatoria:** Expresiones como "liviana" o "buena batería" son graduales. SM3 aplica un principio experto no compensatorio: una excelente batería no tapa un peso excesivo (un equipo de 2.5 kg con 12 h de batería es pesado, no "bastante móvil").
 
 ### 1.2 Límites Estrictos de Responsabilidad (Fronteras en PG3)
@@ -83,7 +83,7 @@ La base de datos oficial del proyecto implementa una distinción clave surgida d
 * `vram_gb`: Entero ($0$ en integradas, $8$ en dedicadas del catálogo).
 * `tgp_w`: Entero en Watts o `null` (ej. $60$ en `Notebook_X`, $115$ en `Notebook_C`).
 * `tgp_max_w`: Entero en Watts (límite máximo del chip, ej. $115$).
-* `potencia_relativa`: Float en $[0.0, 1.0]$ ($	ext{tgp\_w} / 	ext{tgp\_max\_w}$, ej. $0.522$ en `Notebook_X`, $1.0$ en `Notebook_C`).
+* `potencia_relativa`: Float en $[0.0, 1.0]$ ($\text{tgp\_w} / \text{tgp\_max\_w}$, ej. $0.522$ en `Notebook_X`, $1.0$ en `Notebook_C`).
 
 #### Nodo `(:GamaGPU)` — Relación: `(g)-[:ES_DE_GAMA]->(gg:GamaGPU)`
 * `indice`: Entero del 1 al 5:
@@ -102,7 +102,7 @@ La base de datos oficial del proyecto implementa una distinción clave surgida d
 #### Nodo `(:Bateria)` — Relación: `(n)-[:POSEE]->(b:Bateria)`
 * `autonomia_medida_h`: Float o `null` (horas reales en pruebas de laboratorio).
 * `autonomia_declarada_h`: Float o `null` (cifra comercial).
-* `autonomia_usada_h`: Float (calculada por regla `GM-R12`: medida si existe, o $0.7 	imes 	ext{declarada}$; `null` si ninguna).
+* `autonomia_usada_h`: Float (calculada por regla `GM-R12`: medida si existe, o $0.7 \times \text{declarada}$; `null` si ninguna).
 * `tipo_dato`: String (`'medida'`, `'estimada'`, `'desconocida'`).
 * `fuente`: String (`'Notebookcheck / RTINGS'` o `'ficha del fabricante'`).
 
@@ -111,7 +111,7 @@ La base de datos oficial del proyecto implementa una distinción clave surgida d
 * `grado_gpu`: Float en $[0.0, 1.0]$.
 * `margen_gama`: String (`'superior'`, `'justa'`, `'inferior'`, `'excluye'`).
 * `grado_pantalla`: Float en $[0.0, 1.0]$.
-* `adecuacion_grafica`: Float en $[0.0, 1.0]$ ($0.6 	imes 	ext{grado\_gpu} + 0.4 	imes 	ext{grado\_pantalla}$).
+* `adecuacion_grafica`: Float en $[0.0, 1.0]$ ($0.6 \times \text{grado\_gpu} + 0.4 \times \text{grado\_pantalla}$).
 
 #### Nodo `(:Alerta)`
 * Relaciones: `(ev)-[:GENERA]->(al:Alerta)` para alertas relativas al perfil, o `(n)-[:GENERA]->(al)` para alertas absolutas.
@@ -125,7 +125,7 @@ La base de datos oficial del proyecto implementa una distinción clave surgida d
 ## 4. Motor de Inferencia: Lógica Difusa y Reglas de Conocimiento
 
 ### 4.1 Conjuntos Difusos (Bloque 4 del Cypher)
-Funciones gaussianas $\mu(x) = \exp\left(-rac{(x - c)^2}{2\sigma^2}ight)$ con hombros en los extremos:
+Funciones gaussianas $\mu(x) = \exp\left(-\frac{(x - c)^2}{2\sigma^2}\right)$ con hombros en los extremos:
 
 | Variable Difusa | Etiqueta | Centro ($c$) | Ancho ($\sigma$) | Tipo | Comportamiento |
 |---|---|:---:|:---:|:---:|---|
@@ -136,41 +136,43 @@ Funciones gaussianas $\mu(x) = \exp\left(-rac{(x - c)^2}{2\sigma^2}ight)$ con 
 | (Universo $[1, 24]$) | `media` | 6.5 h | 1.20 | Gaussiana | En 6.5 h da $\mu=1.0$. En 8.0 h da $\mu=0.46$. |
 | | `alta` | 10.0 h | 1.50 | Hombro der. | $x \ge 10.0 \Rightarrow \mu=1.0$. En 8.0 h da $\mu=0.41$. |
 | **`potencia_relativa`** | `restringida` | 0.35 | 0.10 | Hombro izq. | $x \le 0.35 \Rightarrow \mu=1.0$. |
-| ($	ext{TGP}/	ext{TGP}_{	ext{máx}}$) | `moderada` | 0.60 | 0.10 | Gaussiana | En 0.52 (Notebook_X) da $\mu=0.74$. |
+| ($\text{TGP}/\text{TGP}_{\text{máx}}$) | `moderada` | 0.60 | 0.10 | Gaussiana | En 0.52 (Notebook_X) da $\mu=0.74$. |
 | | `plena` | 0.80 | 0.10 | Hombro der. | $x \ge 0.80 \Rightarrow \mu=1.0$. En 1.0 da $\mu=1.0$. |
 | **`adecuacion_movilidad`** | `baja`, `media`, `alta` | 0.05 / 0.50 / 0.95 | 0.12 | Gaussianas salida | Defuzificación por centroide sobre 101 puntos. |
 | **`grado_gpu`** | `insuficiente`, `parcial`, `pleno` | 0.20 / 0.55 / 0.95 | 0.12 / 0.12 / 0.10 | Gaussianas salida | Defuzificación por centroide sobre 101 puntos. |
 
 ### 4.2 Reglas Difusas de Mamdani (Bloque 5 del Cypher)
-* **`GM-RD1`:** `SI peso ES liviana AND autonomia ES alta ENTONCES movilidad ES alta` ($w_1 = \min(\mu_{	ext{liv}}, \mu_{	ext{alt}})$).
+* **`GM-RD1`:** `SI peso ES liviana AND autonomia ES alta ENTONCES movilidad ES alta` ($w_1 = \min(\mu_{\text{liv}}, \mu_{\text{alt}})$).
 * **`GM-RD2`:** `SI (liviana AND media) OR (intermedia AND (media OR alta)) ENTONCES movilidad ES media`.
-* **`GM-RD3` (No compensatoria):** `SI peso ES pesada OR autonomia ES baja ENTONCES movilidad ES baja` ($w_3 = \max(\mu_{	ext{pes}}, \mu_{	ext{baj}})$).
+* **`GM-RD3` (No compensatoria):** `SI peso ES pesada OR autonomia ES baja ENTONCES movilidad ES baja` ($w_3 = \max(\mu_{\text{pes}}, \mu_{\text{baj}})$).
 * **`GM-RD4`:** `SI (margen superior AND potencia moderada/plena) OR (margen justa AND potencia plena) ENTONCES gpu ES pleno`.
 * **`GM-RD5`:** `SI (superior AND restringida) OR (justa AND moderada) OR (inferior AND plena) ENTONCES gpu ES parcial`.
 * **`GM-RD6`:** `SI (justa AND restringida) OR (inferior AND restringida/moderada) ENTONCES gpu ES insuficiente`.
 
 ### 4.3 Reglas Crisp de Negocio y Políticas
-* **`GM-R4`:** Brecha de gamas de GPU (gama $\ge$ requerida $ightarrow 1.0$; 1 nivel inferior $ightarrow 0.5$; 2 o más $ightarrow 0.0$).
+* **`GM-R4`:** Brecha de gamas de GPU (gama $\ge$ requerida $\rightarrow 1.0$; 1 nivel inferior $\rightarrow 0.5$; 2 o más $\rightarrow 0.0$).
 * **`GM-R8`:** Alerta si el TGP reduce el grado de GPU en más de 0.20 respecto a la sola gama.
-* **`GM-R11`:** Alerta si prioridad es autonomía y $\mu_{	ext{baja}}(	ext{autonomía}) \ge 0.50$.
-* **`GM-R12`:** Autonomía efectiva: si no hay medida, se aplica $0.7 	imes 	ext{declarada}$ y se marca como estimada.
+* **`GM-R11`:** Alerta si prioridad es autonomía y $\mu_{\text{baja}}(\text{autonomía}) \ge 0.50$.
+* **`GM-R12`:** Autonomía efectiva: si no hay medida, se aplica $0.7 \times \text{declarada}$ y se marca como estimada.
 * **`GM-R14`:** Grado GPU = 0.0 marca requisito excluyente no cumplido (`[:INCUMPLE {excluyente: true}]`).
 * **`GM-R15`:** GPU integrada y RAM en canal simple dispara alerta de ancho de banda reducido.
 * **`GM-R16`:** Monitor externo fija grado de pantalla en 1.0 y reduce el peso de la movilidad al 50%.
-* **`GM-R17`:** TGP desconocido genera intervalo $[	ext{peor}, 	ext{mejor}]$ y alerta sin asumir potencia plena.
+* **`GM-R17`:** TGP desconocido genera intervalo $[\text{peor}, \text{mejor}]$ y alerta sin asumir potencia plena.
 
 ---
 
 ## 5. Catálogo de Prueba Real en Neo4j (Bloque 8 del Cypher)
 
+> **Corrección (09/11/2026):** las adecuaciones de movilidad de esta tabla se recalcularon con GM-RD1..RD3 y los parámetros del grafo (Mamdani, centroide sobre 101 puntos). Los valores coinciden con `Contexto_PG1_PG2_Grupo_para_PG3.md` §9.3 y con los resultados de SM4 en Neo4j (A 0,625 · B 0,776 · C 0,231 · E 0,547 · G 0,239 · H 0,430 · K 0,537 · X 0,486). Los valores anteriores (A 0,655 · B 0,914 · E 0,655) no se reproducían.
+
 | Modelo | Precio | Peso | GPU (`g.gama`, `g.dedicada`) | TGP / Máx | Pantalla | Batería (`autonomia_usada_h`, tipo) | Rol de Prueba en SM3 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|---|
-| **`Notebook_A`** | $950 | 1.4 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 65% | 8.0 h (medida) | Movilidad equilibrada (0.655). |
-| **`Notebook_B`** | $700 | 1.3 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 62% | 10.0 h (medida) | **Campeona de Movilidad:** Adecuación 0.914 (`GM-RD1` fuerza 0.88). |
-| **`Notebook_C`** | $1200 | 2.3 kg | `'dedicada media'` (Verdadero) | **115 / 115 W** | QHD 144Hz 98% | 5.0 h (medida) | **Máxima Gráfica:** TGP pleno ($	ext{potencia}=1.0$, grado GPU 0.916), pero pesada y movilidad baja (0.230). |
-| **`Notebook_E`** | $980 | 1.5 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 70% | 7.0 h (medida) | Movilidad alta (0.655), pero SM2 la descarta por CPU sin virtualización. |
+| **`Notebook_A`** | $950 | 1.4 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 65% | 8.0 h (medida) | Movilidad media (0.625). |
+| **`Notebook_B`** | $700 | 1.3 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 62% | 10.0 h (medida) | **Campeona de Movilidad:** Adecuación 0.776, alta (`GM-RD1` fuerza 0.88). |
+| **`Notebook_C`** | $1200 | 2.3 kg | `'dedicada media'` (Verdadero) | **115 / 115 W** | QHD 144Hz 98% | 5.0 h (medida) | **Máxima Gráfica:** TGP pleno ($\text{potencia}=1.0$, grado GPU 0.916), pero pesada y movilidad baja (0.231). |
+| **`Notebook_E`** | $980 | 1.5 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 70% | 7.0 h (medida) | Movilidad media (0.547), pero SM2 la descarta por CPU sin virtualización. |
 | **`Notebook_G`** | $650 | 1.9 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 55% | **3.99 h (estimada)** | **Regla GM-R12:** 5.7 h declaradas castigadas al 70%. Pantalla básica (55% sRGB). |
-| **`Notebook_H`** | $1000 | 2.0 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 58% | 6.0 h (medida) | Movilidad intermedia (0.428) y peso de 2.0 kg. |
+| **`Notebook_H`** | $1000 | 2.0 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 58% | 6.0 h (medida) | Movilidad media (0.430) y peso de 2.0 kg. |
 | **`Notebook_K`** | $900 | 1.6 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 60% | 7.5 h (medida) | Canal simple de RAM (dispara alerta `GM-R15` en SM3). |
 | **`Notebook_M`** | $880 | 1.5 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 66% | **null (desconocida)** | **Incertidumbre:** Batería `null`, movilidad `null`, alerta `GM-R12`. |
 | **`Notebook_X`** | $1050 | 1.8 kg | `'dedicada media'` (Verdadero) | **60 / 115 W** | FHD 144Hz 95% | 7.0 h (medida) | **TGP Recortado:** Potencia relativa 0.522, grado GPU 0.55 y alerta `GM-R8`. Pantalla apta diseño. |
@@ -259,30 +261,30 @@ class Extraccion(BaseModel):
 
 ### 7.2 Guardrails Deterministas en Python
 1. `intencion == "fuera_de_alcance"`: Derivación automática a SM2 (sin consultar Neo4j).
-2. `peso_max_kg` fuera de $[0.5, 5.0]$ kg $ightarrow$ Error de plausibilidad física.
-3. `bateria_min_horas` fuera de $(0, 30]$ h $ightarrow$ Error de plausibilidad física.
-4. `gama_min` fuera de $\{1, 2, 3, 4, 5\} ightarrow$ Error de parámetro.
+2. `peso_max_kg` fuera de $[0.5, 5.0]$ kg $\rightarrow$ Error de plausibilidad física.
+3. `bateria_min_horas` fuera de $(0, 30]$ h $\rightarrow$ Error de plausibilidad física.
+4. `gama_min` fuera de $\{1, 2, 3, 4, 5\} \rightarrow$ Error de parámetro.
 5. `consulta_incompleta_o_absurda == True`: Respuesta guiada sin golpear la base.
 
 ### 7.3 System Prompts
-* **Extracción (`prompts/extraccion.txt`):** Parser semántico puro (temperature 0). Heurísticas: gamer $ightarrow$ dedicada gama $\ge 4$; liviana $ightarrow$ peso $\le 1.5$ kg; buena batería $ightarrow$ batería $\ge 8.0$ h; diseño $ightarrow$ sRGB $\ge 95\%$.
+* **Extracción (`prompts/extraccion.txt`):** Parser semántico puro (temperature 0). Heurísticas: gamer $\rightarrow$ dedicada gama $\ge 4$; liviana $\rightarrow$ peso $\le 1.5$ kg; buena batería $\rightarrow$ batería $\ge 8.0$ h; diseño $\rightarrow$ sRGB $\ge 95\%$.
 * **Explicación (`prompts/explicacion.txt`):** Asesor técnico empático (temperature 0.3). Prohibición estricta de inventar datos; justificación obligatoria con peso, horas efectivas, TGP en Watts, reglas `GM-RDx` y alertas preventivas.
 
 ---
 
 ## 8. Banco de Casos de Prueba Validados (11 Casos)
 
-1. *"Quiero una notebook gamer para jugar juegos pesados"* $ightarrow$ Recupera `Notebook_C` (potencia 1.0) y `Notebook_X` (potencia 0.52).
-2. *"Necesito algo liviano, menos de 1.5 kg, con 10 horas de batería"* $ightarrow$ Recupera únicamente `Notebook_B` (1.3 kg, 10 h).
-3. *"Gamer pero que pese menos de 2 kilos"* $ightarrow$ Filtra `Notebook_C` (2.3 kg) y recupera `Notebook_X` (1.8 kg, dedicada, pero alerta por TGP de 60 W).
-4. *"Soy diseñador gráfico, necesito buena pantalla"* $ightarrow$ Filtra `Notebook_G` (55% sRGB) y recupera pantallas con sRGB $\ge 95\%$.
-5. *"¿Qué tal la Notebook_X?"* $ightarrow$ Recupera ficha completa de X, alerta `GM-R8` por TGP recortado y reglas difusas activadas.
-6. *"Quiero una que pese 50 gramos y dure 200 horas"* $ightarrow$ Bloqueo por guardrail en Python sin consultar la base.
-7. *"¿Cuánta RAM tiene la mejor?"* $ightarrow$ Derivación determinista a SM2 (Mauricio Miranda).
-8. *"Recomendame una"* $ightarrow$ Mensaje de clarificación solicitando criterios.
-9. *"¿Cuánto dura la batería de la Notebook_M?"* $ightarrow$ Muestra `bateria_horas = null`, tipo de dato `'desconocida'`, movilidad en rango $[0 ; 1]$ y alerta `GM-R12` sin inventar números.
-10. *"¿Qué tal la Notebook_Z?"* $ightarrow$ Modelo no existente en el catálogo; lista los 9 modelos disponibles.
-11. *"¿Cuánto dura la batería de la Notebook_G?"* $ightarrow$ Muestra 3.99 h estimadas (70% de 5.7 h declaradas según `GM-R12`) con advertencia de estimación.
+1. *"Quiero una notebook gamer para jugar juegos pesados"* $\rightarrow$ Recupera `Notebook_C` (potencia 1.0) y `Notebook_X` (potencia 0.52).
+2. *"Necesito algo liviano, menos de 1.5 kg, con 10 horas de batería"* $\rightarrow$ Recupera únicamente `Notebook_B` (1.3 kg, 10 h).
+3. *"Gamer pero que pese menos de 2 kilos"* $\rightarrow$ Filtra `Notebook_C` (2.3 kg) y recupera `Notebook_X` (1.8 kg, dedicada, pero alerta por TGP de 60 W).
+4. *"Soy diseñador gráfico, necesito buena pantalla"* $\rightarrow$ Filtra `Notebook_G` (55% sRGB) y recupera pantallas con sRGB $\ge 95\%$.
+5. *"¿Qué tal la Notebook_X?"* $\rightarrow$ Recupera ficha completa de X, alerta `GM-R8` por TGP recortado y reglas difusas activadas.
+6. *"Quiero una que pese 50 gramos y dure 200 horas"* $\rightarrow$ Bloqueo por guardrail en Python sin consultar la base.
+7. *"¿Cuánta RAM tiene la mejor?"* $\rightarrow$ Derivación determinista a SM2 (Mauricio Miranda).
+8. *"Recomendame una"* $\rightarrow$ Mensaje de clarificación solicitando criterios.
+9. *"¿Cuánto dura la batería de la Notebook_M?"* $\rightarrow$ Muestra `bateria_horas = null`, tipo de dato `'desconocida'`, movilidad en rango $[0 ; 1]$ y alerta `GM-R12` sin inventar números.
+10. *"¿Qué tal la Notebook_Z?"* $\rightarrow$ Modelo no existente en el catálogo; lista los 9 modelos disponibles.
+11. *"¿Cuánto dura la batería de la Notebook_G?"* $\rightarrow$ Muestra 3.99 h estimadas (70% de 5.7 h declaradas según `GM-R12`) con advertencia de estimación.
 
 ---
 
@@ -303,5 +305,5 @@ Para el backend unificado de PG3, SM3 provee:
 * **Caso E2E 2 — Estudiante Universitario con Alta Movilidad (OFI):**
   - **SM1:** Deduce perfil `OFI`, prioridad `'autonomia'` y `'portabilidad'`.
   - **SM2:** Verifica RAM básica (8 o 16 GB).
-  - **SM3:** Rankea primera a `Notebook_B` (1.3 kg, 10 h, adecuación 0.914) y alerta sobre `Notebook_G` por batería baja estimada y pantalla pobre.
+  - **SM3:** Rankea primera a `Notebook_B` (1.3 kg, 10 h, adecuación 0.776) y alerta sobre `Notebook_G` por batería baja estimada y pantalla pobre.
   - **SM4:** Recomienda `Notebook_B` como la opción más costo-eficiente.

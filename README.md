@@ -46,7 +46,7 @@ SeleccionDeNotebooks_IA/
 ├── README.md
 └── docs/
     ├── consigna/                   # ConsignaPG3.md: consigna de la cátedra y ejemplo de referencia
-    └── contexto/                   # contexto de cada submódulo para PG3 (SM2, SM4)
+    └── contexto/                   # contexto para PG3: PG1/PG2 grupal y SM1–SM4 (Contexto_SMX_{Apellido}_para_PG3.md)
 ```
 
 ## 5. Requisitos

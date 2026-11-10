@@ -2,7 +2,7 @@
 
 > **Proyecto:** Asistente Experto para la Selección Personalizada de Notebooks · **Grupo 2 · Comisión 5K09 · UTN FRM · Ciclo 2026**
 > **Para qué sirve este archivo:** que cualquier persona o asistente de IA entienda, sin haber leído nada más, qué se entregó en PG1 y PG2, qué corrigió la profesora, cuál es el estado real de la base de conocimiento en Neo4j y qué falta hacer para PG3.
-> **Complementa a:** `CONTEXTO_PROYECTO_SM2_PARA_PG3.md` (detalle del submódulo SM2 y de PI4). Este archivo cubre lo **grupal**; no repite el detalle de SM2.
+> **Complementa a:** `Contexto_SM2_Miranda_para_PG3.md` (detalle del submódulo SM2 y de PI4). Este archivo cubre lo **grupal**; no repite el detalle de SM2.
 > **Generado:** 09/11/2026, a partir de `Grupo_2_PG1_U1` (docx), `Grupo_2_PG2_U1` (docx), `Grupo_2_PG2_U1.cypher` y las devoluciones de la profesora a PG1 y PG2.
 
 ---
@@ -269,7 +269,7 @@ El grafo tiene **61 nodos `:Regla`**: **23 `:ReglaDifusa`** y **38 `:ReglaCrisp`
 
 ## 8. Modelo del grafo implementado [CÓD][PG2]
 
-> **Este modelo reemplaza a la sección 8 de `CONTEXTO_PROYECTO_SM2_PARA_PG3.md`**, que era una deducción hecha sin el `.cypher`. Si hay diferencia, vale esta sección.
+> **Este modelo reemplaza a la sección 8 de `Contexto_SM2_Miranda_para_PG3.md`**, que era una deducción hecha sin el `.cypher`. Si hay diferencia, vale esta sección.
 
 ### 8.1 Script por bloques (se ejecutan en orden; `MATCH (n) DETACH DELETE n` al inicio: **borra todo**)
 
