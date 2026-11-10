@@ -244,7 +244,77 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 
 **Opción recomendada:** mandan los literales del Cypher canónico (D-01); los contextos y los prompts se ajustan a ellos.
 
-### D-07 · Contrato común del orquestador
+### D-07 · Contrato común del orquestador — **RESUELTA (09/11/2026)**
+
+> **Decisiones del grupo:**
+> - **Enrutamiento por plan multisubmódulo.** El LLM, con el prompt maestro, devuelve un plan JSON. Python lo valida y lo ejecuta.
+> - **Una sola explicación.** Las evidencias de todos los submódulos se juntan y un único prompt (base: el de SM4) las redacta.
+> - **Pedido:** el de la sesión, o se pregunta.
+> - **Tono:** voseo, para el asesor, hasta 180 palabras.
+>
+> El resto del contrato son definiciones técnicas por defecto, que se pueden revisar al implementar.
+>
+> **1. Intenciones (cerradas, con el submódulo que responde)**
+>
+> | Intención | Responde | Consultas | Viene de |
+> | --- | --- | --- | --- |
+> | `SM1.registrar_pedido` | SM1 | alta + `REGLAS_SM1` + L1 | SM1 `registrar_pedido` (escribe en el grafo) |
+> | `SM1.aclarar_pedido` | SM1 | ídem, sobre el mismo pedido | SM1 `aclarar_pedido` (escribe; ver D-08) |
+> | `SM1.interpretacion_pedido` | SM1 | L1 | SM1 `interpretacion_pedido` |
+> | `SM2.riesgo_ram` | SM2 | C2 (desde `Evaluacion`) | SM2 `riesgo_ram` |
+> | `SM2.virtualizacion` | SM2 | C1 | SM2 `virtualizacion` |
+> | `SM3.buscar` (`orden`: `grafica`, `movilidad` o `mixta`) | SM3 | consulta unificada | SM3 `grafica`, `movilidad` y `mixta` |
+> | `SM3.ficha` | SM3 | consulta por modelo | SM3 `modelo` |
+> | `SM4.recomendar` | SM4 | Q1, Q2, Q3, Q6B | SM4 `recomendar` |
+> | `SM4.explicar_notebook` | SM4 | Q4 (L2) | SM4 `explicar_notebook` **y** SM2 `explicar_notebook` (eran la misma L2) |
+> | `SM4.comparar` | SM4 | Q6, Q6B | SM4 `comparar` |
+> | `SM4.costo_beneficio` | SM4 | Q7 | SM4 `costo_beneficio` |
+> | `GRUPO.traza_reglas` | todos | L3 | SM2 `traza_reglas` y SM4 Q5 (eran la misma L3) |
+> | `GRUPO.parametros` | todos | L4 | SM2 `parametros` y SM4 Q8 |
+> | `fuera_de_alcance` | router | ninguna: mensaje fijo | SM1–SM3 `fuera_de_alcance` y SM4 `desconocida`. **Ya no deriva a SM2** (como hacía SM3): el router decide |
+>
+> **2. Plan del router (salida JSON del prompt maestro)**
+>
+> `{"requerimiento_id": "req_NN" | null, "consultas": [{"sm": "SM2", "intencion": "riesgo_ram", "parametros": {...}}], "evidencia": [{"dato": "...", "fragmento": "..."}], "fuera_de_alcance": bool, "aclaracion": str | null}`
+>
+> Python valida cada consulta: intención cerrada, modelos en el catálogo, `fragmento` literal (como SM4) y el pedido escrito por el usuario o de la sesión.
+>
+> **3. Pedido de la sesión.** Es el último que el usuario **nombró o registró** en esa sesión. Si no hay ninguno, se pregunta. El LLM nunca lo completa: si el pedido no aparece en el texto ni en la sesión, se descarta (error real de SM2 en PI4). Se elimina el `req_01` por defecto de SM2 y de SM4.
+>
+> **4. Evidencia común (lo único que ve el LLM de explicación)**
+>
+> `{"pedido": L1, "SM1": {...}, "SM2": {...}, "SM3": {...}, "SM4": {...}, "advertencia": str}`
+>
+> Solo aparecen las claves de los submódulos consultados. Rangos, `desconocida` y perfil `indeterminado` viajan intactos.
+>
+> **5. Explicación.**
+> - Un solo prompt, sobre la base del de SM4, en **voseo** (el de SM4 se pasa del tuteo al voseo), para el **asesor**, con **máximo 180 palabras**.
+> - Bloques REC-R11: cumple, no cumple, falta verificar y alertas.
+> - Temperatura 0 (D-05).
+> - Puede escribir los estados con tildes; el verificador compara sin tildes.
+>
+> **6. Verificador común.**
+> - Base de SM2 + SM4: cifras, modelos y reglas tienen que estar en la evidencia.
+> - Más la verificación semántica pendiente de SM2: rangos, perfil indeterminado, «una alerta no es una regla activada» y atribución de cada alerta a su notebook.
+> - Hasta 2 regeneraciones; después, plantilla fija.
+>
+> **7. Advertencia de parámetros sin validar.** Va **siempre que se consulte el grafo**: con D-06 todo está `'sin validar'`, incluida REN-R1. Se elimina la excepción de SM2 para `virtualizacion`.
+>
+> **8. Entrada.** Se rechaza con una aclaración, **sin recortar en silencio** (antes SM2 cortaba en 500 caracteres y SM4 recortaba en 1500), si está vacía, si no tiene letras o si supera los **1500 caracteres**.
+>
+> **9. Traza (una por consulta del usuario)**
+>
+> `{consulta_usuario, plan, validacion{observaciones, aclaracion}, consultas[{sm, nombre, cypher, parametros, filas}], evidencia, intentos[{texto, problemas}], respuesta, origen_respuesta, segundos}`
+>
+> `origen_respuesta` ∈ {`llm`, `plantilla_fija`, `validacion`, `fuera_de_alcance`, `error`}, con el número de intento aparte.
+>
+> **10. Acceso al grafo.** `READ_ACCESS` en todo, salvo `SM1.registrar_pedido` y `SM1.aclarar_pedido` (escritura; D-08).
+>
+> **11. API.**
+> - `POST /consultar {texto, requerimiento_id?}` → `{respuesta, requerimiento_id, submodulos_consultados, origen_respuesta, traza}`.
+> - `GET /salud` → estado de Neo4j, de Ollama y del modelo.
+>
+> **Contextos actualizados:** SM1 §12.2, SM2 §10.2 y §15.1, SM3 §2.2 y SM4 §6.2 y §7.2. Lo de abajo describe la situación previa.
 
 **Inconsistencia.**
 - **Intenciones:**

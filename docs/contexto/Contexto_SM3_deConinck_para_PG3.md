@@ -40,6 +40,13 @@ En el flujo principal de recomendación (cuando el usuario pide una sugerencia g
 4. **SM4** combina las adecuaciones de SM2 y SM3 con el presupuesto y formula la recomendación final.
 
 ### 2.2 Flujo Conversacional Especialista (Enrutamiento por Prompt Maestro)
+
+> **Contrato común (D-07):**
+> - Las intenciones pasan a ser `SM3.buscar` (con `orden`: `grafica`, `movilidad` o `mixta`) y `SM3.ficha` (antes `modelo`).
+> - `fuera_de_alcance` **ya no deriva a SM2**: lo decide el router del prompt maestro.
+> - La explicación es una sola, común a los cuatro submódulos, en voseo y con hasta 180 palabras.
+>
+> Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
 Cuando el usuario realiza una pregunta orientada a aspectos visuales, gráficos o de traslado, el **System Prompt Maestro de PG3** deriva la consulta directamente a SM3:
 
 | Intención del Usuario | Palabras Clave / Criterios | Submódulo Destino |

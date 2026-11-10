@@ -459,6 +459,8 @@ Un único asistente con: base en Neo4j, razonamiento por reglas, componentes dif
 
 ### 12.2 Intenciones de SM1 para el prompt maestro (propuesta) `[DED]`
 
+> **Contrato común (D-07):** quedan `SM1.registrar_pedido`, `SM1.aclarar_pedido` y `SM1.interpretacion_pedido`, dentro del plan multisubmódulo del router. Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
+
 | Intención | Cuándo | Qué ejecuta | Escribe en el grafo |
 | --- | --- | --- | --- |
 | `registrar_pedido` | El usuario describe un pedido nuevo (actividades, programas, juegos, presupuesto) | Extracción → validación → alta + `REGLAS_SM1` → `Q_RESULTADO` | **Sí** (Requerimiento nuevo) |

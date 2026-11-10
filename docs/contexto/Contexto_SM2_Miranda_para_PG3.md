@@ -384,6 +384,13 @@ Salidas anticipadas: aclaración / fuera_de_alcance / error → no se consulta e
 
 ### 10.2 Intención → consulta `[CÓD]`
 
+> **Contrato común (D-07):**
+> - Quedan `SM2.riesgo_ram` y `SM2.virtualizacion`.
+> - `explicar_notebook` pasa a `SM4.explicar_notebook` (era la misma L2); `traza_reglas` y `parametros` pasan a `GRUPO.traza_reglas` y `GRUPO.parametros`.
+> - Se eliminan `REQ_POR_DEFECTO = "req_01"`, el límite de 500 caracteres (ahora 1500, sin recorte) y la excepción que omitía la advertencia en `virtualizacion`.
+>
+> Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
+
 | Intención | Consulta | Parámetros | Notas |
 | --- | --- | --- | --- |
 | `riesgo_ram` | C2 | `$req`, `$modelo`, `$tipo_ram`, `$ram_min`, `$etiqueta` (opcionales los 4 últimos) | Orden: riesgo desc. Reglas: top 3 por fuerza. Alertas: solo `submodulo_origen='SM2'` |
@@ -557,6 +564,8 @@ Python plano en vez de LangChain (por ahora); Ollama local (costo, privacidad, r
 ## 15. Sugerencias de diseño para PG3 (propuestas, **no** decisiones del grupo)
 
 ### 15.1 Orquestación
+
+> **Adoptado en D-07:** plan multisubmódulo, evidencia con espacio de nombres por submódulo, una sola explicación y verificador común. Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
 - **Un solo `Orquestador` maestro** que: (1) pre-valida, (2) llama al LLM con el **prompt maestro** para obtener un plan de enrutamiento, (3) valida el plan en código, (4) ejecuta uno o varios **adaptadores de submódulo**, (5) fusiona las evidencias con un *namespace* por submódulo, (6) una sola explicación con verificación global y por submódulo, (7) plantilla fija si falla.
 - **Adaptador SM2** = el `Orquestador` actual partido en `extraer/validar → recuperar → construir_evidencia` para que el enrutador reutilice la recuperación sin la segunda llamada al LLM.
 - **Contrato del plan** (ejemplo): `{"submodulos": ["SM2","SM3","SM4"], "consultas": [{"sm":"SM2","intencion":"riesgo_ram","modelo":"Notebook_K"}, ...], "requerimiento_id": null | "req_01"}`. Cada submódulo valida su parte (intenciones cerradas, parámetros contra el grafo).

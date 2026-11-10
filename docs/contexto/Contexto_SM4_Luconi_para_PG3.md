@@ -490,6 +490,13 @@ Archivos en `/mnt/project-files/PI4/` (en el repo: `docs/fuentes/SM4/` y `docs/c
 
 ### 6.2 Consultas Cypher del SM4 (diccionario `CONSULTAS`)
 
+> **Contrato común (D-07):**
+> - Quedan `SM4.recomendar`, `SM4.explicar_notebook`, `SM4.comparar` y `SM4.costo_beneficio`.
+> - Q5 pasa a `GRUPO.traza_reglas` y Q8 a `GRUPO.parametros`; `desconocida` pasa a `fuera_de_alcance`.
+> - Se elimina `req_01` como pedido por defecto: vale el de la sesión, o se pregunta.
+>
+> Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
+
 | Id | Pregunta que responde | Origen en PG2 | Parámetros |
 |---|---|---|---|
 | L1_REQUERIMIENTO | ¿Cómo se interpretó el pedido? (presupuesto, prioridad, perfil, grado, notebook consultada, preguntas pendientes) | L1 (bloque 13) | `$requerimiento_id` |
@@ -689,6 +696,8 @@ Puntos a verificar o corregir en el SM4 antes de integrar:
 - **Funcionamiento.** Verificar con `MATCH (:Recomendacion)-[p:PROPONE]->(n) RETURN p.orden, n.modelo ORDER BY p.orden` → 1 A, 2 H, 3 B.
 
 ### 7.2 Integración y prompt maestro (punto 2 y tabla de productos)
+
+> **Adoptado en D-07:** el prompt de explicación de SM4 es la base de la explicación común, pasado a voseo y a máximo 180 palabras, y `verificar_explicacion()` es la base del verificador común. Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
 
 - **Principio que el prompt maestro debe respetar:** "Neo4j maneja la verdad". El SM4 ya lo aplica:
   - el LLM no decide, no calcula y no escribe Cypher;
