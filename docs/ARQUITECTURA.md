@@ -313,7 +313,7 @@ SeleccionDeNotebooks_IA/
 | Unitarias offline | `ejecutar()` de cada SM con un `Grafo` falso que devuelve las filas del fixture, `validar()` del router, `verificar()` y la plantilla | Nada | `unittest` |
 | Grafo | Regresión CP1–CP11 contra los esperados de PG1/PG2 §9 | Neo4j | `scripts/verificar_grafo.py` |
 | Funcionales (consigna §3.5) | Recuperación, consultas, reglas, difuso y respuesta, con esperado contra obtenido | Neo4j | `tests/test_smX.py` (clase `ConGrafo`, se saltea si no hay Neo4j) |
-| E2E (consigna §7) | E2E-1, 2, 3, 5 y 8 de D-12, con la traza en el formato de la cátedra | Neo4j + Ollama | `scripts/correr_e2e.py`, que escribe `docs/pruebas/E2E-n.md` |
+| E2E (consigna §7) | E2E-1, 2, 5, 9 y 10 (casos integrales, cruzan submódulos) y E2E-3 y 8 (controles), con la traza en el formato de la cátedra. Los E2E-1, 2, 3, 5 y 8 son de D-12; E2E-9 y 10 se agregaron el 10/11 | Neo4j + Ollama | `scripts/correr_e2e.py`, que escribe `docs/pruebas/E2E-n.md` |
 
 El criterio de aprobado de un E2E es **lo que dice el grafo** (estados, grados, puestos y alertas de D-12), no el texto del LLM. El texto se controla con el verificador y se documenta.
 
@@ -325,19 +325,20 @@ Una línea JSON por consulta en `trazas/AAAA-MM-DD.jsonl` (en `.gitignore`), con
 
 Con la traza y el grafo se reconstruyen las 5 cosas de la consigna:
 - **regla:** `[:ACTIVA]` y L3;
-- **fuente:** la propiedad `fuente` de reglas, variables, léxico y componentes (por ejemplo, `Bateria.fuente`, `Notebook.fuente_precio`). No hay nodos `:Fuente`;
+- **fuente:** el canónico **no** guarda `fuente` en las `:Regla`. El origen está en `Parametro.origen` (incluidos los `centros_y_sigmas_<variable>` que respaldan cada regla difusa), `EtiquetaDifusa.fuente`, `Juego.fuente`, `Notebook.fuente_precio` y `Bateria.fuente`. No hay nodos `:Fuente`. `GRUPO` los expone (PG3-05) y lo que falta sale como «no registrada», sin inventar nada;
 - **evidencia:** la que vio el explicador;
 - **consulta:** el Cypher con sus parámetros y filas;
 - **explicación:** la respuesta con sus intentos.
 
 ## 9. Fuera del nivel 1
 
-Queda en el plan como nivel 2, solo si sobra tiempo:
-- pedido nuevo con escritura e inferencia por `$req` (D-08);
+**Condicional (compuerta del miércoles, PLAN §2):** el pedido nuevo con escritura e inferencia por `$req` (D-08, PG3-21). El contrato ya lo prevé (las intenciones `SM1.registrar_pedido` y `SM1.aclarar_pedido` y `Grafo.escribir`), así que entrar o no entrar **no cambia esta arquitectura**: cambia qué archivos de `cypher/` se parametrizan por `$req` y que el router habilita esas dos intenciones. Sin él, las reglas y el difuso corren al cargar el grafo y el asistente solo lee sus resultados; el informe lo declara.
+
+Queda en el plan como nivel 2, solo si sobra tiempo y antes del congelamiento:
 - las reglas de D-04;
 - dos escenarios (D-09);
 - `requisitos_explicitos` (D-10);
 - `SALIDA_PI2` de los 7 perfiles y `req_04`/`req_05` (D-03, D-11);
-- E2E-4, E2E-6 y E2E-7.
+- E2E-4 y E2E-7 (el E2E-6 va con PG3-21).
 
 El informe lo declara como trabajo futuro, con su diseño ya documentado en los contextos.
