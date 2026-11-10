@@ -323,4 +323,4 @@ python scripts/empaquetar_zip.py     # genera Grupo_2_PG3_ProyectoFinal.zip
 
 ## 15. Licencia y uso
 
-Trabajo académico de la Cátedra de Inteligencia Artificial (UTN FRM). Uso educativo. `[definir licencia: el repositorio es público]`
+Trabajo académico de la Cátedra de Inteligencia Artificial (UTN FRM). Uso educativo. 
