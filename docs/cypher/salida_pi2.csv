@@ -1,0 +1,64 @@
+modelo,perfil,adecuacion_rendimiento,grado_pantalla,origen_rendimiento,origen_pantalla,estado
+Notebook_A,VIRT,0.9,1.0,PI2 de SM2,PI2 de SM3,cargado
+Notebook_B,VIRT,0.8,1.0,PI2 de SM2,PI2 de SM3,cargado
+Notebook_H,VIRT,0.88,0.9,PI2 de SM2,PI2 de SM3,cargado
+Notebook_K,VIRT,0.5,0.9,PI2 de SM2,PI2 de SM3,cargado
+Notebook_X,VIRT,0.92,1.0,PI2 de SM2,PI2 de SM3,cargado
+Notebook_E,VIRT,0.85,0.95,PI2 de SM2,PI2 de SM3,cargado
+Notebook_C,VIRT,0.95,1.0,PI2 de SM2,PI2 de SM3,cargado
+Notebook_G,VIRT,0.55,0.8,PI2 de SM2,PI2 de SM3,cargado
+Notebook_M,VIRT,0.88,0.95,PI2 de SM2,PI2 de SM3,cargado
+Notebook_A,OFI,,,,,pendiente
+Notebook_B,OFI,,,,,pendiente
+Notebook_H,OFI,,,,,pendiente
+Notebook_K,OFI,0.8,0.9,Supuesto del grupo para CP11 (reemplazar),Supuesto del grupo para CP11 (reemplazar),supuesto
+Notebook_X,OFI,,,,,pendiente
+Notebook_E,OFI,,,,,pendiente
+Notebook_C,OFI,,,,,pendiente
+Notebook_G,OFI,,,,,pendiente
+Notebook_M,OFI,,,,,pendiente
+Notebook_A,DEV,,,,,pendiente
+Notebook_B,DEV,,,,,pendiente
+Notebook_H,DEV,,,,,pendiente
+Notebook_K,DEV,,,,,pendiente
+Notebook_X,DEV,,,,,pendiente
+Notebook_E,DEV,,,,,pendiente
+Notebook_C,DEV,,,,,pendiente
+Notebook_G,DEV,,,,,pendiente
+Notebook_M,DEV,,,,,pendiente
+Notebook_A,DIS,,,,,pendiente
+Notebook_B,DIS,,,,,pendiente
+Notebook_H,DIS,,,,,pendiente
+Notebook_K,DIS,,,,,pendiente
+Notebook_X,DIS,,,,,pendiente
+Notebook_E,DIS,,,,,pendiente
+Notebook_C,DIS,,,,,pendiente
+Notebook_G,DIS,,,,,pendiente
+Notebook_M,DIS,,,,,pendiente
+Notebook_A,VID3D,,,,,pendiente
+Notebook_B,VID3D,,,,,pendiente
+Notebook_H,VID3D,,,,,pendiente
+Notebook_K,VID3D,,,,,pendiente
+Notebook_X,VID3D,,,,,pendiente
+Notebook_E,VID3D,,,,,pendiente
+Notebook_C,VID3D,,,,,pendiente
+Notebook_G,VID3D,,,,,pendiente
+Notebook_M,VID3D,,,,,pendiente
+Notebook_A,GAM,,,,,pendiente
+Notebook_B,GAM,,,,,pendiente
+Notebook_H,GAM,,,,,pendiente
+Notebook_K,GAM,,,,,pendiente
+Notebook_X,GAM,,,,,pendiente
+Notebook_E,GAM,,,,,pendiente
+Notebook_C,GAM,,,,,pendiente
+Notebook_G,GAM,,,,,pendiente
+Notebook_M,GAM,,,,,pendiente
+Notebook_A,DATOS,,,,,pendiente
+Notebook_B,DATOS,,,,,pendiente
+Notebook_H,DATOS,,,,,pendiente
+Notebook_K,DATOS,,,,,pendiente
+Notebook_X,DATOS,,,,,pendiente
+Notebook_E,DATOS,,,,,pendiente
+Notebook_C,DATOS,,,,,pendiente
+Notebook_G,DATOS,,,,,pendiente
+Notebook_M,DATOS,,,,,pendiente

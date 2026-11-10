@@ -129,6 +129,8 @@ Desde PI2 el resultado suma también `version_cuaderno`, `parametros_sin_validar
 
 ## 4. Flujo de proceso SP1–SP8 `[DOC]`
 
+> **En el prototipo (D-02 y D-03):** SM2 no corre SP1–SP8 en el grafo. Entrega `adecuacion_rendimiento` como dato por par notebook-perfil (`SALIDA_PI2`), calculado con sus reglas de PI2. **Pendiente:** completar los 6 perfiles que faltan (OFI, DEV, DIS, VID3D, GAM, DATOS) en `docs/cypher/salida_pi2.csv` y reemplazar el supuesto K–OFI 0,80. Hay que documentar el método, porque la fórmula de SP6 sin núcleos ni carga sostenida no reproduce los valores de VIRT: K da 0,75 en vez de 0,50 y G da 0,41 en vez de 0,55.
+
 SP1 se ejecuta una vez por pedido; SP2–SP8 se repiten para cada notebook del catálogo.
 
 | Paso | Qué hace | Reglas |

@@ -61,6 +61,7 @@ Cuando el usuario realiza una pregunta orientada a aspectos visuales, gráficos 
 > - Sin autonomía, `adecuacion_movilidad` queda en `null` y el rango [0 ; 1] lo arma SM4 (REC-R15).
 > - La gama mínima de GPU sale de `Perfil.gama_gpu_min` (DIS 3, GAM 3, VID3D 4), no de la intensidad de SM1.
 > - `entrena_modelos_gpu` y `req_gama_gpu` no existen.
+> - `grado_pantalla` no se calcula en el grafo: llega como dato por par notebook-perfil (`SALIDA_PI2`). **D-03:** SM3 completa los 6 perfiles que faltan en `docs/cypher/salida_pi2.csv` con sus reglas de PI2 y documenta el método.
 >
 > Ver D-04 y D-10 en `docs/INCONSISTENCIAS_CONTEXTOS.md`.
 

@@ -127,7 +127,18 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 **Opciones.** a) Manda la tabla del Cypher canónico y se corrigen los contextos *(recomendada)*. b) Adoptar la de SM2/SM4 y cambiar el grafo (cambian todos los valores esperados).
 **Archivos:** SM2 §6.1, SM4 §2.7, SM3 §7.3 y §9.2, PG1/PG2 §8.5.
 
-### D-03 · ¿Quién calcula la adecuación de rendimiento (y la de pantalla)?
+### D-03 · ¿Quién calcula la adecuación de rendimiento (y la de pantalla)? — **RESUELTA (09/11/2026)**
+
+> **Decisión del grupo:** se **completa `SALIDA_PI2`** para los **7 perfiles**. El rendimiento y la pantalla siguen siendo dato de entrada, no se calculan en el grafo, así que `req_01` no cambia.
+>
+> **Trabajo asignado:**
+> - **SM2 (Miranda):** `adecuacion_rendimiento` de las 9 notebooks en OFI, DEV, DIS, VID3D, GAM y DATOS.
+> - **SM3 (de Coninck):** `grado_pantalla` para los mismos pares.
+> - Se completa la planilla [`docs/cypher/salida_pi2.csv`](cypher/salida_pi2.csv) (53 filas pendientes, más K–OFI, que hoy es un supuesto) y después se carga en el bloque 8 del canónico con su `origen`.
+>
+> **Condición:** cada uno documenta el método. La fórmula de SP6 sin núcleos ni carga sostenida no reproduce los valores de VIRT (K 0,75 en vez de 0,50; G 0,41 en vez de 0,55), así que el informe tiene que decir con qué reglas se obtuvieron.
+>
+> Contextos actualizados: PG1/PG2 §8.5, SM2 §4 y SM3 §3. Lo de abajo describe la situación previa.
 
 **Inconsistencia.** SM2 describe el cálculo (SP1–SP8: grados de CPU, RAM y almacenamiento con 0,35/0,40/0,25 y REN-R3, R4, R5, R8 y R12) y el JSON SM2 → SM4. En el grafo, `rend` se **carga como dato fijo** (A 0,90, B 0,80…) y ninguna de esas reglas está cargada. SM4 consume `adecuacion_rendimiento` como si la calculara SM2. Pasa lo mismo con la pantalla: el grafo de PG2 la carga fija y SM3 dice calcular `grado_pantalla` desde sRGB y refresco (depende de D-01).
 

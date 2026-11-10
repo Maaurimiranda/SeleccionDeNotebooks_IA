@@ -353,7 +353,7 @@ Alertas que dependen del pedido cuelgan de `Evaluacion`: riesgo de obsolescencia
 | G | 650 | entrada, 4, **no informada** | 8 **desconocida**, —, —, desconocido | 512 / no | integrada moderna | FHD 60 Hz 55 % | 5,7 h declarada (3,99 usada) | 0,55 / 0,80 |
 | M | 880 | alta, 8, soportada | 16 mixta, 1, 64, doble | 1024 / sí | integrada moderna | FHD 60 Hz 66 % | **no informada** | 0,88 / 0,95 |
 
-El rendimiento y la pantalla **no se calculan**: se cargan por par notebook-perfil en `SALIDA_PI2` («salidas crisp que SM2 y SM3 ya producían en PI2»). Solo hay pares para VIRT, más **K–OFI (0,80 / 0,90), que es un supuesto del grupo para CP11, pendiente de que SM2 lo recalcule**. Sin un par, la notebook no se evalúa para ese perfil (D-03).
+El rendimiento y la pantalla **no se calculan**: se cargan por par notebook-perfil en `SALIDA_PI2` («salidas crisp que SM2 y SM3 ya producían en PI2»). Solo hay pares para VIRT, más **K–OFI (0,80 / 0,90), que es un supuesto del grupo para CP11, pendiente de que SM2 lo recalcule**. Sin un par, la notebook no se evalúa para ese perfil. **D-03 (resuelta):** se completan los 7 perfiles; SM2 calcula el rendimiento y SM3 la pantalla con sus reglas de PI2, sobre la planilla `docs/cypher/salida_pi2.csv`. Hasta cargarlos, solo VIRT y K–OFI son evaluables.
 
 ### 8.6 Perfiles (valores provisionales, sin validar) [CÓD]
 
