@@ -1,8 +1,7 @@
-"""Regenera tests/fixtures/ con filas REALES del grafo cargado (PG3-01, 03, 04, 07, 09).
+"""Regenera tests/fixtures/ con filas REALES del grafo cargado (PG3-01, 03, 04, 07, 09, 12).
 
 Cada fixture tiene la forma {"parametros", "consultas", "evidencia"}: la salida de
 ejecutar() para esos parámetros. Los tests offline la usan con un Grafo falso.
-SM4 no se regenera hasta PG3-12 (su servicio es un stub).
 
 Uso:  python -m scripts.generar_fixtures
 """
@@ -10,7 +9,7 @@ import json
 from pathlib import Path
 
 from asistente.grafo import Grafo
-from asistente.submodulos import grupo, sm1, sm2, sm3
+from asistente.submodulos import grupo, sm1, sm2, sm3, sm4
 
 DIR = Path(__file__).resolve().parent.parent / "tests" / "fixtures"
 
@@ -24,6 +23,14 @@ CASOS = [
      "SM3.buscar"),
     ("SM3.buscar", sm3, {"requerimiento_id": "req_01", "orden": "grafica"}, "SM3.buscar.sin_filtros"),
     ("SM3.ficha", sm3, {"requerimiento_id": "req_01", "modelo": "Notebook_M"}, "SM3.ficha"),
+    ("SM4.recomendar", sm4, {"requerimiento_id": "req_01"}, "SM4.recomendar"),
+    ("SM4.recomendar", sm4, {"requerimiento_id": "req_03"}, "SM4.recomendar.req_03"),
+    ("SM4.explicar_notebook", sm4, {"requerimiento_id": "req_01", "modelo": "Notebook_M"}, "SM4.explicar_notebook"),
+    ("SM4.explicar_notebook", sm4, {"requerimiento_id": "req_01", "modelo": "Notebook_G"},
+     "SM4.explicar_notebook.G"),
+    ("SM4.comparar", sm4, {"requerimiento_id": "req_01", "modelos": ["Notebook_E", "Notebook_B", "Notebook_H"]},
+     "SM4.comparar"),
+    ("SM4.costo_beneficio", sm4, {"requerimiento_id": "req_01"}, "SM4.costo_beneficio"),
     ("GRUPO.traza_reglas", grupo, {"requerimiento_id": "req_01", "modelo": "Notebook_A"}, "GRUPO.traza_reglas"),
     ("GRUPO.parametros", grupo, {}, "GRUPO.parametros"),
 ]

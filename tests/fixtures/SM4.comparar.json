@@ -1,6 +1,154 @@
 {
-  "_nota": "Fixture de FORMA (PG3-01). Luconi lo reemplaza por filas reales del grafo en PG3-12.",
-  "parametros": {"requerimiento_id": "req_01"},
-  "consultas": [],
-  "evidencia": {"stub": true, "datos": "SM4.comparar todavia no esta implementado (PG3-12)."}
+ "intencion": "SM4.comparar",
+ "parametros": {
+  "requerimiento_id": "req_01",
+  "modelos": [
+   "Notebook_E",
+   "Notebook_B",
+   "Notebook_H"
+  ]
+ },
+ "consultas": [
+  {
+   "nombre": "SM4.Q6_COMPARAR",
+   "cypher": "MATCH (c:Requerimiento {id:$requerimiento_id})-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)\nWHERE n.modelo IN $modelos\nMATCH (n)-[:POSEE]->(r:RAM)\nMATCH (mx:Parametro {nombre:'P_MAX_RECOMENDADAS'}), (me:Parametro {nombre:'P_MARGEN_EMPATE'})\nOPTIONAL MATCH (c)-[:RECIBE]->(:Recomendacion)-[p:PROPONE|PROPONE_FUERA_DE_PRESUPUESTO]->(n)\nOPTIONAL MATCH (c)-[cp:CONSULTA_POR]->(n)\n\nCALL {\n  WITH ev, n\n  OPTIONAL MATCH (al:Alerta)\n  WHERE EXISTS { MATCH (ev)-[:GENERA]->(al) } OR EXISTS { MATCH (n)-[:GENERA]->(al) }\n  RETURN collect(DISTINCT CASE WHEN al IS NULL THEN null ELSE\n         {codigo:al.regla_origen, texto:al.mensaje} END) AS alertas\n}\n\nCALL {\n  WITH ev\n  OPTIONAL MATCH (ev)-[a:ACTIVA]->(q:Regla)\n  WHERE q.id IN ['REC-RD4', 'REC-RD5']\n  RETURN q.id AS regla_descarte ORDER BY a.fuerza DESC, q.id LIMIT 1\n}\nWITH *, CASE\n  WHEN ev.excluyente_virtualizacion = 'no cumple' THEN\n       {regla:'REC-R3', motivo:'La CPU no soporta virtualizacion por hardware: requisito excluyente del perfil'}\n  WHEN ev.excluyente_virtualizacion = 'falta informacion' THEN\n       {regla:'REC-R3', motivo:'La ficha no informa si la CPU soporta virtualizacion: no se puede comparar'}\n  WHEN ev.estado = 'Descartada' THEN\n       {regla:regla_descarte, motivo:'El grado de recomendacion queda en descartar'}\n  WHEN NOT ev.estado STARTS WITH 'Recomendada' THEN\n       {regla:'REC-R15', motivo:'El resultado depende de un dato que falta: ' + coalesce(ev.dato_faltante, 'no informado')}\n  WHEN p IS NOT NULL THEN null\n  WHEN cp IS NOT NULL THEN\n       {regla:null, motivo:'Es una consulta puntual por esta notebook: se responde con su evaluacion, sin ranking'}\n  WHEN ev.excedente_presupuesto > 0 THEN\n       {regla:null, motivo:'Supera el presupuesto: solo se ofrece una alternativa fuera de presupuesto'}\n  ELSE {regla:'REC-R8', motivo:'Quedo fuera de los primeros ' + toString(toInteger(mx.valor)) + ' puestos del ranking'}\nEND AS m\n\nRETURN CASE type(p) WHEN 'PROPONE' THEN 'puesto ' + toString(p.orden)\n                    WHEN 'PROPONE_FUERA_DE_PRESUPUESTO' THEN 'alternativa fuera de presupuesto'\n                    ELSE CASE WHEN cp IS NOT NULL THEN 'consulta puntual: se responde con su evaluacion, sin ranking'\n                              ELSE 'no figura en la recomendacion' END END AS en_la_recomendacion,\n       CASE type(p) WHEN 'PROPONE' THEN toInteger(floor(\n            coalesce(ev.grado_recomendacion, ev.grado_recomendacion_min) / me.valor)) END AS franja_empate, m.motivo AS motivo, m.regla AS regla,\n       n.modelo AS notebook, n.precio_usd AS precio_usd, ev.estado AS estado,\n       ev.grado_recomendacion AS grado_recomendacion, ev.grado_recomendacion_min AS grado_recomendacion_min,\n       ev.grado_recomendacion_max AS grado_recomendacion_max,\n       ev.adecuacion_global AS adecuacion_global, ev.adecuacion_global_min AS adecuacion_global_min,\n       ev.adecuacion_global_max AS adecuacion_global_max,\n       ev.excedente_presupuesto AS excedente_presupuesto_pct,\n       ev.indice_costo_beneficio AS indice_costo_beneficio, r.nivel_ampliabilidad AS ampliabilidad_ram,\n       alertas\nORDER BY coalesce(p.orden, 99), coalesce(ev.grado_recomendacion, ev.grado_recomendacion_min) DESC, notebook",
+   "parametros": {
+    "requerimiento_id": "req_01",
+    "modelos": [
+     "Notebook_E",
+     "Notebook_B",
+     "Notebook_H"
+    ]
+   },
+   "filas": [
+    {
+     "en_la_recomendacion": "puesto 2",
+     "franja_empate": 12,
+     "motivo": null,
+     "regla": null,
+     "notebook": "Notebook_H",
+     "precio_usd": 1000.0,
+     "estado": "Recomendada (Media)",
+     "grado_recomendacion": 0.626,
+     "grado_recomendacion_min": null,
+     "grado_recomendacion_max": null,
+     "adecuacion_global": 0.811,
+     "adecuacion_global_min": null,
+     "adecuacion_global_max": null,
+     "excedente_presupuesto_pct": 0.0,
+     "indice_costo_beneficio": 0.811,
+     "ampliabilidad_ram": "alta",
+     "alertas": []
+    },
+    {
+     "en_la_recomendacion": "puesto 3",
+     "franja_empate": 12,
+     "motivo": null,
+     "regla": null,
+     "notebook": "Notebook_B",
+     "precio_usd": 700.0,
+     "estado": "Recomendada (Media)",
+     "grado_recomendacion": 0.632,
+     "grado_recomendacion_min": null,
+     "grado_recomendacion_max": null,
+     "adecuacion_global": 0.813,
+     "adecuacion_global_min": null,
+     "adecuacion_global_max": null,
+     "excedente_presupuesto_pct": 0.0,
+     "indice_costo_beneficio": 1.161,
+     "ampliabilidad_ram": "baja",
+     "alertas": []
+    },
+    {
+     "en_la_recomendacion": "no figura en la recomendacion",
+     "franja_empate": null,
+     "motivo": "La CPU no soporta virtualizacion por hardware: requisito excluyente del perfil",
+     "regla": "REC-R3",
+     "notebook": "Notebook_E",
+     "precio_usd": 980.0,
+     "estado": "Descartada (excluyente incumplido)",
+     "grado_recomendacion": 0.623,
+     "grado_recomendacion_min": null,
+     "grado_recomendacion_max": null,
+     "adecuacion_global": 0.81,
+     "adecuacion_global_min": null,
+     "adecuacion_global_max": null,
+     "excedente_presupuesto_pct": 0.0,
+     "indice_costo_beneficio": 0.827,
+     "ampliabilidad_ram": "alta",
+     "alertas": []
+    }
+   ]
+  },
+  {
+   "nombre": "SM4.Q6B_CRITERIO_DESEMPATE",
+   "cypher": "MATCH (q:Regla {id:'REC-R8'}), (me:Parametro {nombre:'P_MARGEN_EMPATE'})\nRETURN q.id AS regla, q.enunciado AS enunciado, me.valor AS margen_empate,\n       q.estado_validacion AS validacion, me.estado_validacion AS validacion_margen",
+   "parametros": {},
+   "filas": [
+    {
+     "regla": "REC-R8",
+     "enunciado": "SI la diferencia de grado_recomendacion < P_MARGEN_EMPATE ENTONCES desempatar por nivel_ampliabilidad",
+     "margen_empate": 0.05,
+     "validacion": "sin validar",
+     "validacion_margen": "sin validar"
+    }
+   ]
+  }
+ ],
+ "evidencia": {
+  "requerimiento_id": "req_01",
+  "notebooks": [
+   {
+    "notebook": "Notebook_H",
+    "estado": "Recomendada (Media)",
+    "grado": 0.626,
+    "precio_usd": 1000.0,
+    "adecuacion_global": 0.811,
+    "excedente_presupuesto_pct": 0.0,
+    "indice_costo_beneficio": 0.811,
+    "ampliabilidad_ram": "alta",
+    "alertas": [],
+    "en_la_recomendacion": "puesto 2",
+    "empata_con": [
+     "Notebook_B"
+    ]
+   },
+   {
+    "notebook": "Notebook_B",
+    "estado": "Recomendada (Media)",
+    "grado": 0.632,
+    "precio_usd": 700.0,
+    "adecuacion_global": 0.813,
+    "excedente_presupuesto_pct": 0.0,
+    "indice_costo_beneficio": 1.161,
+    "ampliabilidad_ram": "baja",
+    "alertas": [],
+    "en_la_recomendacion": "puesto 3",
+    "empata_con": [
+     "Notebook_H"
+    ]
+   },
+   {
+    "notebook": "Notebook_E",
+    "estado": "Descartada (excluyente incumplido)",
+    "grado": 0.623,
+    "precio_usd": 980.0,
+    "adecuacion_global": 0.81,
+    "excedente_presupuesto_pct": 0.0,
+    "indice_costo_beneficio": 0.827,
+    "ampliabilidad_ram": "alta",
+    "alertas": [],
+    "en_la_recomendacion": "no figura en la recomendacion",
+    "motivo": "La CPU no soporta virtualizacion por hardware: requisito excluyente del perfil",
+    "regla": "REC-R3"
+   }
+  ],
+  "criterio_desempate": {
+   "regla": "REC-R8",
+   "enunciado": "SI la diferencia de grado_recomendacion < P_MARGEN_EMPATE ENTONCES desempatar por nivel_ampliabilidad",
+   "margen_empate": 0.05,
+   "validacion": "sin validar",
+   "validacion_margen": "sin validar"
+  }
+ }
 }

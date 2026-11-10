@@ -14,7 +14,8 @@ CLAVES = {"respuesta", "requerimiento_id", "submodulos_consultados", "origen_res
 class TestAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        grafo = GrafoFalso(fixture("SM1.interpretacion_pedido"), fixture("SM2.riesgo_ram"))
+        grafo = GrafoFalso(fixture("SM1.interpretacion_pedido"), fixture("SM2.riesgo_ram"),
+                           fixture("SM4.explicar_notebook.G"))
         orq = Orquestador(grafo, LLMFalso(), planificar=lambda *a, **k: fixture("plan_ejemplo"),
                           dir_trazas=tempfile.mkdtemp())
         cls.cliente = TestClient(crear_app(orq))
