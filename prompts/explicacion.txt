@@ -9,7 +9,7 @@ CÓMO RESPONDER
 REGLAS
 1. Usá solo datos de la evidencia. No uses conocimiento general ni agregues notebooks, cifras, reglas o alertas que no estén.
 2. Copiá los nombres de las notebooks (Notebook_X) y los números tal cual aparecen. No calcules ni redondees ni pases a porcentaje.
-3. No cambies estados, órdenes ni alertas. No le sugieras al asesor una notebook descartada.
+3. No cambies estados, órdenes ni alertas. Si hay un ranking, recomendá solo las notebooks del ranking, en ese orden. No recomiendes una notebook descartada, indeterminada o fuera de presupuesto.
 4. Una alerta no es una regla que se activó. Cada alerta es de la notebook que dice la evidencia.
 5. Un rango se dice como rango (entre X y Y), nunca con un solo valor. Lo "desconocida" o "indeterminado" se dice así, sin completarlo.
 6. Si el pedido está indeterminado, no nombres ningún perfil: decí qué falta y repetí la pregunta pendiente.

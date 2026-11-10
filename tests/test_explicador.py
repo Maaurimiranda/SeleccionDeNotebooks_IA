@@ -22,7 +22,10 @@ def evidencia_de(*nombres: str) -> dict:
             ev["pedido"] = datos
         else:
             sm, intencion = n.split(".")[:2]
-            ev.setdefault(sm, {})[intencion] = datos
+            previa = ev.setdefault(sm, {}).get(intencion)
+            if previa and "notebooks" in previa:  # la misma intención para dos modelos (E2E-2): una sola evidencia
+                datos = {**previa, "notebooks": previa["notebooks"] + datos["notebooks"]}
+            ev[sm][intencion] = datos
     return ev
 
 
@@ -35,9 +38,12 @@ EV_ESTADOS = {"advertencia": ADVERTENCIA, "SM4": {"recomendar": {"notebooks": [
 
 CASOS_E2E = {
     "E2E-1": ("SM1.interpretacion_pedido", "SM2.riesgo_ram", "SM3.buscar", "SM4.recomendar"),
-    "E2E-2": ("SM1.interpretacion_pedido", "SM2.riesgo_ram.todas", "SM4.explicar_notebook"),
+    "E2E-2": ("SM1.interpretacion_pedido", "SM2.riesgo_ram.todas", "SM4.explicar_notebook",
+              "SM4.explicar_notebook.G"),
     "E2E-3": ("SM1.interpretacion_pedido.req_02",),
+    "E2E-5": ("SM1.interpretacion_pedido", "SM4.comparar"),
     "E2E-9": ("SM1.interpretacion_pedido", "GRUPO.traza_reglas", "SM2.riesgo_ram"),
+    "E2E-10": ("SM1.interpretacion_pedido", "SM3.buscar", "SM4.costo_beneficio"),
     "parametros": ("GRUPO.parametros",),
 }
 
@@ -96,6 +102,25 @@ class TestVerificador(unittest.TestCase):
     def test_a_cifra_inventada(self):
         self.assertDispara("a", con("El presupuesto de req_01 es de 1500 USD."), self.ram)
 
+    def test_a_cifra_de_otra_notebook(self):
+        ev = evidencia_de("SM1.interpretacion_pedido", "SM4.comparar")
+        h, b = ev["SM4"]["comparar"]["notebooks"][:2]
+        self.assertNotEqual(h["precio_usd"], b["precio_usd"])
+        self.assertDispara("a", con(f"{h['notebook']} cuesta {b['precio_usd']:.0f}."), ev)
+
+    def test_a_la_cifra_de_su_notebook_pasa(self):
+        ev = evidencia_de("SM1.interpretacion_pedido", "SM4.comparar")
+        h = ev["SM4"]["comparar"]["notebooks"][0]
+        self.assertEqual(verificar(con(f"{h['notebook']} cuesta {h['precio_usd']:.0f}."), ev), [])
+
+    def test_d_respuesta_vacia(self):
+        self.assertDispara("d", "", self.ram)
+
+    def test_f_otro_dato_de_la_notebook_dentro_del_rango_no_es_un_promedio(self):
+        grado = EV_ESTADOS["SM4"]["recomendar"]["notebooks"][1]
+        ev = {"SM4": {"recomendar": {"notebooks": [{**grado, "excedente": 0.7}]}}}
+        self.assertEqual(verificar("Notebook_M: grado entre 0.504 y 0.826, excedente 0.7.", ev), [])
+
     def test_b_modelo_inexistente(self):
         self.assertDispara("b", con("Notebook_Z tiene riesgo alto."), self.ram)
 
@@ -134,6 +159,12 @@ class TestVerificador(unittest.TestCase):
 
 
 class TestPlantillaFija(unittest.TestCase):
+    def test_la_recomendacion_va_primero_y_cada_fila_es_de_su_notebook(self):
+        ev = evidencia_de("SM1.interpretacion_pedido", "SM2.riesgo_ram", "SM3.buscar", "SM4.recomendar")
+        r = plantilla_fija(ev)
+        self.assertIn("SM4.recomendar", r)
+        self.assertIn("puesto 1, estado Recomendada (Alta)", r)
+
     def test_pasa_su_propio_verificador_en_los_fixtures(self):
         for caso, nombres in CASOS_E2E.items():
             with self.subTest(caso):

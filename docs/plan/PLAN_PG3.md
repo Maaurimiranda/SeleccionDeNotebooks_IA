@@ -12,7 +12,7 @@
 
 ## 1. Cómo leer este plan
 
-- **Nivel 1:** lo imprescindible para aprobar. Cubre cada criterio de evaluación de la consigna (§7) y cada ítem a–l del ZIP. Suma unas **44,5 h** (42 h del plan anterior, más 1,5 h de PG3-05 y 1 h de los dos casos integrales nuevos de PG3-11). **Ya hechas: 19,5 h. Faltan unas 25 h.**
+- **Nivel 1:** lo imprescindible para aprobar. Cubre cada criterio de evaluación de la consigna (§7) y cada ítem a–l del ZIP. Suma unas **44,5 h** (42 h del plan anterior, más 1,5 h de PG3-05 y 1 h de los dos casos integrales nuevos de PG3-11). **Ya hechas: ~27 h (el 10/11 se sumaron PG3-05, PG3-12, PG3-15 y casi todo PG3-13). Faltan unas 17 h.** El estado detallado y el prompt para seguir están en [`PROMPT_CONTINUACION.md`](PROMPT_CONTINUACION.md).
 - **Condicional:** PG3-21 (pedido nuevo con inferencia en vivo). Se decide en una **compuerta** el miércoles (ver §2) y, si entra, se hace antes del congelamiento. Si no, se declara trabajo futuro.
 - **Nivel 2:** si sobra tiempo. Son las mejoras de D-03, D-04, D-09, D-10 y D-11. Cada una está escrita como issue, así que se puede tomar cuando haya un hueco. Lo que no se haga se declara como **trabajo futuro** en el informe. Después del congelamiento del jueves no entra nada de nivel 2.
 - **Asignación:**

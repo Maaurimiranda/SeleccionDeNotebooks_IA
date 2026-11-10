@@ -16,6 +16,7 @@ from asistente.contrato import ESTADOS
 MAX_REGENERACIONES = 2
 MAX_PALABRAS = 180             # D-07 §5, para la respuesta del LLM
 MAX_PALABRAS_PLANTILLA = 250   # la plantilla es el último recurso: completa, pero acotada
+MAX_FILAS_PLANTILLA = 5        # filas de una lista que muestra la plantilla
 MAX_FILAS_PROMPT = 12          # filas de una lista que ve el LLM (qwen2.5:3b tiene poco contexto)
 PERFILES = ("OFI", "DEV", "VIRT", "DIS", "VID3D", "GAM", "DATOS")
 NOMBRES_DE_PERFIL = ("oficina", "ofimática", "ofimatica", "gamer", "gaming", "programación", "programacion",
@@ -107,6 +108,23 @@ def _alertas(evidencia) -> dict[str, set[str]]:
     return por_codigo
 
 
+def _numeros_por_modelo(evidencia) -> tuple[dict[str, set[Decimal]], set[Decimal]]:
+    """Números de cada notebook (los de sus dicts y textos) y números que no son de ninguna (pedido, umbrales)."""
+    por_modelo: dict[str, set[Decimal]] = {}
+    sin_modelo: set[Decimal] = set()
+    for d, modelo in _recorrer(evidencia):
+        destino = por_modelo.setdefault(modelo, set()) if modelo else sin_modelo
+        for v in d.values():
+            for hoja in (v if isinstance(v, list) else [v]):
+                if isinstance(hoja, bool):
+                    continue
+                if isinstance(hoja, (int, float)):
+                    destino.add(Decimal(str(hoja)))
+                elif isinstance(hoja, str):
+                    destino.update(_numeros(hoja))
+    return por_modelo, sin_modelo
+
+
 def _rangos(evidencia) -> list[tuple[str | None, Decimal, Decimal]]:
     salida = []
     for d, modelo in _recorrer(evidencia):
@@ -153,11 +171,20 @@ def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS)
     volcado = json.dumps(evidencia, ensure_ascii=False)
     oraciones = _oraciones(respuesta)
 
-    # (a) cada número está en la evidencia (con tolerancia de redondeo)
+    # (a) cada número está en la evidencia (con tolerancia de redondeo) y, si la oración habla de una sola
+    # notebook, es un dato de esa notebook o del pedido, no de otra
     nums = _numeros_de_la_evidencia(evidencia)
+    por_modelo, sin_modelo = _numeros_por_modelo(evidencia)
     for n in dict.fromkeys(_numeros(respuesta)):
         if not _respaldado(n, nums):
             problemas.append(f"(a) la cifra {n} no está en la evidencia")
+    for o in oraciones:
+        modelos = set(_MODELO.findall(o))
+        if len(modelos) == 1 and next(iter(modelos)) in por_modelo:
+            m = next(iter(modelos))
+            for n in dict.fromkeys(_numeros(o)):
+                if _respaldado(n, nums) and not _respaldado(n, por_modelo[m] | sin_modelo):
+                    problemas.append(f"(a) la cifra {n} no es un dato de {m}")
 
     # (b) los modelos y las reglas citados existen en la evidencia
     for m in dict.fromkeys(re.findall(r"\bNotebo\w*", respuesta)):
@@ -179,7 +206,9 @@ def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS)
 
     # (d) largo
     palabras = len(respuesta.split())
-    if palabras > max_palabras:
+    if not palabras:
+        problemas.append("(d) la respuesta está vacía")
+    elif palabras > max_palabras:
         problemas.append(f"(d) tiene {palabras} palabras y el máximo es {max_palabras}")
 
     # (e) advertencia
@@ -189,11 +218,12 @@ def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS)
 
     # (f) un rango se dice como rango: ni un valor intermedio ni un solo extremo
     for modelo, lo, hi in _rangos(evidencia):
+        propios = por_modelo.get(modelo, set()) | sin_modelo if modelo else nums  # otro dato de la notebook no es un promedio
         for o in oraciones:
             if modelo and modelo not in o:
                 continue
             en_o = _numeros(o)
-            adentro = [n for n in en_o if lo < n < hi and not _respaldado(n, {lo, hi})]
+            adentro = [n for n in en_o if lo < n < hi and not _respaldado(n, propios)]
             tiene_lo, tiene_hi = (any(_respaldado(n, {x}) for n in en_o) for x in (lo, hi))
             if adentro:
                 problemas.append(f"(f) da {adentro[0]} dentro del rango [{lo} ; {hi}]{' de ' + modelo if modelo else ''}: "
@@ -238,30 +268,42 @@ def _valor(v) -> str:
 
 
 def _escalares(d: dict, salvo=()) -> str:
-    return ", ".join(f"{k} {_valor(v)}" for k, v in d.items()
+    return ", ".join(f"{k.replace('_', ' ')} {_valor(v)}" for k, v in d.items()
                      if k not in salvo and (v is None or _es_rango(v) or isinstance(v, (str, int, float, bool))))
 
 
 def _fila(d: dict) -> str:
-    texto = f"- {d['notebook']}: " if d.get("notebook") else "- "
-    texto += _escalares(d, salvo=("notebook",))
+    """Una notebook en una línea: sus datos, las listas de texto (cumple, no cumple, falta verificar) y sus alertas."""
+    partes = [_escalares(d, salvo=("notebook",))]
+    for k, v in d.items():
+        if isinstance(v, list) and v and all(isinstance(x, str) for x in v):
+            partes.append(f"{k.replace('_', ' ')}: {'; '.join(v)}")
     alertas = [f"{a['codigo']} ({a.get('texto', '')})" for a in d.get("alertas") or []]
-    return texto + ("; alertas: " + "; ".join(alertas) if alertas else "")
+    if alertas:
+        partes.append("alertas: " + "; ".join(alertas))
+    return (f"- {d['notebook']}: " if d.get("notebook") else "- ") + "; ".join(p for p in partes if p)
 
 
 def _lineas_de(nombre: str, ev: dict) -> list[str]:
     lineas = [f"{nombre}:"]
-    resumen = _escalares(ev, salvo=("requerimiento_id",))
+    resumen = _escalares({k: v for k, v in ev.items() if v is not None}, salvo=("requerimiento_id",))
     if resumen:
         lineas.append(resumen + ".")
     for clave, valor in ev.items():
-        if not isinstance(valor, list) or not valor or not all(isinstance(x, dict) for x in valor):
-            continue
-        if clave == "reglas":
-            ids = list(dict.fromkeys(r["id"] for r in valor if "id" in r))
-            lineas.append(f"Reglas activadas: {', '.join(ids[:12])}.")
-        elif clave != "parametros":
-            lineas.extend(_fila(x) for x in valor)
+        etiqueta = clave.replace("_", " ")
+        if isinstance(valor, dict) and clave not in ("origen", "pesos") and not _es_rango(valor):
+            if valor.get("notebook"):
+                lineas.append(f"{etiqueta}: " + _fila(valor)[2:])
+            elif _escalares(valor):
+                lineas.append(f"{etiqueta}: {_escalares(valor)}.")
+        elif isinstance(valor, list) and valor and all(isinstance(x, dict) for x in valor):
+            if clave == "reglas":
+                ids = list(dict.fromkeys(r["id"] for r in valor if "id" in r))
+                lineas.append(f"Reglas activadas: {', '.join(ids[:12])}.")
+            elif clave != "parametros":
+                lineas.extend(_fila(x) for x in valor[:MAX_FILAS_PLANTILLA])
+                if len(valor) > MAX_FILAS_PLANTILLA:
+                    lineas.append("(Hay más filas: están en la traza de la consulta.)")
     return lineas
 
 
@@ -277,7 +319,7 @@ def plantilla_fija(evidencia: dict) -> str:
         else:
             lineas.append(f"Pedido {pedido.get('requerimiento')}: perfil {pedido.get('perfil_dominante')}, "
                           f"presupuesto {_valor(pedido.get('presupuesto'))}, prioridad {pedido.get('prioridad')}.")
-    for sm in ("SM1", "SM2", "SM3", "SM4", "GRUPO"):
+    for sm in ("SM4", "SM2", "SM3", "SM1", "GRUPO"):  # lo más importante primero: el recorte es por líneas, desde el final
         for intencion, ev in (evidencia.get(sm) or {}).items():
             lineas.extend(_lineas_de(f"{sm}.{intencion}", ev))
     cierre = [f"Advertencia: {evidencia['advertencia']}"] if evidencia.get("advertencia") else []
@@ -331,7 +373,7 @@ def _correcciones(anterior: str, problemas: list[str]) -> str:
 def _con_advertencia(respuesta: str, evidencia: dict) -> str:
     """El modelo chico suele omitir la advertencia: si falta, la agrega el código, literal."""
     advertencia = evidencia.get("advertencia")
-    if advertencia and _espacios(advertencia) not in _espacios(respuesta):
+    if respuesta.strip() and advertencia and _espacios(advertencia) not in _espacios(respuesta):
         return f"{respuesta}\n{advertencia}"
     return respuesta
 

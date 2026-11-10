@@ -40,6 +40,9 @@ class GrafoFalso:
 class LLMFalso:
     modelo = "falso"
 
+    def texto(self, sistema, usuario, variables=None):
+        return ""  # respuesta vacía: el explicador no la acepta y sale la plantilla fija
+
     def salud(self):
         return {"ok": True, "modelo": "falso"}
 
