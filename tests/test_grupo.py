@@ -51,12 +51,29 @@ class TestGrupoOffline(unittest.TestCase):
         self.assertEqual(len(o["reglas"]) + len(o["reglas_sin_origen"]), len(ids))
         self.assertEqual(o["notebook"], {"fuente_precio": "Mercado Libre", "fuente_autonomia": NO_REGISTRADA})
 
+    def test_origen_con_filas_reales_del_grafo(self):
+        """El fixture trae las filas reales de la traza de A: 14 de sus 18 reglas tienen origen."""
+        f = fixture("GRUPO.traza_reglas")
+        ids = {r["id"] for r in f["evidencia"]["reglas"]}
+        o = grupo.ejecutar("GRUPO.traza_reglas", f["parametros"], GrafoFalso(f))["evidencia"]["origen"]
+        self.assertTrue(o["reglas"])
+        self.assertEqual(set(o["reglas"]) | set(o["reglas_sin_origen"]), ids)
+        self.assertFalse(set(o["reglas"]) & set(o["reglas_sin_origen"]))
+        self.assertNotIn(NO_REGISTRADA, o["notebook"].values())
+
     def test_sin_origen_en_el_grafo_dice_no_registrada(self):
         f = fixture("GRUPO.traza_reglas")
-        o = grupo.ejecutar("GRUPO.traza_reglas", f["parametros"], GrafoFalso(f))["evidencia"]["origen"]
+        vacio = GrafoFalso(f, _filas("origen_reglas", []), _filas("origen_notebook", []))
+        o = grupo.ejecutar("GRUPO.traza_reglas", f["parametros"], vacio)["evidencia"]["origen"]
         self.assertEqual(o["reglas"], {})
         self.assertEqual(len(o["reglas_sin_origen"]), len({r["id"] for r in f["evidencia"]["reglas"]}))
         self.assertEqual(set(o["notebook"].values()), {NO_REGISTRADA})
+
+    def test_parametros_con_origen_real(self):
+        f = fixture("GRUPO.parametros")
+        e = grupo.ejecutar("GRUPO.parametros", {}, GrafoFalso(f))["evidencia"]
+        self.assertEqual(e["sin_origen"], 0)
+        self.assertTrue(all(p["origen"] != NO_REGISTRADA for p in e["parametros"]))
 
     def test_parametros_con_y_sin_origen(self):
         f = fixture("GRUPO.parametros")

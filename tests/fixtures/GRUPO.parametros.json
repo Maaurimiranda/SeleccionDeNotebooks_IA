@@ -9,6 +9,26 @@
    "filas": [
     {
      "submodulo": "SM1",
+     "nombre": "dedicacion_h.rara_vez",
+     "valor": {
+      "sigma": 1.5,
+      "centro": 0.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "dedicacion_h.ocasional",
+     "valor": {
+      "sigma": 2.0,
+      "centro": 4.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
      "nombre": "dedicacion_h.frecuente",
      "valor": {
       "sigma": 4.5,
@@ -29,20 +49,10 @@
     },
     {
      "submodulo": "SM1",
-     "nombre": "dedicacion_h.ocasional",
+     "nombre": "exigencia_grafica.baja",
      "valor": {
-      "sigma": 2.0,
-      "centro": 4.0
-     },
-     "estado_validacion": "sin validar",
-     "tipo": "etiqueta_difusa"
-    },
-    {
-     "submodulo": "SM1",
-     "nombre": "dedicacion_h.rara_vez",
-     "valor": {
-      "sigma": 1.5,
-      "centro": 0.0
+      "sigma": 12.0,
+      "centro": 10.0
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -53,16 +63,6 @@
      "valor": {
       "sigma": 12.0,
       "centro": 45.0
-     },
-     "estado_validacion": "sin validar",
-     "tipo": "etiqueta_difusa"
-    },
-    {
-     "submodulo": "SM1",
-     "nombre": "exigencia_grafica.baja",
-     "valor": {
-      "sigma": 12.0,
-      "centro": 10.0
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -89,16 +89,6 @@
     },
     {
      "submodulo": "SM1",
-     "nombre": "peso_perfil.determinante",
-     "valor": {
-      "sigma": 0.1,
-      "centro": 0.95
-     },
-     "estado_validacion": "sin validar",
-     "tipo": "etiqueta_difusa"
-    },
-    {
-     "submodulo": "SM1",
      "nombre": "peso_perfil.relevante",
      "valor": {
       "sigma": 0.12,
@@ -109,10 +99,10 @@
     },
     {
      "submodulo": "SM1",
-     "nombre": "intensidad_grafica.alta",
+     "nombre": "peso_perfil.determinante",
      "valor": {
-      "sigma": 0.12,
-      "centro": 0.85
+      "sigma": 0.1,
+      "centro": 0.95
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -138,11 +128,11 @@
      "tipo": "etiqueta_difusa"
     },
     {
-     "submodulo": "SM2",
-     "nombre": "suficiencia_ram.justa",
+     "submodulo": "SM1",
+     "nombre": "intensidad_grafica.alta",
      "valor": {
-      "sigma": 0.2,
-      "centro": 1.0
+      "sigma": 0.12,
+      "centro": 0.85
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -153,6 +143,16 @@
      "valor": {
       "sigma": 0.2,
       "centro": 0.5
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "suficiencia_ram.justa",
+     "valor": {
+      "sigma": 0.2,
+      "centro": 1.0
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -179,16 +179,6 @@
     },
     {
      "submodulo": "SM2",
-     "nombre": "indice_ampliabilidad.mucha",
-     "valor": {
-      "sigma": 0.2,
-      "centro": 1.0
-     },
-     "estado_validacion": "sin validar",
-     "tipo": "etiqueta_difusa"
-    },
-    {
-     "submodulo": "SM2",
      "nombre": "indice_ampliabilidad.poca",
      "valor": {
       "sigma": 0.2,
@@ -203,6 +193,26 @@
      "valor": {
       "sigma": 0.18,
       "centro": 0.5
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "indice_ampliabilidad.mucha",
+     "valor": {
+      "sigma": 0.2,
+      "centro": 1.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "riesgo_obsolescencia.bajo",
+     "valor": {
+      "sigma": 18.0,
+      "centro": 0.0
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -228,11 +238,11 @@
      "tipo": "etiqueta_difusa"
     },
     {
-     "submodulo": "SM2",
-     "nombre": "riesgo_obsolescencia.bajo",
+     "submodulo": "SM3",
+     "nombre": "peso_kg.liviana",
      "valor": {
-      "sigma": 18.0,
-      "centro": 0.0
+      "sigma": 0.2,
+      "centro": 1.2
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -259,10 +269,10 @@
     },
     {
      "submodulo": "SM3",
-     "nombre": "peso_kg.liviana",
+     "nombre": "autonomia_h.baja",
      "valor": {
-      "sigma": 0.2,
-      "centro": 1.2
+      "sigma": 1.0,
+      "centro": 3.0
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -289,10 +299,10 @@
     },
     {
      "submodulo": "SM3",
-     "nombre": "autonomia_h.baja",
+     "nombre": "potencia_relativa.restringida",
      "valor": {
-      "sigma": 1.0,
-      "centro": 3.0
+      "sigma": 0.1,
+      "centro": 0.35
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -303,16 +313,6 @@
      "valor": {
       "sigma": 0.1,
       "centro": 0.6
-     },
-     "estado_validacion": "sin validar",
-     "tipo": "etiqueta_difusa"
-    },
-    {
-     "submodulo": "SM3",
-     "nombre": "potencia_relativa.restringida",
-     "valor": {
-      "sigma": 0.1,
-      "centro": 0.35
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -359,10 +359,10 @@
     },
     {
      "submodulo": "SM3",
-     "nombre": "grado_gpu.pleno",
+     "nombre": "grado_gpu.insuficiente",
      "valor": {
-      "sigma": 0.1,
-      "centro": 0.95
+      "sigma": 0.12,
+      "centro": 0.2
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -379,20 +379,20 @@
     },
     {
      "submodulo": "SM3",
-     "nombre": "grado_gpu.insuficiente",
+     "nombre": "grado_gpu.pleno",
      "valor": {
-      "sigma": 0.12,
-      "centro": 0.2
+      "sigma": 0.1,
+      "centro": 0.95
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
     },
     {
      "submodulo": "SM4",
-     "nombre": "adecuacion_global.alta",
+     "nombre": "adecuacion_global.baja",
      "valor": {
-      "sigma": 0.07,
-      "centro": 0.9
+      "sigma": 0.14,
+      "centro": 0.4
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -409,10 +409,10 @@
     },
     {
      "submodulo": "SM4",
-     "nombre": "adecuacion_global.baja",
+     "nombre": "adecuacion_global.alta",
      "valor": {
-      "sigma": 0.14,
-      "centro": 0.4
+      "sigma": 0.07,
+      "centro": 0.9
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -449,10 +449,10 @@
     },
     {
      "submodulo": "SM4",
-     "nombre": "grado_recomendacion.recomendar",
+     "nombre": "grado_recomendacion.descartar",
      "valor": {
       "sigma": 0.15,
-      "centro": 1.0
+      "centro": 0.0
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -469,10 +469,10 @@
     },
     {
      "submodulo": "SM4",
-     "nombre": "grado_recomendacion.descartar",
+     "nombre": "grado_recomendacion.recomendar",
      "valor": {
       "sigma": 0.15,
-      "centro": 0.0
+      "centro": 1.0
      },
      "estado_validacion": "sin validar",
      "tipo": "etiqueta_difusa"
@@ -688,6 +688,321 @@
      "tipo": "parametro"
     }
    ]
+  },
+  {
+   "nombre": "GRUPO.origen_parametros",
+   "cypher": "MATCH (e:EtiquetaDifusa)<-[:TIENE_ETIQUETA]-(v:VariableDifusa)\nRETURN v.nombre + '.' + e.nombre AS nombre, e.fuente AS origen\nUNION ALL\nMATCH (p:Parametro)\nRETURN p.nombre AS nombre, p.origen AS origen",
+   "parametros": {},
+   "filas": [
+    {
+     "nombre": "dedicacion_h.rara_vez",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "dedicacion_h.ocasional",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "dedicacion_h.frecuente",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "dedicacion_h.principal",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "exigencia_grafica.baja",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "exigencia_grafica.media",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "exigencia_grafica.alta",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "peso_perfil.marginal",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "peso_perfil.relevante",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "peso_perfil.determinante",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "intensidad_grafica.baja",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "intensidad_grafica.media",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "intensidad_grafica.alta",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "suficiencia_ram.insuficiente",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "suficiencia_ram.justa",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "suficiencia_ram.suficiente",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "suficiencia_ram.holgada",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "indice_ampliabilidad.poca",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "indice_ampliabilidad.media",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "indice_ampliabilidad.mucha",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "riesgo_obsolescencia.bajo",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "riesgo_obsolescencia.medio",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "riesgo_obsolescencia.alto",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "peso_kg.liviana",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "peso_kg.intermedia",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "peso_kg.pesada",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "autonomia_h.baja",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "autonomia_h.media",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "autonomia_h.alta",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "potencia_relativa.restringida",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "potencia_relativa.moderada",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "potencia_relativa.plena",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "adecuacion_movilidad.baja",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "adecuacion_movilidad.media",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "adecuacion_movilidad.alta",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "grado_gpu.insuficiente",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "grado_gpu.parcial",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "grado_gpu.pleno",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "adecuacion_global.baja",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "adecuacion_global.media",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "adecuacion_global.alta",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "excedente_presupuesto.dentro",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "excedente_presupuesto.levemente",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "excedente_presupuesto.muy",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "grado_recomendacion.descartar",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "grado_recomendacion.considerar",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "grado_recomendacion.recomendar",
+     "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
+    },
+    {
+     "nombre": "umbral_exigencia",
+     "origen": "Decision del grupo; cruce marginal/relevante de peso_perfil"
+    },
+    {
+     "nombre": "banda_frontera",
+     "origen": "Decision del grupo"
+    },
+    {
+     "nombre": "entropia_max",
+     "origen": "Decision del grupo"
+    },
+    {
+     "nombre": "P_COSTO_MODULO_RAM_USD",
+     "origen": "Precios de Mercado Libre, 09/2026"
+    },
+    {
+     "nombre": "P_PESO_RANURAS_AMPLIABILIDAD",
+     "origen": "Formula del indice a de la PI3 de SM2 (peso de las ranuras; el resto es el margen hasta el maximo)"
+    },
+    {
+     "nombre": "P_RANURAS_REFERENCIA",
+     "origen": "Formula del indice a de la PI3 de SM2 (ranuras libres que cuentan como ampliabilidad plena)"
+    },
+    {
+     "nombre": "P_DIF_ALERTA_TGP",
+     "origen": "Decision del grupo"
+    },
+    {
+     "nombre": "P_GRADO_GPU_UN_NIVEL_ABAJO",
+     "origen": "GM-R4 de PG1 (GPU un nivel abajo -> 0,5; dos o mas -> 0)"
+    },
+    {
+     "nombre": "P_PESO_GPU_GRAFICA",
+     "origen": "Ponderacion de la adecuacion grafica de la PI2 de SM3"
+    },
+    {
+     "nombre": "P_PESO_PANTALLA_GRAFICA",
+     "origen": "Ponderacion de la adecuacion grafica de la PI2 de SM3"
+    },
+    {
+     "nombre": "P_ALFA_ALERTA_AUTONOMIA",
+     "origen": "Decision del grupo"
+    },
+    {
+     "nombre": "P_FACTOR_AUTONOMIA",
+     "origen": "Supuesto del grupo (GM-R12)"
+    },
+    {
+     "nombre": "P_INCREMENTO_PRIORIDAD",
+     "origen": "Decision del grupo (REC-R5)"
+    },
+    {
+     "nombre": "P_MARGEN_EMPATE",
+     "origen": "Decision del grupo (REC-R8)"
+    },
+    {
+     "nombre": "P_MAX_RECOMENDADAS",
+     "origen": "Consigna y decision del grupo"
+    },
+    {
+     "nombre": "centros_y_sigmas_dedicacion_h",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_exigencia_grafica",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_peso_perfil",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_intensidad_grafica",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_suficiencia_ram",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_indice_ampliabilidad",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_riesgo_obsolescencia",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_peso_kg",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_autonomia_h",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_potencia_relativa",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_adecuacion_movilidad",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_grado_gpu",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_adecuacion_global",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_excedente_presupuesto",
+     "origen": "Decision de diseno del grupo (PI3)"
+    },
+    {
+     "nombre": "centros_y_sigmas_grado_recomendacion",
+     "origen": "Decision de diseno del grupo (PI3)"
+    }
+   ]
   }
  ],
  "evidencia": {
@@ -700,7 +1015,8 @@
      "centro": 12.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -710,7 +1026,8 @@
      "centro": 4.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -720,7 +1037,8 @@
      "centro": 28.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -730,7 +1048,8 @@
      "centro": 0.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -740,7 +1059,8 @@
      "centro": 80.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -750,7 +1070,8 @@
      "centro": 10.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -760,7 +1081,8 @@
      "centro": 45.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -770,7 +1092,8 @@
      "centro": 0.85
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -780,7 +1103,8 @@
      "centro": 0.15
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -790,7 +1114,8 @@
      "centro": 0.5
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -800,7 +1125,8 @@
      "centro": 0.95
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -810,7 +1136,8 @@
      "centro": 0.2
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
@@ -820,56 +1147,64 @@
      "centro": 0.6
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM1",
     "nombre": "banda_frontera",
     "valor": 0.05,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision del grupo"
    },
    {
     "submodulo": "SM1",
     "nombre": "centros_y_sigmas_dedicacion_h",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM1",
     "nombre": "centros_y_sigmas_exigencia_grafica",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM1",
     "nombre": "centros_y_sigmas_intensidad_grafica",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM1",
     "nombre": "centros_y_sigmas_peso_perfil",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM1",
     "nombre": "entropia_max",
     "valor": 0.6,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision del grupo"
    },
    {
     "submodulo": "SM1",
     "nombre": "umbral_exigencia",
     "valor": 0.4,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision del grupo; cruce marginal/relevante de peso_perfil"
    },
    {
     "submodulo": "SM2",
@@ -879,7 +1214,8 @@
      "centro": 0.5
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM2",
@@ -889,7 +1225,8 @@
      "centro": 1.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM2",
@@ -899,7 +1236,8 @@
      "centro": 0.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM2",
@@ -909,7 +1247,8 @@
      "centro": 100.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM2",
@@ -919,7 +1258,8 @@
      "centro": 0.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM2",
@@ -929,7 +1269,8 @@
      "centro": 50.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM2",
@@ -939,7 +1280,8 @@
      "centro": 2.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM2",
@@ -949,7 +1291,8 @@
      "centro": 0.5
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM2",
@@ -959,7 +1302,8 @@
      "centro": 1.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM2",
@@ -969,49 +1313,56 @@
      "centro": 1.5
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM2",
     "nombre": "P_COSTO_MODULO_RAM_USD",
     "valor": 30.0,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Precios de Mercado Libre, 09/2026"
    },
    {
     "submodulo": "SM2",
     "nombre": "P_PESO_RANURAS_AMPLIABILIDAD",
     "valor": 0.5,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Formula del indice a de la PI3 de SM2 (peso de las ranuras; el resto es el margen hasta el maximo)"
    },
    {
     "submodulo": "SM2",
     "nombre": "P_RANURAS_REFERENCIA",
     "valor": 2.0,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Formula del indice a de la PI3 de SM2 (ranuras libres que cuentan como ampliabilidad plena)"
    },
    {
     "submodulo": "SM2",
     "nombre": "centros_y_sigmas_indice_ampliabilidad",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM2",
     "nombre": "centros_y_sigmas_riesgo_obsolescencia",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM2",
     "nombre": "centros_y_sigmas_suficiencia_ram",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM3",
@@ -1021,7 +1372,8 @@
      "centro": 0.95
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1031,7 +1383,8 @@
      "centro": 0.05
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1041,7 +1394,8 @@
      "centro": 0.5
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1051,7 +1405,8 @@
      "centro": 10.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1061,7 +1416,8 @@
      "centro": 3.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1071,7 +1427,8 @@
      "centro": 6.5
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1081,7 +1438,8 @@
      "centro": 0.2
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1091,7 +1449,8 @@
      "centro": 0.55
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1101,7 +1460,8 @@
      "centro": 0.95
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1111,7 +1471,8 @@
      "centro": 1.8
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1121,7 +1482,8 @@
      "centro": 1.2
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1131,7 +1493,8 @@
      "centro": 2.5
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1141,7 +1504,8 @@
      "centro": 0.6
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1151,7 +1515,8 @@
      "centro": 0.8
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
@@ -1161,84 +1526,96 @@
      "centro": 0.35
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM3",
     "nombre": "P_ALFA_ALERTA_AUTONOMIA",
     "valor": 0.5,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision del grupo"
    },
    {
     "submodulo": "SM3",
     "nombre": "P_DIF_ALERTA_TGP",
     "valor": 0.2,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision del grupo"
    },
    {
     "submodulo": "SM3",
     "nombre": "P_FACTOR_AUTONOMIA",
     "valor": 0.7,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Supuesto del grupo (GM-R12)"
    },
    {
     "submodulo": "SM3",
     "nombre": "P_GRADO_GPU_UN_NIVEL_ABAJO",
     "valor": 0.5,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "GM-R4 de PG1 (GPU un nivel abajo -> 0,5; dos o mas -> 0)"
    },
    {
     "submodulo": "SM3",
     "nombre": "P_PESO_GPU_GRAFICA",
     "valor": 0.6,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Ponderacion de la adecuacion grafica de la PI2 de SM3"
    },
    {
     "submodulo": "SM3",
     "nombre": "P_PESO_PANTALLA_GRAFICA",
     "valor": 0.4,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Ponderacion de la adecuacion grafica de la PI2 de SM3"
    },
    {
     "submodulo": "SM3",
     "nombre": "centros_y_sigmas_adecuacion_movilidad",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM3",
     "nombre": "centros_y_sigmas_autonomia_h",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM3",
     "nombre": "centros_y_sigmas_grado_gpu",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM3",
     "nombre": "centros_y_sigmas_peso_kg",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM3",
     "nombre": "centros_y_sigmas_potencia_relativa",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM4",
@@ -1248,7 +1625,8 @@
      "centro": 0.9
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM4",
@@ -1258,7 +1636,8 @@
      "centro": 0.4
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM4",
@@ -1268,7 +1647,8 @@
      "centro": 0.7
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM4",
@@ -1278,7 +1658,8 @@
      "centro": 0.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM4",
@@ -1288,7 +1669,8 @@
      "centro": 10.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM4",
@@ -1298,7 +1680,8 @@
      "centro": 25.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM4",
@@ -1308,7 +1691,8 @@
      "centro": 0.5
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM4",
@@ -1318,7 +1702,8 @@
      "centro": 0.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM4",
@@ -1328,52 +1713,60 @@
      "centro": 1.0
     },
     "estado_validacion": "sin validar",
-    "tipo": "etiqueta_difusa"
+    "tipo": "etiqueta_difusa",
+    "origen": "Decision de diseno del grupo sobre casos publicados y fichas tecnicas"
    },
    {
     "submodulo": "SM4",
     "nombre": "P_INCREMENTO_PRIORIDAD",
     "valor": 0.2,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision del grupo (REC-R5)"
    },
    {
     "submodulo": "SM4",
     "nombre": "P_MARGEN_EMPATE",
     "valor": 0.05,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision del grupo (REC-R8)"
    },
    {
     "submodulo": "SM4",
     "nombre": "P_MAX_RECOMENDADAS",
     "valor": 3.0,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Consigna y decision del grupo"
    },
    {
     "submodulo": "SM4",
     "nombre": "centros_y_sigmas_adecuacion_global",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM4",
     "nombre": "centros_y_sigmas_excedente_presupuesto",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    },
    {
     "submodulo": "SM4",
     "nombre": "centros_y_sigmas_grado_recomendacion",
     "valor": null,
     "estado_validacion": "sin validar",
-    "tipo": "parametro"
+    "tipo": "parametro",
+    "origen": "Decision de diseno del grupo (PI3)"
    }
   ],
   "total": 77,
-  "sin_validar": 77
+  "sin_validar": 77,
+  "sin_origen": 0
  }
 }

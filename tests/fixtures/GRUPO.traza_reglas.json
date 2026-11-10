@@ -82,7 +82,7 @@
      "consecuente": "peso_perfil = determinante",
      "sobre": "Actividad",
      "escenario": null,
-     "fuerza": 0.011,
+     "fuerza": 1.0,
      "validacion": "sin validar",
      "fuente": null
     },
@@ -94,7 +94,7 @@
      "consecuente": "peso_perfil = determinante",
      "sobre": "Actividad",
      "escenario": null,
-     "fuerza": 1.0,
+     "fuerza": 0.011,
      "validacion": "sin validar",
      "fuente": null
     },
@@ -267,6 +267,191 @@
      "fuente": null
     }
    ]
+  },
+  {
+   "nombre": "GRUPO.origen_reglas",
+   "cypher": "UNWIND $reglas AS rid\nMATCH (q:Regla {id: rid})\nOPTIONAL MATCH (p:Parametro)\nWHERE p.nombre = 'centros_y_sigmas_' + split(coalesce(q.consecuente, ''), ' = ')[0]\n   OR p.origen =~ ('.*\\\\b' + rid + '\\\\b.*')\nOPTIONAL MATCH (ce:ConsultaExperto)-[:VALIDA]->(p)\nRETURN rid AS regla, p.nombre AS parametro, p.origen AS origen, p.estado_validacion AS validacion,\n       ce.id AS consulta_experto, ce.estado AS estado_consulta\nORDER BY regla, parametro, consulta_experto",
+   "parametros": {
+    "reglas": [
+     "FZ-R2",
+     "FZ-R4",
+     "FZ-R5",
+     "GM-R3",
+     "GM-RD1",
+     "GM-RD2",
+     "INT-R11",
+     "INT-RD1",
+     "INT-RD2",
+     "INT-RD3",
+     "INT-RD7",
+     "REC-R4",
+     "REC-R5",
+     "REC-R9",
+     "REC-RD1",
+     "REC-RD2",
+     "REC-RD3",
+     "REC-RD4"
+    ]
+   },
+   "filas": [
+    {
+     "regla": "FZ-R2",
+     "parametro": "centros_y_sigmas_riesgo_obsolescencia",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-riesgo_obsolescencia",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "FZ-R4",
+     "parametro": "centros_y_sigmas_riesgo_obsolescencia",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-riesgo_obsolescencia",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "FZ-R5",
+     "parametro": "centros_y_sigmas_riesgo_obsolescencia",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-riesgo_obsolescencia",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "GM-R3",
+     "parametro": null,
+     "origen": null,
+     "validacion": null,
+     "consulta_experto": null,
+     "estado_consulta": null
+    },
+    {
+     "regla": "GM-RD1",
+     "parametro": "centros_y_sigmas_adecuacion_movilidad",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-adecuacion_movilidad",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "GM-RD2",
+     "parametro": "centros_y_sigmas_adecuacion_movilidad",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-adecuacion_movilidad",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "INT-R11",
+     "parametro": null,
+     "origen": null,
+     "validacion": null,
+     "consulta_experto": null,
+     "estado_consulta": null
+    },
+    {
+     "regla": "INT-RD1",
+     "parametro": "centros_y_sigmas_peso_perfil",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-peso_perfil",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "INT-RD2",
+     "parametro": "centros_y_sigmas_peso_perfil",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-peso_perfil",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "INT-RD3",
+     "parametro": "centros_y_sigmas_peso_perfil",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-peso_perfil",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "INT-RD7",
+     "parametro": "centros_y_sigmas_intensidad_grafica",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-intensidad_grafica",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "REC-R4",
+     "parametro": null,
+     "origen": null,
+     "validacion": null,
+     "consulta_experto": null,
+     "estado_consulta": null
+    },
+    {
+     "regla": "REC-R5",
+     "parametro": "P_INCREMENTO_PRIORIDAD",
+     "origen": "Decision del grupo (REC-R5)",
+     "validacion": "sin validar",
+     "consulta_experto": null,
+     "estado_consulta": null
+    },
+    {
+     "regla": "REC-R9",
+     "parametro": null,
+     "origen": null,
+     "validacion": null,
+     "consulta_experto": null,
+     "estado_consulta": null
+    },
+    {
+     "regla": "REC-RD1",
+     "parametro": "centros_y_sigmas_grado_recomendacion",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-grado_recomendacion",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "REC-RD2",
+     "parametro": "centros_y_sigmas_grado_recomendacion",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-grado_recomendacion",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "REC-RD3",
+     "parametro": "centros_y_sigmas_grado_recomendacion",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-grado_recomendacion",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "REC-RD4",
+     "parametro": "centros_y_sigmas_grado_recomendacion",
+     "origen": "Decision de diseno del grupo (PI3)",
+     "validacion": "sin validar",
+     "consulta_experto": "CE-grado_recomendacion",
+     "estado_consulta": "pendiente"
+    }
+   ]
+  },
+  {
+   "nombre": "GRUPO.origen_notebook",
+   "cypher": "MATCH (n:Notebook {modelo:$modelo})\nOPTIONAL MATCH (n)-[:POSEE]->(b:Bateria)\nRETURN n.fuente_precio AS fuente_precio, b.fuente AS fuente_autonomia",
+   "parametros": {
+    "modelo": "Notebook_A"
+   },
+   "filas": [
+    {
+     "fuente_precio": "Mercado Libre Argentina y tiendas oficiales, 01/10/2026",
+     "fuente_autonomia": "Notebookcheck / RTINGS"
+    }
+   ]
   }
  ],
  "evidencia": {
@@ -319,7 +504,7 @@
     "antecedente": "D.principal",
     "consecuente": "peso_perfil = determinante",
     "sobre": "Actividad",
-    "fuerza": 0.011,
+    "fuerza": 1.0,
     "validacion": "sin validar"
    },
    {
@@ -329,7 +514,7 @@
     "antecedente": "D.principal",
     "consecuente": "peso_perfil = determinante",
     "sobre": "Actividad",
-    "fuerza": 1.0,
+    "fuerza": 0.011,
     "validacion": "sin validar"
    },
    {
@@ -474,6 +659,144 @@
    "SM2",
    "SM3",
    "SM4"
-  ]
+  ],
+  "origen": {
+   "reglas": {
+    "FZ-R2": [
+     {
+      "parametro": "centros_y_sigmas_riesgo_obsolescencia",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-riesgo_obsolescencia",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "FZ-R4": [
+     {
+      "parametro": "centros_y_sigmas_riesgo_obsolescencia",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-riesgo_obsolescencia",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "FZ-R5": [
+     {
+      "parametro": "centros_y_sigmas_riesgo_obsolescencia",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-riesgo_obsolescencia",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "GM-RD1": [
+     {
+      "parametro": "centros_y_sigmas_adecuacion_movilidad",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-adecuacion_movilidad",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "GM-RD2": [
+     {
+      "parametro": "centros_y_sigmas_adecuacion_movilidad",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-adecuacion_movilidad",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "INT-RD1": [
+     {
+      "parametro": "centros_y_sigmas_peso_perfil",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-peso_perfil",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "INT-RD2": [
+     {
+      "parametro": "centros_y_sigmas_peso_perfil",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-peso_perfil",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "INT-RD3": [
+     {
+      "parametro": "centros_y_sigmas_peso_perfil",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-peso_perfil",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "INT-RD7": [
+     {
+      "parametro": "centros_y_sigmas_intensidad_grafica",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-intensidad_grafica",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "REC-R5": [
+     {
+      "parametro": "P_INCREMENTO_PRIORIDAD",
+      "origen": "Decision del grupo (REC-R5)",
+      "validacion": "sin validar"
+     }
+    ],
+    "REC-RD1": [
+     {
+      "parametro": "centros_y_sigmas_grado_recomendacion",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-grado_recomendacion",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "REC-RD2": [
+     {
+      "parametro": "centros_y_sigmas_grado_recomendacion",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-grado_recomendacion",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "REC-RD3": [
+     {
+      "parametro": "centros_y_sigmas_grado_recomendacion",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-grado_recomendacion",
+      "estado_consulta": "pendiente"
+     }
+    ],
+    "REC-RD4": [
+     {
+      "parametro": "centros_y_sigmas_grado_recomendacion",
+      "origen": "Decision de diseno del grupo (PI3)",
+      "validacion": "sin validar",
+      "consulta_experto": "CE-grado_recomendacion",
+      "estado_consulta": "pendiente"
+     }
+    ]
+   },
+   "reglas_sin_origen": [
+    "GM-R3",
+    "INT-R11",
+    "REC-R4",
+    "REC-R9"
+   ],
+   "notebook": {
+    "fuente_precio": "Mercado Libre Argentina y tiendas oficiales, 01/10/2026",
+    "fuente_autonomia": "Notebookcheck / RTINGS"
+   }
+  }
  }
 }
