@@ -1,7 +1,10 @@
 """GRUPO · Repositorio: L3 y L4 del bloque 13 (traza y parámetros).
 
-L3 suma la validación y la fuente de cada regla (si la propiedad existe).
-L4 suma los (:Parametro) crisp a las etiquetas difusas.
+L3 suma la validación de cada regla. L4 suma los (:Parametro) crisp a las etiquetas difusas.
+
+Origen del conocimiento (PG3-05): las (:Regla) no guardan `fuente` en el grafo, así que el origen
+se busca en otros nodos: `origen_reglas` (los parámetros que respaldan cada regla y la consulta al
+técnico que los valida), `origen_notebook` (precio y autonomía) y `origen_parametros`.
 """
 from asistente.submodulos.comun import leer_consulta
 
@@ -35,6 +38,32 @@ MATCH (p:Parametro)
 RETURN p.submodulo AS submodulo, p.nombre AS nombre, p.valor AS valor,
        p.estado_validacion AS estado_validacion, 'parametro' AS tipo
 """,
+    # Un parámetro respalda una regla si (a) es el `centros_y_sigmas_<variable>` de la variable de su
+    # consecuente (solo esa variable, no las del antecedente) o (b) su `origen` nombra el id de la regla.
+    # El borde de palabra (\b) evita atribuir REC-R1 a un origen que dice REC-R15.
+    "origen_reglas": r"""
+UNWIND $reglas AS rid
+MATCH (q:Regla {id: rid})
+OPTIONAL MATCH (p:Parametro)
+WHERE p.nombre = 'centros_y_sigmas_' + split(coalesce(q.consecuente, ''), ' = ')[0]
+   OR p.origen =~ ('.*\\b' + rid + '\\b.*')
+OPTIONAL MATCH (ce:ConsultaExperto)-[:VALIDA]->(p)
+RETURN rid AS regla, p.nombre AS parametro, p.origen AS origen, p.estado_validacion AS validacion,
+       ce.id AS consulta_experto, ce.estado AS estado_consulta
+ORDER BY regla, parametro, consulta_experto
+""",
+    "origen_notebook": """
+MATCH (n:Notebook {modelo:$modelo})
+OPTIONAL MATCH (n)-[:POSEE]->(b:Bateria)
+RETURN n.fuente_precio AS fuente_precio, b.fuente AS fuente_autonomia
+""",
+    "origen_parametros": """
+MATCH (e:EtiquetaDifusa)<-[:TIENE_ETIQUETA]-(v:VariableDifusa)
+RETURN v.nombre + '.' + e.nombre AS nombre, e.fuente AS origen
+UNION ALL
+MATCH (p:Parametro)
+RETURN p.nombre AS nombre, p.origen AS origen
+""",
 }
 
 
@@ -49,3 +78,15 @@ def traza(grafo, requerimiento_id: str, modelo: str):
 
 def parametros(grafo):
     return leer_consulta(grafo, SM, "L4", CONSULTAS["L4"], {})
+
+
+def origen_reglas(grafo, reglas: list[str]):
+    return leer_consulta(grafo, SM, "origen_reglas", CONSULTAS["origen_reglas"], {"reglas": reglas})
+
+
+def origen_notebook(grafo, modelo: str):
+    return leer_consulta(grafo, SM, "origen_notebook", CONSULTAS["origen_notebook"], {"modelo": modelo})
+
+
+def origen_parametros(grafo):
+    return leer_consulta(grafo, SM, "origen_parametros", CONSULTAS["origen_parametros"], {})
