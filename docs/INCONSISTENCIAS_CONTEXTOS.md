@@ -27,7 +27,7 @@
 
 ## 2. Decisiones para el grupo
 
-D-01 está resuelta. Orden sugerido para el resto: D-02 a D-05 y después las demás en paralelo.
+**Las trece decisiones están resueltas (09/11/2026).** Cada una dice qué contextos se actualizaron y qué trabajo queda.
 
 ### D-01 · Versión canónica del grafo — **RESUELTA (09/11/2026)**
 
@@ -332,7 +332,16 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 
 **Decisiones:** una lista única de intenciones con prefijo de submódulo, una forma de traza y de evidencia con espacio de nombres por submódulo (lo proponen SM1 §12.3 y SM2 §15.1), un prompt de explicación común (SM4 §7.2 lo ofrece), audiencia, tono, longitud y política de pedido por defecto.
 
-### D-08 · Pedidos nuevos: escritura e inferencia incremental
+### D-08 · Pedidos nuevos: escritura e inferencia incremental — **RESUELTA (09/11/2026, opción recomendada)**
+
+> **Decisión:**
+> - **El script se separa en tres:** carga (bloques 0 a 8), inferencia (9 y 10) y consultas (11 a 13).
+> - **Inferencia parametrizada por `$req`:** los bloques 9 y 10 corren solo sobre el requerimiento indicado, como ya hace SM1 con `REGLAS_SM1`, y ningún otro pedido se toca.
+> - **Escritura solo para registrar o aclarar:** `SM1.registrar_pedido` y `SM1.aclarar_pedido` abren la única sesión de escritura (D-07 §10); el resto es `READ_ACCESS`.
+> - **Una aclaración actualiza el mismo `Requerimiento`:** se completan las actividades o la dedicación, la `Pregunta` pasa a `estado: 'respondida'` y se vuelve a inferir ese pedido. No se crea un pedido nuevo (SM1 13-G).
+> - **El `DETACH DELETE` inicial** queda solo en el script de carga.
+>
+> Lo de abajo describe la situación previa.
 
 **Inconsistencia.** SM1 escribe un `Requerimiento` por consulta, pero el bloque 10 (SM2–SM4) corre una sola vez sobre todos los pedidos y el script empieza con `MATCH (n) DETACH DELETE n`. Un pedido nuevo **no se puede evaluar** sin recargar todo (PG1/PG2 §15.11, SM1 §12.4-4, SM4 §6.9). Además, una aclaración crea **otro** `Requerimiento` en lugar de actualizar el original (SM1 13-G).
 
@@ -342,7 +351,14 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 
 Además: ¿la aclaración actualiza el mismo pedido y cierra la `Pregunta`?
 
-### D-09 · Incertidumbre de SM1 que nadie consume
+### D-09 · Incertidumbre de SM1 que nadie consume — **RESUELTA (09/11/2026)**
+
+> **Decisión:** se aplica la política general de dato faltante (P1-3 de la profesora) y el enunciado de INT-R14 del canónico: **evaluar los dos escenarios** (opción b).
+> - **Perfil cuyo rango cruza 0,4:** se evalúa con el perfil como «preferencia» y como «impone requisitos». Si el estado de una notebook no cambia entre escenarios, se informa ese estado; si cambia, queda `Recomendada condicionada por falta de informacion` o `Indeterminada: completar informacion`, según REC-R15, y se repite la pregunta de INT-R14.
+> - **Perfil dominante con rango:** se marca como **provisional** y se calcula en cada escenario. No se elige por el grado mínimo (la causa del error de CP1 en el PI4 de SM1).
+> - **Intensidad `incierta`:** la gama mínima de GPU (GM-R1/GM-R2, D-04) se evalúa con la intensidad del peor y del mejor escenario, con el mismo tratamiento.
+>
+> Lo de abajo describe la situación previa.
 
 **Inconsistencia.**
 - **Perfil `indeterminado` por un rango que cruza 0,4:** hoy no impone requisitos de hecho y nadie decidió qué hacer (SM1 §3.5).
@@ -351,7 +367,15 @@ Además: ¿la aclaración actualiza el mismo pedido y cierra la `Pregunta`?
 
 **Opciones.** a) No evaluar el catálogo hasta la aclaración (como con `req_02`). b) Evaluar los dos escenarios. c) Evaluar solo con los perfiles que imponen requisitos y avisar. Para el dominante con rango: dejarlo vacío o marcarlo «provisional». Para la intensidad incierta: tomar la gama del peor caso, la del mejor, o pedir aclaración.
 
-### D-10 · Datos que un submódulo espera y ninguno produce
+### D-10 · Datos que un submódulo espera y ninguno produce — **RESUELTA (09/11/2026, opción recomendada)**
+
+> **Decisión:**
+> - **`requisitos_explicitos`:** se implementan. SM1 los extrae con su evidencia literal, como «al menos 32 GB», y los guarda en el `Requerimiento` con `origen: 'explicito'` o `'institucional'`, que absorbe a `requisitos_institucionales`. Los usan REN-R2 (D-04: el mayor pasa a ser el mínimo) e INT-R9 (posible contradicción).
+> - **`entrena_modelos_gpu`:** se descarta. No tiene ninguna regla que lo consuma y el perfil DATOS ya cubre CUDA y PyTorch.
+> - **`aviso_sm3`:** resuelto por D-04 (alertas REN-R11/REN-R14 y GM-R15).
+> - **JSON de grados SM2 → SM4:** se descarta. La interfaz entre submódulos es el grafo (`Evaluacion`) y la evidencia común de D-07.
+>
+> Lo de abajo describe la situación previa.
 
 | Dato | Lo espera | Situación |
 | --- | --- | --- |
@@ -362,7 +386,17 @@ Además: ¿la aclaración actualiza el mismo pedido y cierra la `Pregunta`?
 
 **Opciones:** implementarlos o borrarlos de los contextos y declararlos trabajo futuro.
 
-### D-11 · `req_03` y la prueba de dos compradores (corrección C-C)
+### D-11 · `req_03` y la prueba de dos compradores (corrección C-C) — **RESUELTA (09/11/2026, opción recomendada)**
+
+> **Decisión:**
+> - **`req_03` queda como está** en el canónico: la consulta puntual de SM4 sobre K y CP11.
+> - **Se agrega `req_04`** (`comprador_04`, 1000 USD, prioridad `ninguna`): *«Quiero una notebook para la facu, para ofimática y navegar todos los días, tengo 1000 USD.»* Evalúa el catálogo completo con OFI. «Todos los días» son 14 h y dan un grado de 0,630, así que impone requisitos (SM1 §6.4); con eso se resuelve el `[?]` de PG1/PG2 §10.6.
+> - **Se agrega `req_05`** (`comprador_05`, VIRT, 1000 USD, prioridad `precio`): prueba REC-R9. El puesto 1 tiene que ser la recomendada con mayor índice costo-beneficio. SM4 §7.1 lo llamaba `req_04`.
+> - **Contaminación de REC-R3:** el código del canónico decide el estado por `ev.excluyente_virtualizacion`, así que no debería contaminar. Lo confirma la prueba E2E-4 con `req_04`.
+>
+> Para que `req_04` evalúe el catálogo hacen falta los `SALIDA_PI2` de OFI (D-03).
+>
+> Lo de abajo describe la situación previa.
 
 **Inconsistencia.** Hay tres propuestas distintas para la misma prueba:
 - **PG1/PG2 §10.6:** `req_03` nuevo, OFI («para la facu, ofimática y navegar todos los días, 1000 USD»), con riesgos esperados y la comprobación de que E y G **no** queden descartada o indeterminada (contaminación de REC-R3).
@@ -372,7 +406,30 @@ Además: ¿la aclaración actualiza el mismo pedido y cierra la `Pregunta`?
 **Opciones.** a) Usar el `req_03` de SM4 y agregar las comprobaciones de PG1/PG2 (E y G no contaminadas, riesgos por pedido). *(Recomendada.)* b) Usar el `req_03` de PG1/PG2 y renombrar el de SM4.
 En las dos hay que *verificar* que la versión corregida ya no tenga la contaminación de REC-R3 (PG1/PG2 §10.3).
 
-### D-12 · Numeración de casos y selección de E2E
+### D-12 · Numeración de casos y selección de E2E — **RESUELTA (09/11/2026, opción recomendada)**
+
+> **Prefijos por origen:**
+> - `PG2-CPn`: los casos CP1–CP11 del script canónico.
+> - `SM1-PI4-CPn`: los 6 casos del PI4 de SM1.
+> - `SM2-PI4-n`: los 13 casos del PI4 de SM2.
+> - `SM3-PI4-n`: los 12 casos de `sm3_asistente.py`.
+> - `SM4-PI4-CPn`: los 10 casos del PI4 de SM4.
+> - Los E2E de los contextos pasan a ser candidatos; **la lista oficial de PG3 es esta:**
+>
+> | ID | Caso | Submódulos | Pedidos | Esperado (canónico) | Listo para probar |
+> | --- | --- | --- | --- | --- | --- |
+> | **E2E-1** | Recomendación completa | SM1 + SM2 + SM3 + SM4 | `req_01` | A 0,785 puesto 1 · H puesto 2 · B puesto 3 (REC-R8) · X fuera de presupuesto · M condicionada · E y C descartadas · G indeterminada (PG1/PG2 §9.3) | Sí |
+> | **E2E-2** | Dato faltante que cruza módulos | SM2 + SM3 + SM4 | `req_01` | M: `Recomendada condicionada por falta de informacion`, grado [0,504 ; 0,826], falta la autonomía (REC-R15). G: `Indeterminada: completar informacion`, riesgo [49,58 ; 81,46] y alertas REN-R10 y FZ-R7 (REN-R13 cuando se implemente D-04) | Sí |
+> | **E2E-3** | Perfil indeterminado | SM1 (+ router) | `req_02` | Perfil `indeterminado`, 0 evaluaciones, pregunta pendiente; **no asume OFI** | Sí |
+> | **E2E-4** | Dos compradores, misma notebook (C-C) | SM1 + SM2 + SM4 | `req_01` vs `req_04` (y `req_03` sobre K) | Riesgos por pedido de PG1/PG2 §10.6; E **no** descartada y G **no** indeterminada para `req_04`; cada explicación cita lo de **su** pedido | No: falta `req_04` (D-11) y `SALIDA_PI2` OFI (D-03) |
+> | **E2E-5** | Excluyente frente a puntaje | SM2 + SM4 | `req_01` | E 0,81 ≈ B 0,813 ≈ H 0,811, pero `Descartada (excluyente incumplido)` (REN-R1 + REC-R3) | Sí |
+> | E2E-6 *(opcional)* | Pedido nuevo de punta a punta | SM1 → SM2 → SM3 → SM4 | nuevo | Se registra, se evalúa solo ese pedido y se recomienda | No: requiere D-08 |
+> | E2E-7 *(opcional)* | RAM y gráfica en K | SM2 + SM3 | `req_01` | REN-R7 «condicionado a ampliación» + alerta de canal simple (REN-R11 → GM-R15) | No: requiere D-04 |
+> | E2E-8 *(control)* | Fuera de dominio | router | — | Mensaje fijo, sin consultar el grafo | Sí |
+>
+> Cumple la consigna: hay 5 E2E que cruzan submódulos (≥ 3), y los 5 sirven además como los ≥ 5 casos de uso integrados.
+>
+> Lo de abajo describe la situación previa.
 
 **Inconsistencia.**
 - `CP1`…`CP10` significan cosas distintas en PG2, en el PI4 de SM1 (6 casos) y en el PI4 de SM4 (10 casos).
@@ -386,7 +443,19 @@ En las dos hay que *verificar* que la versión corregida ya no tenga la contamin
 4. dos compradores sobre la misma notebook;
 5. excluyente frente a puntaje (E).
 
-### D-13 · Estructura común de los contextos
+### D-13 · Estructura común de los contextos — **RESUELTA (09/11/2026, opción recomendada)**
+
+> **Decisión:** los cinco contextos siguen la plantilla de SM1 y SM2:
+> - etiquetas de procedencia (`[DOC]`, `[CÓD]`, `[DED]`, `[?]`, más `[PG1]`, `[PG2]` y `[PROF]` en el grupal);
+> - correcciones de la profesora con su estado;
+> - discrepancias;
+> - glosario.
+>
+> **Ya hecho:** a SM3 y SM4 se les agregó un anexo con la plantilla, las discrepancias encontradas en esta revisión y lo que falta.
+>
+> **Pendiente de cada autor:** etiquetar sus datos y completar las correcciones de la profesora a sus PI. **No se completan desde acá porque no están en ningún archivo del repo.** SM3: de Coninck. SM4: Luconi.
+>
+> Lo de abajo describe la situación previa.
 
 **Inconsistencia.** SM1 y SM2 siguen la misma plantilla: etiquetas `[DOC]`/`[CÓD]`/`[DED]`/`[?]`, correcciones de la profesora, discrepancias y glosario. PG1/PG2 usa otras etiquetas (`[PG1]`, `[PG2]`, `[PROF]`). SM4 no tiene etiquetas ni sección de discrepancias. **SM3 no tiene etiquetas, ni correcciones de la profesora, ni discrepancias, ni línea de tiempo**, y afirma estar «alineado 100 %» con un script que contradice otros contextos.
 
@@ -394,6 +463,29 @@ En las dos hay que *verificar* que la versión corregida ya no tenga la contamin
 Esto le corresponde a cada autor (SM3: de Coninck; SM4: Luconi).
 
 ---
+
+## 2bis. Trabajo pendiente consolidado (lo que dejan las decisiones)
+
+**Grafo canónico (`docs/cypher/Grupo_2_PG2_U1_corregido.cypher`):**
+1. Separar el script en carga (bloques 0–8), inferencia parametrizada por `$req` (9–10) y consultas (11–13) (D-08).
+2. Portar SM1 desde el linaje A: software (Docker, VirtualBox) con `ASOCIADO_A`, `necesita_virtualizacion`, `orden_exigencia`, INT-R14 con dos lecturas e INT-R2/R3/R4/R6 (D-01).
+3. Implementar REN-R2, REN-R11, REN-R13, REN-R14, GM-R1/R2, GM-R14 (excluyente que REC-R3 tiene que leer), GM-R15, GM-R16 + REC-R16, INT-R8 (con la condición de la profesora), INT-R9 y la entropía (D-04).
+4. Evaluar dos escenarios cuando el perfil o la intensidad son inciertos (D-09).
+5. `requisitos_explicitos` en `Requerimiento` (D-10).
+6. Cambiar `'provisional'` por `'sin validar'` y agregar la prioridad `grafica` a REC-R5 (D-06).
+7. Agregar `req_04` (OFI) y `req_05` (VIRT, prioridad precio) (D-11).
+8. Cargar `SALIDA_PI2` de los 7 perfiles desde `docs/cypher/salida_pi2.csv` (D-03).
+
+**Datos a completar por cada autor:**
+- `salida_pi2.csv`: SM2 (Miranda) el rendimiento y SM3 (de Coninck) la pantalla, con el método documentado (D-03).
+- SM3 y SM4: etiquetas de procedencia y correcciones de la profesora (D-13).
+
+**Código de los PI4 → orquestador común:**
+- SM1: dejar Groq por Ollama/`requests` y extraer `requisitos_explicitos` (D-05, D-10).
+- SM2: consultas a `ev.*`, modelo `qwen2.5:7b`, sin `req_01` por defecto (D-01, D-05, D-07).
+- SM3: sin LangChain, `rich` ni `python-dotenv`, temperatura 0 (D-05).
+- SM4: voseo, temperatura 0 y `requests` (D-05, D-07).
+- Todos se integran al contrato de D-07: intenciones, plan, evidencia, verificador y traza.
 
 ## 3. Verificaciones pendientes (necesitan el script, no una decisión)
 

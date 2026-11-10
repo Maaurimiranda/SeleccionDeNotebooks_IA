@@ -101,12 +101,14 @@ Grados de CPU, RAM, almacenamiento y rendimiento (0 a 1); clasificación de cada
 
 | Con | Contrato | Estado |
 | --- | --- | --- |
-| SM1 → SM2 | Perfiles ≥ 0,4, perfil dominante, `necesita_virtualizacion`, requisitos explícitos/institucionales. SM2 aplica virtualización si la pide el indicador **o** el perfil (VIRT) | Pedir a SM1 el slot `requisitos_explicitos` (o confirmar que se mapea a institucionales) `[?]` |
+| SM1 → SM2 | Perfiles ≥ 0,4, perfil dominante, `necesita_virtualizacion`, requisitos explícitos/institucionales. SM2 aplica virtualización si la pide el indicador **o** el perfil (VIRT) | Pedir a SM1 el slot `requisitos_explicitos` (o confirmar que se mapea a institucionales) `[?]` **D-10:** SM1 extrae `requisitos_explicitos` (los institucionales van con `origen: 'institucional'`). |
 | SM2 → SM3 | Bandera `aviso_sm3 = "ancho_de_banda_reducido"` cuando GPU integrada + RAM en canal simple (REN-R11) o canal desconocido (REN-R14, con alerta). SM3 lo usa en GM-R15 | Propuesto por SM2 en PI2 (b.1.2); SM3 lo consume en GM-R15 según PI2/PI3. Confirmar el formato exacto del campo `[?]` |
 | SM2 → SM4 | JSON de resultados (ver 3.6). SM4 aplica MIN (REC-R3) sobre excluyentes y trata «no evaluado» como grado ausente, no como 0 | Confirmar con SM4 que aplica MIN sobre este formato `[?]` |
 | SM2 → asesor | Indirecto, a través de SM4 | — |
 
 ### 3.6 JSON de resultados SM2 → SM4 (ejemplo de la Notebook K, PI1) `[DOC]`
+
+> **D-10:** este JSON no se usa en el prototipo. La interfaz entre submódulos es el grafo (`Evaluacion`) y la evidencia común de D-07.
 
 ```json
 {
@@ -580,6 +582,8 @@ Python plano en vez de LangChain (por ahora); Ollama local (costo, privacidad, r
 5. Decidir cómo mostrar el rango de riesgo con SM4 (REC-R11 y REC-R15).
 
 ### 15.3 Casos E2E candidatos (cruzan submódulos; **validar contra el grafo**)
+
+> **Lista oficial de E2E de PG3 (D-12):** ver `docs/INCONSISTENCIAS_CONTEXTOS.md`. Los de esta sección son candidatos del submódulo.
 - **E2E-1 · Explicar una recomendación completa:** «¿Por qué la Notebook A quedó recomendada y qué riesgo de RAM tiene?» → SM2 (FZ-R4, riesgo bajo 23,02), SM3 (GM-RD1/RD2), SM4 (REC-RD1, 0,785). Usa L3 y L2.
 - **E2E-2 · Dato faltante que atraviesa módulos:** «¿Por qué la G quedó indeterminada y qué debo completar?» → SM2 (virtualización no informada, ampliabilidad desconocida, rango [49,58 ; 81,46]) + SM4 (estado «Indeterminada» y condición). Exige conservar «desconocida» y el rango.
 - **E2E-3 · Perfil indeterminado:** req_02 → SM1 (pregunta pendiente INT-R13) + SM2 (no evalúa el catálogo). Extensión: tras responder la pregunta, registrar el pedido (requiere permisos de escritura y bloque 7 de PG2).

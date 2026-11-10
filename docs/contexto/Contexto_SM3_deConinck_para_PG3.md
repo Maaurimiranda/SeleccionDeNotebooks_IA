@@ -321,6 +321,8 @@ Para el backend unificado de PG3, SM3 provee:
 * `responder(pregunta: str) -> Traza`: Función pública que ejecuta el sándwich completo si el Prompt Maestro le transfiere el control.
 
 ### 9.2 Integración en Casos de Uso E2E Cruzados de PG3
+
+> **Lista oficial de E2E de PG3 (D-12):** ver `docs/INCONSISTENCIAS_CONTEXTOS.md`. Los de esta sección son candidatos del submódulo.
 * **Caso E2E 1 — Diseñador Gráfico / Modelador 3D (DIS / VID3D):**
   - **SM1:** Deduce el perfil. Según el grafo canónico (PG1/PG2 §8.6), DIS exige GPU gama $\ge 3$ y VID3D gama $\ge 4$. El sRGB $\ge 95\%$ de DIS figura solo en el `fundamento` del perfil, no como `Requisito`, y el filtro lo aplica `sm3_asistente.py` con `SRGB_DISENO = 95`.
   - **SM2:** DIS exige CPU media y VID3D CPU alta; los dos piden RAM 16/32 GB y SSD mínimo 1024 GB.
@@ -332,3 +334,29 @@ Para el backend unificado de PG3, SM3 provee:
   - **SM2:** Verifica RAM básica (8 o 16 GB).
   - **SM3:** Rankea primera a `Notebook_B` (1.3 kg, 10 h, adecuación 0.776) y alerta sobre `Notebook_G` por batería baja estimada y pantalla pobre.
   - **SM4:** Recomienda `Notebook_B` como la opción más costo-eficiente.
+
+---
+
+## Anexo · Estado de unificación (D-13, 09/11/2026)
+
+**Etiquetas de procedencia** (plantilla común con SM1 y SM2):
+
+| Etiqueta | Significa |
+| --- | --- |
+| `[DOC]` | Escrito en los informes PI1–PI4, en las correcciones o en la consigna |
+| `[CÓD]` | Se lee en el código del PI4 (`docs/fuentes/SM3/sm3_asistente.py`) o en el grafo canónico (`docs/cypher/Grupo_2_PG2_U1_corregido.cypher`) |
+| `[DED]` | Deducido de lo anterior |
+| `[?]` | No confirmado |
+
+*Este documento todavía no lleva etiquetas por dato: queda a cargo de de Coninck.*
+
+**Correcciones de la profesora a PI1–PI4:** **pendiente de completar por de Coninck**. No figuran en ningún archivo del repo.
+
+**Discrepancias encontradas en la revisión del 09/11/2026** (detalle y decisiones en `docs/INCONSISTENCIAS_CONTEXTOS.md`):
+
+- Las movilidades de §5 no se reproducían; se recalcularon (S-05).
+- Afirmaba GM-R14, GM-R15, GM-R16, `margen_gama = 'excluye'` y `entrena_modelos_gpu`, que el grafo no tiene. Se implementan GM-R14, R15 y R16 (D-04); `entrena_modelos_gpu` se descarta (D-10).
+- El caso E2E 1 exigía para DIS gama ≥ 4 y CPU alta; el grafo pide gama 3 y CPU media (D-02).
+- La explicación iba a temperatura 0,3 y con LangChain, `rich` y `python-dotenv`; ahora es temperatura 0 con `requests` (D-05).
+- Las intenciones pasan a `SM3.buscar` y `SM3.ficha`; `fuera_de_alcance` ya no deriva a SM2 (D-07).
+- Pendiente: completar `grado_pantalla` para 6 perfiles en `docs/cypher/salida_pi2.csv` (D-03).

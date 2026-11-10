@@ -585,6 +585,9 @@ La profesora no dice cuál es el valor correcto: dice que **lo diga el técnico*
 
 ## 14. Casos E2E sugeridos con valores esperados
 
+> **Lista oficial de E2E de PG3 (D-12):** ver `docs/INCONSISTENCIAS_CONTEXTOS.md`. Los de esta sección son candidatos del submódulo.
+> **D-11:** la prueba de dos compradores usa `req_04` (OFI, catálogo completo), no el `req_03` del canónico, que es una consulta puntual. «Todos los días» = 14 h → grado 0,630 ≥ 0,4, así que OFI impone requisitos.
+
 Cada caso cruza submódulos y usa valores de §9 (verificables contra el grafo). **[a validar]**: la redacción de la consulta depende del router que se diseñe.
 
 | ID | Consulta del usuario (ejemplo) | Submódulos | Debe devolver |

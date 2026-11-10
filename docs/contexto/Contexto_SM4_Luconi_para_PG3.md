@@ -690,7 +690,7 @@ Puntos a verificar o corregir en el SM4 antes de integrar:
            amp DESC, ev.indice_costo_beneficio DESC
   ```
 
-  Cuando la prioridad es "precio", también se agrega `[:ACTIVA]` de la recomendación a la regla REC-R9, para que quede en la traza. Para probarlo hace falta un pedido de prueba con prioridad "precio" (por ejemplo, un req_04 VIRT de 1000 USD): el puesto 1 tiene que ser la recomendada con mayor índice costo-beneficio. Los resultados de req_01, req_02 y req_03 no cambian, porque ninguno tiene esa prioridad.
+  Cuando la prioridad es "precio", también se agrega `[:ACTIVA]` de la recomendación a la regla REC-R9, para que quede en la traza. Para probarlo hace falta un pedido de prueba con prioridad "precio" (por ejemplo, un req_04 VIRT de 1000 USD): el puesto 1 tiene que ser la recomendada con mayor índice costo-beneficio. Los resultados de req_01, req_02 y req_03 no cambian, porque ninguno tiene esa prioridad. *(D-11: ese pedido de prueba es `req_05`.)*
 - **REC-R7 y REC-R13** solo miran la RAM (`ram_sobra` y `ram_min`). Los otros componentes quedan en SM2 y SM3. `ram_sobra` es nulo en DEV, VIRT, VID3D y DATOS (P11 pendiente).
 - **El índice costo-beneficio** usa precio/1000, no precio/presupuesto como en PI1. Dejarlo explícito.
 - **Funcionamiento.** Verificar con `MATCH (:Recomendacion)-[p:PROPONE]->(n) RETURN p.orden, n.modelo ORDER BY p.orden` → 1 A, 2 H, 3 B.
@@ -739,6 +739,8 @@ Componentes del SM4 para el diagrama:
 Ver `PI4/flujo_orquestacion_SM4.png`.
 
 ### 7.4 Casos de uso integrados que cruzan submódulos (puntos 4 y 5; mínimo 3 E2E)
+
+> **Lista oficial de E2E de PG3 (D-12):** ver `docs/INCONSISTENCIAS_CONTEXTOS.md`. Los de esta sección son candidatos del submódulo.
 
 1. **Recomendación completa para req_01** (SM1 → SM2 → SM3 → SM4):
    - SM1: perfil VIRT 0,899 y prioridad rendimiento;
@@ -831,3 +833,30 @@ Pruebas funcionales del SM4 con resultado esperado y obtenido: la tabla 6.6 más
 - Qwen Team (2024). Qwen2.5 Technical Report.
 - Documentación de Neo4j (Cypher Manual, Python Driver), Ollama (`/api/chat`, Structured outputs), FastAPI y LangChain.
 - Fuentes de datos: Notebookcheck, RTINGS, r/SuggestALaptop, fichas de Lenovo, Dell, HP, ASUS, Acer, MSI y Apple, Mercado Libre Argentina y BNA.
+
+---
+
+## Anexo · Estado de unificación (D-13, 09/11/2026)
+
+**Etiquetas de procedencia** (plantilla común con SM1 y SM2):
+
+| Etiqueta | Significa |
+| --- | --- |
+| `[DOC]` | Escrito en los informes PI1–PI4, en las correcciones o en la consigna |
+| `[CÓD]` | Se lee en el código del PI4 (`docs/fuentes/SM4/Luconi_Martina_PI4_U4.py`) o en el grafo canónico (`docs/cypher/Grupo_2_PG2_U1_corregido.cypher`) |
+| `[DED]` | Deducido de lo anterior |
+| `[?]` | No confirmado |
+
+*Este documento todavía no lleva etiquetas por dato: queda a cargo de Luconi.*
+
+**Correcciones de la profesora a PI1–PI4:** **pendiente de completar por Luconi**. No figuran en ningún archivo del repo.
+
+**Discrepancias encontradas en la revisión del 09/11/2026** (detalle y decisiones en `docs/INCONSISTENCIAS_CONTEXTOS.md`):
+
+- El script de referencia pasa a ser el canónico `Grupo_2_PG2_U1_corregido.cypher`, con REC-R9 ya corregido (D-01).
+- Los pesos por perfil de §2.7 son los del canónico. La tabla de PG1/PG2 que difería quedó reemplazada (D-01/D-02).
+- `estado_validacion = 'provisional'` se unifica en `'sin validar'` (D-06).
+- La explicación iba a temperatura 0,2 y con `urllib`; ahora es temperatura 0 con `requests`, y el prompt pasa del tuteo al voseo (D-05, D-07).
+- Se elimina `req_01` como pedido de sesión por defecto (D-07).
+- El pedido de prueba de REC-R9 pasa a llamarse `req_05`; `req_04` es el OFI de la prueba de dos compradores (D-11).
+- Los casos de PI4 se citan como `SM4-PI4-CPn`, y CP11 del grafo como `PG2-CP11` (D-12).
