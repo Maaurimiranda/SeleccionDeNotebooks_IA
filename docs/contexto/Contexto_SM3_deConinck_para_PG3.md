@@ -292,7 +292,7 @@ class Extraccion(BaseModel):
 ### 7.3 System Prompts
 * **Extracción (`prompts/extraccion.txt`):** Parser semántico puro (temperature 0). Heurísticas: gamer $\rightarrow$ dedicada gama $\ge 4$; liviana $\rightarrow$ peso $\le 1.5$ kg; buena batería $\rightarrow$ batería $\ge 8.0$ h; diseño $\rightarrow$ sRGB $\ge 95\%$.
 * **Explicación (`prompts/explicacion.txt`):** Asesor técnico empático (temperature 0.3). Prohibición estricta de inventar datos; justificación obligatoria con peso, horas efectivas, TGP en Watts, reglas `GM-RDx` y alertas preventivas. 
-  > **D-05 (09/11/2026):** Ollama local con `qwen2.5:7b` (alternativa `qwen2.5:3b` por `OLLAMA_MODEL`), temperatura 0 en las dos llamadas y HTTP directo a `/api/chat` con `requests`, sin LangChain. La explicación pasa de 0,3 a 0. Se quitan `langchain-*`, `ollama`, `rich` y `python-dotenv`; `httpx` queda solo para los tests y `pydantic` solo para la API.
+  > **D-05 (09/11/2026):** Ollama local con `qwen2.5:3b` (cambio del 10/11/2026; `qwen2.5:7b` opcional por `OLLAMA_MODEL`), temperatura 0 en las dos llamadas y HTTP directo a `/api/chat` con `requests`, sin LangChain. La explicación pasa de 0,3 a 0. Se quitan `langchain-*`, `ollama`, `rich` y `python-dotenv`; `httpx` queda solo para los tests y `pydantic` solo para la API.
 
 ---
 
