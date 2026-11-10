@@ -13,10 +13,10 @@ Está formado por cuatro submódulos que comparten una única base de conocimien
 
 | Submódulo | Responsabilidad | Autor |
 | --- | --- | --- |
-| **SM1** · Interpretación | Convierte el pedido del comprador en perfiles de uso con grado, presupuesto y requisitos | Olea, F. |
+| **SM1** · Interpretación | Convierte el pedido del comprador en perfiles de uso con grado, presupuesto y requisitos | Olea, F. (47855) |
 | **SM2** · Rendimiento y capacidad | Evalúa CPU, RAM y almacenamiento; riesgo de obsolescencia de la RAM (lógica difusa) | Miranda, M. (50101) |
-| **SM3** · Gráfica y movilidad | Evalúa GPU, pantalla, peso y autonomía | de Coninck, R. |
-| **SM4** · Integración y recomendación | Combina los grados, aplica los requisitos excluyentes y recomienda | Luconi Furque, M. *(confirmar)* |
+| **SM3** · Gráfica y movilidad | Evalúa GPU, pantalla, peso y autonomía | de Coninck, R. (49998)|
+| **SM4** · Integración y recomendación | Combina los grados, aplica los requisitos excluyentes y recomienda | Luconi Furque, M. (48889) |
 
 > Legajos y contactos de los demás integrantes: `[completar]`.
 
