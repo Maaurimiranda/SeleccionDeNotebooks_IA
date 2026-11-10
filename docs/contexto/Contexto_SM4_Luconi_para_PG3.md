@@ -347,7 +347,7 @@ AND = MIN, OR = MAX, agregación MAX, inferencia Mamdani (recorte), desborrosifi
 
 ## 5. PG2 – Implementación del SM4 en Neo4j (bloque 10.f del script grupal)
 
-Script: `PG2/Grupo_2_PG2_U1.cypher` (bloques 0 a 13), o `PI4/Grupo_2_PG2_U1_bloques_0a12.cypher`, que es la versión cortada antes del bloque 13 para cargar en Neo4j Browser. Es la **versión corregida** tras la devolución de PG2.
+Script canónico (D-01): `docs/cypher/Grupo_2_PG2_U1_corregido.cypher` (bloques 0 a 13, con la corrección de REC-R9 de §7.1 ya aplicada). `docs/cypher/Grupo_2_PG2_U1_bloques_0a12.cypher` es la misma versión cortada antes del bloque 13 y sin esa corrección; con ella corrieron los casos de PI4. Es la **versión corregida** tras la devolución de PG2.
 
 ### 5.1 Corrección clave de PG2 (condiciona todo)
 
@@ -459,7 +459,7 @@ Para req_03, Notebook_K queda OFI, pesos 0,333 / 0,083 / 0,583, adecuación 0,65
 
 ## 6. PI4 – Integración del LLM con la base de conocimiento (patrón sándwich)
 
-Archivos en `/mnt/project-files/PI4/`:
+Archivos en `/mnt/project-files/PI4/` (en el repo: `docs/fuentes/SM4/` y `docs/cypher/`):
 
 - `Luconi_Martina_PI4_U4.py`: prototipo, unas 900 líneas.
 - `prompts_PI4_SM4.txt`
@@ -555,7 +555,7 @@ Esquema de salida:
 | Componente | Elección | Por qué |
 |---|---|---|
 | Orquestación | Python 3 con funciones propias (`orquestar()`) | El flujo es fijo, no un agente: así cada control queda explícito y se puede probar |
-| LLM | Ollama local, **qwen2.5:3b** (por defecto en el .py; se configura con `OLLAMA_MODEL`) | Gratis, local y con salida estructurada. Se usó 3B porque el 7B colgaba la PC de prueba por RAM y disco |
+| LLM | Ollama local, **qwen2.5:3b** en las corridas de PI4 (el `.py` trae `qwen2.5:7b` por defecto; se configura con `OLLAMA_MODEL`) | Gratis, local y con salida estructurada. Se usó 3B porque el 7B colgaba la PC de prueba por RAM y disco |
 | Base de conocimiento | Neo4j 5.x (probado en 5.26) con el driver `neo4j` (6.4.1), solo lectura | El grafo de PG2 es la base: el prototipo no escribe ni recalcula |
 | Consultas | Plantillas parametrizadas | Evitan Text2Cypher, con el que el LLM podría consultar otra cosa, inventar filtros o modificar el grafo |
 | Verificador | `verificar_explicacion()` + `plantilla_fija()` | REC-R11 automático: el control no depende de que el modelo obedezca |
@@ -675,7 +675,7 @@ Puntos a verificar o corregir en el SM4 antes de integrar:
   - los estados son `Recomendada (Alta)`, `Recomendada (Media)`, `Recomendada condicionada por falta de informacion`, `Indeterminada: completar informacion`, `Descartada (excluyente incumplido)` y `Descartada`;
   - se usa "ampliabilidad" (`nivel_ampliabilidad`), no "expandibilidad". La tabla de equivalencias está en 3.2.
 - **Numeración de reglas.** Las R1 a R14 de PI1 pasaron a REC-* en PG2 (tabla 2.4). En PG3 se usan solo las REC-*.
-- **REC-R9 con prioridad "precio" (corrección para el script de PG3).** En el bloque 10.f entregado en PG2, el ranking ordenaba siempre por franja de grado, ampliabilidad y costo-beneficio, sin mirar la prioridad. Ningún pedido de prueba tenía prioridad "precio", por eso no se notó. En la PG3, el `ORDER BY` de la consulta "Recomendacion final" del bloque 10.f pasa a ser:
+- **REC-R9 con prioridad "precio" (corrección para el script de PG3; ya aplicada en el canónico `Grupo_2_PG2_U1_corregido.cypher`).** En el bloque 10.f entregado en PG2, el ranking ordenaba siempre por franja de grado, ampliabilidad y costo-beneficio, sin mirar la prioridad. Ningún pedido de prueba tenía prioridad "precio", por eso no se notó. En la PG3, el `ORDER BY` de la consulta "Recomendacion final" del bloque 10.f pasa a ser:
 
   ```cypher
   ORDER BY CASE WHEN c.prioridad = 'precio' THEN ev.indice_costo_beneficio ELSE 0 END DESC,  // REC-R9
@@ -794,7 +794,7 @@ Pruebas funcionales del SM4 con resultado esperado y obtenido: la tabla 6.6 más
 | Ítem del ZIP | Archivo del SM4 |
 |---|---|
 | e) Código fuente | `Luconi_Martina_PI4_U4.py` (integrar en el FastAPI común); `requirements.txt`: `neo4j`, `fastapi`, `uvicorn`, `pydantic` (Ollama se instala aparte) |
-| f) Scripts Cypher | `Grupo_2_PG2_U1.cypher` (bloque 10.f, SM4) y las plantillas del diccionario `CONSULTAS` |
+| f) Scripts Cypher | `Grupo_2_PG2_U1_corregido.cypher` (canónico; bloque 10.f, SM4) y las plantillas del diccionario `CONSULTAS` |
 | g) Configuración | Variables `NEO4J_*` y `OLLAMA_*`; `prompts_PI4_SM4.txt` |
 | c) Casos de prueba | Tabla 6.6 más las trazas de `--casos` (`ejecucion_casos_PI4.json`, regenerar con el LLM real) |
 | b) Diagramas | `flujo_orquestacion_SM4.png` |

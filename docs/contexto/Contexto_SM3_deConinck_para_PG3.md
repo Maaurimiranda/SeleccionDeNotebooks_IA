@@ -4,7 +4,7 @@
 * **Cátedra:** Inteligencia Artificial · Departamento de Sistemas de Información · UTN FRM (Ciclo 2026)
 * **Grupo:** Grupo 2 · Comisión 5K09
 * **Responsable:** de Coninck, Ramiro (Legajo: 49998)
-* **Base de Conocimiento:** Alineada 100% con `Grupo_2_PG2_U1_bloques_0a12 (1).cypher` (Versión Corregida PG2)
+* **Base de Conocimiento:** grafo canónico `docs/cypher/Grupo_2_PG2_U1_corregido.cypher` (D-01), superconjunto de `Grupo_2_PG2_U1_bloques_0a12.cypher`, con el que corrió `sm3_asistente.py` en PI4 (código en `docs/fuentes/SM3/`). Lo que este documento afirma y el grafo no tiene está en la nota de §3.
 * **Propósito:** Documento de contexto técnico de SM3 para el equipo (Olea, Miranda, Luconi Furque) para la integración, enrutamiento, ejecución y orquestación final en **PG3**.
 
 ---
@@ -54,6 +54,15 @@ Cuando el usuario realiza una pregunta orientada a aspectos visuales, gráficos 
 ---
 
 ## 3. Ontología y Base de Conocimiento en Neo4j (`bloques_0a12.cypher`)
+
+> **Verificado contra el canónico (09/11/2026):**
+> - `margen_gama` toma `superior`, `justa` o `inferior`: no existe `excluye`.
+> - `RAM.canal` está cargado (K en `simple`), pero **no hay regla GM-R15 ni alerta de ancho de banda**. Tampoco existen GM-R14 (con `INCUMPLE`) ni GM-R16, ni las alertas de GM-R12 y GM-R17.
+> - Sin autonomía, `adecuacion_movilidad` queda en `null` y el rango [0 ; 1] lo arma SM4 (REC-R15).
+> - La gama mínima de GPU sale de `Perfil.gama_gpu_min` (DIS 3, GAM 3, VID3D 4), no de la intensidad de SM1.
+> - `entrena_modelos_gpu` y `req_gama_gpu` no existen.
+>
+> Ver D-04 y D-10 en `docs/INCONSISTENCIAS_CONTEXTOS.md`.
 
 La base de datos oficial del proyecto implementa una distinción clave surgida de las devoluciones de PG2:
 * **En `(:Notebook)` y sus componentes** residen los datos técnicos objetivos y las conclusiones que **no dependen del comprador**: la **movilidad** (`adecuacion_movilidad`), calculada a partir del peso y la batería.
@@ -173,7 +182,7 @@ Funciones gaussianas $\mu(x) = \exp\left(-\frac{(x - c)^2}{2\sigma^2}\right)$ co
 | **`Notebook_E`** | $980 | 1.5 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 70% | 7.0 h (medida) | Movilidad media (0.547), pero SM2 la descarta por CPU sin virtualización. |
 | **`Notebook_G`** | $650 | 1.9 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 55% | **3.99 h (estimada)** | **Regla GM-R12:** 5.7 h declaradas castigadas al 70%. Pantalla básica (55% sRGB). |
 | **`Notebook_H`** | $1000 | 2.0 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 58% | 6.0 h (medida) | Movilidad media (0.430) y peso de 2.0 kg. |
-| **`Notebook_K`** | $900 | 1.6 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 60% | 7.5 h (medida) | Canal simple de RAM (dispara alerta `GM-R15` en SM3). |
+| **`Notebook_K`** | $900 | 1.6 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 60% | 7.5 h (medida) | Canal simple de RAM (dato `canal` cargado; la alerta `GM-R15` **no está implementada**, ver D-04). |
 | **`Notebook_M`** | $880 | 1.5 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 66% | **null (desconocida)** | **Incertidumbre:** Batería `null`, movilidad `null`, alerta `GM-R12`. |
 | **`Notebook_X`** | $1050 | 1.8 kg | `'dedicada media'` (Verdadero) | **60 / 115 W** | FHD 144Hz 95% | 7.0 h (medida) | **TGP Recortado:** Potencia relativa 0.522, grado GPU 0.55 y alerta `GM-R8`. Pantalla apta diseño. |
 

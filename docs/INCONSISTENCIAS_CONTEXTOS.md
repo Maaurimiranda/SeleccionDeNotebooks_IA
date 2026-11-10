@@ -2,13 +2,13 @@
 
 > **Para qué sirve.** Lista lo que no coincide entre los cinco contextos de [`docs/contexto/`](contexto/) y las decisiones que hay que tomar para unificarlos antes de desarrollar PG3. Cada decisión dice qué archivos hay que tocar cuando se resuelva.
 > **Revisado:** 09/11/2026 sobre `Contexto_PG1_PG2_Grupo`, `Contexto_SM1_Olea`, `Contexto_SM2_Miranda`, `Contexto_SM3_deConinck` y `Contexto_SM4_Luconi` (todos `_para_PG3.md`), contra `RESTRICCIONES.md` y `consigna/ConsignaPG3.md`.
-> **Límite:** en el repo no hay código ni `.cypher`. Todo se cruzó entre los textos; lo marcado *verificar* necesita el script.
+> **Fuentes:** desde el 09/11/2026 el repo tiene los tres `.cypher` ([`docs/cypher/`](cypher/)) y los PI4 de los cuatro submódulos ([`docs/fuentes/`](fuentes/)). Lo que sigue marcado *verificar* necesita ejecutar el script en Neo4j.
 
 ## Veredicto
 
 **Sí se pueden unir.** Los cuatro submódulos comparten lo esencial: el camino `Requerimiento → EVALUA → Evaluacion → SOBRE → Notebook`, Mamdani con gaussianas, «Neo4j maneja la verdad», el patrón sándwich con plantillas Cypher fijas, el verificador REC-R11 con plantilla fija y la política «desconocido ≠ supuesto».
 
-**Todavía no son uniformes.** El origen de casi todo es que **cada contexto describe una versión distinta del grafo** (D-01). Hasta decidir cuál es la canónica no se pueden fijar los valores esperados de las pruebas E2E.
+**Todavía no son uniformes.** El origen de casi todo es que **cada contexto describe una versión distinta del grafo** (D-01). Hasta decidir cuál es la canónica no se pueden fijar los valores esperados de las pruebas E2E. *Actualización: D-01 está resuelta; el canónico es `docs/cypher/Grupo_2_PG2_U1_corregido.cypher` y los cinco contextos ya lo referencian.*
 
 ---
 
@@ -27,9 +27,18 @@
 
 ## 2. Decisiones para el grupo
 
-Orden sugerido: D-01 primero (bloquea a casi todas), después D-02 a D-05, el resto en paralelo.
+D-01 está resuelta. Orden sugerido para el resto: D-02 a D-05 y después las demás en paralelo.
 
-### D-01 · Versión canónica del grafo (bloqueante)
+### D-01 · Versión canónica del grafo — **RESUELTA (09/11/2026)**
+
+> **Decisión del grupo:** el grafo canónico es **`docs/cypher/Grupo_2_PG2_U1_corregido.cypher`**, y se le portan desde el linaje A las piezas de SM1. Contextos actualizados:
+> - PG1/PG2: §8 reescrita (modelo canónico y diferencias con el linaje A en §8.8) y notas en §0.3, §5–§7, §9, §10, §12, §15 y §16.
+> - SM1: encabezado, §7 y 13-A.
+> - SM2: §8, §12 y §14 (A, B y nueva K).
+> - SM3: encabezado, nota de verificación en §3 y fila de K en §5.
+> - SM4: §5, §6, §6.5, §7.1 y §7.8.
+>
+> **Queda como trabajo (no como decisión):** portar SM1 al canónico (PG1/PG2 §8.8) y llevar a `ev.*` las consultas de PI4 de SM2 (SM2 §14-K).
 
 **Inconsistencia.** Hay tres scripts y cada contexto describe uno:
 
@@ -56,7 +65,7 @@ Qué confirma:
 - **La RAM tiene `canal`** (K en `simple`, G en `desconocido`), pero ninguna regla lo usa: no hay GM-R15 ni REN-R11/R14.
 
 Qué contradice a los otros contextos:
-- **Tamaño:** hay **56 reglas** (23 difusas + 26 crisp + 7 retiradas, entre ellas GM-R10) y no 61; **30 parámetros** y no 59; **14 expresiones** de frecuencia y no 9.
+- **Tamaño:** hay **57 reglas** (23 difusas + 27 crisp + 7 retiradas, entre ellas GM-R10) y no 61; **30 parámetros** y no 59; **14 expresiones** de frecuencia y no 9.
 - **Restricciones de unicidad:** `Notebook` se identifica por `modelo` (no hay `NB_A`), y no hay restricción de unicidad para `Evaluacion`, `Alerta` ni `Lectura`.
 - **Relaciones:** no existen `ASOCIADO_A`, `LLEVA_A`, `TIENE_PREGUNTA` ni `ES_UN`; en su lugar aparecen `APUNTA_A`, `REQUIERE_ACLARACION`, `POSEE_SLOT`, `SALIDA_PI2` y `VALIDA`.
 - **Contra SM1 (que corrió en `v2`):**
@@ -101,6 +110,8 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 
 ### D-02 · Tablas de perfiles: pesos y requisitos
 
+> **Estado tras D-01:** el canónico usa los pesos de SM4 y la tabla de requisitos ya transcrita en PG1/PG2 §8.6. Lo de abajo describe la situación previa. Queda alinear SM2 §6.1 (DEV, DATOS) y SM3 §9.2 (DIS ≥ 4) con esa tabla, y decidir si núcleos y carga sostenida (solo en SM2) se cargan en el grafo o se declaran fuera de alcance.
+
 **Inconsistencia.**
 - **Pesos base:** PG1/PG2 (grafo) y SM4 (PI1) solo coinciden en VIRT y GAM. OFI: 0,30/0,10/0,60 vs 0,4/0,1/0,5; DEV 0,50/0,10/0,40 vs 0,6/0,1/0,3; DIS 0,35/0,45/0,20 vs 0,4/0,5/0,1; VID3D 0,40/0,50/0,10 vs 0,5/0,4/0,1; DATOS 0,50/0,40/0,10 vs 0,7/0,1/0,2. **Los pesos de `req_03` que informa SM4 (0,333/0,083/0,583) salen de la tabla de PI1, no de la de PG2**: con la de PG2 darían 0,25/0,083/0,667. Una de las dos no es la del grafo.
 - **Requisitos:** DEV en SM2 es RAM 8/16 y SSD 256/512, y en el grafo 16/32 y 512/1024. DATOS en SM2 es CPU media, SSD 512/1024 y **virtualización excluyente**; en el grafo es CPU alta, SSD 1024/2048 y solo VIRT exige virtualización. Núcleos y carga sostenida solo existen en SM2.
@@ -137,6 +148,11 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 - **SM4** usa Ollama `qwen2.5:3b`.
 - **SM3** no dice qué modelo usa; usa `pydantic` para la extracción, cuando la lista amarilla lo permite solo para la API.
 - **Temperatura:** la explicación va a 0,3 en SM3 y a 0,2 en SM4; el principio 6 de las restricciones pide 0.
+
+**Verificado en el código (`docs/fuentes/`):**
+- **SM3** usa `ChatOllama` (`langchain_ollama`) con `qwen2.5:3b`, más `langchain_core`, `rich`, `python-dotenv` y `pydantic`. `langchain_ollama`, `rich` y `python-dotenv` no están en las listas verde ni amarilla.
+- **SM4** usa `urllib` (biblioteca estándar) y trae `qwen2.5:7b` por defecto, aunque los casos de PI4 corrieron con `3b`.
+- Las temperaturas de explicación, 0,3 en SM3 y 0,2 en SM4, están confirmadas.
 
 **Opciones.** Un solo proveedor (Ollama), un modelo (`qwen2.5:7b`, o `3b`/`llama3.1:8b` si el hardware no da), temperatura 0 en las dos llamadas y un único cliente (`requests` o `ChatOllama`). *(Recomendada: Ollama con qwen2.5 a temperatura 0, con `requests`.)* SM1 tiene que migrar.
 **Archivos:** SM1 §9.2 y 13-H; SM3 §7; SM4 §6.5; README §5.
@@ -242,16 +258,20 @@ Esto le corresponde a cada autor (SM3: de Coninck; SM4: Luconi).
 ## 3. Verificaciones pendientes (necesitan el script, no una decisión)
 
 - **SM3, grado de GPU de X 0,55 y de C 0,916:** con las adecuaciones gráficas de PG2 para `req_01` (X 0,844, C 0,941, pantalla 1,0) darían ≈ 0,74 y ≈ 0,90. SM3 no dice para qué perfil son.
-- **SM3, M con «movilidad `null`»:** PG2 y SM4 usan un rango [0 ; 1] con `Lectura` peor/mejor. ¿Quién crea el rango, SM3 (GM-R12) o SM4 (REC-R15)?
-- **Alertas de SM3:** SM4 dice que recibe GM-R8 y GM-R11; SM3 emite además GM-R12, GM-R15 y GM-R17.
-- **SM2 PI4:** confirmar la versión final del `.py` (27 tests en el archivo, 49 en el informe; SM2 §14-A).
+- ~~**SM3, M con «movilidad `null`»**~~ **Resuelto en el canónico:** SM3 deja `adecuacion_movilidad` en `null` y SM4 arma el rango con las lecturas peor y mejor (REC-R15).
+- ~~**Alertas de SM3**~~ **Resuelto en el canónico:** solo existen GM-R8 y GM-R11, como dice SM4. GM-R12, GM-R15 y GM-R17 no generan alerta (D-04).
+- **SM2 PI4:** la versión final ya está confirmada (SM2 §14-A); falta reconciliar las 27 verificaciones del archivo con las 49 del informe.
 - **PG1/PG2 §15.10:** un pedido sin perfil que imponga requisitos deja `req_ram_min` en `null` y luego se divide por `null`.
 
-## 4. Material que falta en el repo
+## 4. Material del repo y lo que todavía falta
 
-Ningún contexto se puede verificar contra el código porque en el repo no hay:
-- los tres `.cypher`;
-- `Olea_Facundo_PI4_U4.py`, `Miranda_Mauricio_PI4_U4.py` + `test_offline_SM2.py`, `sm3_asistente.py` + `prompts/` y `Luconi_Martina_PI4_U4.py` + `prompts_PI4_SM4.txt`;
-- PG0 y el Anexo C (entrevista al técnico).
+En el repo:
+- **[`docs/cypher/`](cypher/):** `Grupo_2_PG2_U1.cypher` (linaje A), `Grupo_2_PG2_U1_bloques_0a12.cypher` y `Grupo_2_PG2_U1_corregido.cypher` (**canónico**).
+- **[`docs/fuentes/`](fuentes/):** SM1 `Olea_Facundo_PI4_U4.ipynb` (con el host de Aura enmascarado); SM2 `Miranda_Mauricio_PI4_U4.py` (versión final), `test_offline_SM2.py` y `ejecuciones.jsonl`; SM3 `sm3_asistente.py` y `prompts/`; SM4 `Luconi_Martina_PI4_U4.py`.
 
-El contexto de SM4 además cita rutas `/mnt/project-files/PI4/` y un Drive externo.
+Todavía falta:
+- **PG0** y el **Anexo C** (entrevista al técnico).
+- `prompts_PI4_SM4.txt`. No es imprescindible: los prompts de SM4 están dentro del `.py`.
+- La `SPEC.md` que cita `sm3_asistente.py`.
+
+El contexto de SM4 cita además rutas `/mnt/project-files/PI4/` y un Drive externo.

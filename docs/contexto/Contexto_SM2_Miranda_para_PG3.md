@@ -279,7 +279,7 @@ Anchos σ, pesos de a y consecuentes son decisión del grupo; **B y K casi igual
 
 ## 8. Modelo de datos del grafo Neo4j `[DED]`
 
-> **Reemplazada por `Contexto_PG1_PG2_Grupo_para_PG3.md` §8** (leído contra el `.cypher`). Se conserva solo como referencia de lo que usan las consultas del `.py`. **Deducido de las consultas Cypher del `.py`.** La fuente real es `Grupo_2_PG2_U1.cypher` (bloques 7, 9, 10, 11, 13). Confirmar etiquetas, propiedades y relaciones contra ese archivo antes de escribir Cypher nuevo.
+> **Reemplazada por `Contexto_PG1_PG2_Grupo_para_PG3.md` §8**, que describe el grafo canónico (`Grupo_2_PG2_U1_corregido.cypher`, D-01). Lo que sigue es el linaje A (`Grupo_2_PG2_U1.cypher`), contra el que corre el PI4: en el canónico, riesgo, ρ, índice a, sus alertas y el `ACTIVA` de FZ-R1..R5 están en `Evaluacion`, y la pregunta pendiente cuelga de `REQUIERE_ACLARACION`. Se conserva solo como referencia de lo que usan las consultas del `.py`. **Deducido de las consultas Cypher del `.py`.** La fuente real es `Grupo_2_PG2_U1.cypher` (bloques 7, 9, 10, 11, 13). Confirmar etiquetas, propiedades y relaciones contra ese archivo antes de escribir Cypher nuevo.
 
 **Nodos y propiedades usadas:**
 
@@ -475,7 +475,7 @@ Python plano en vez de LangChain (por ahora); Ollama local (costo, privacidad, r
 | 8 | PI4 caso 5 (B) | No afirmar «no hay reglas en contra» sin respaldo | **Pendiente** (límite del verificador) |
 | 9 | PI4 caso 8 (req_02) | Decir que el pedido no tiene **perfil definido**, no «no hay resultados» | **Pendiente de verificar** (regla 5 del prompt del informe) |
 | 10 | PI4 | **Verificación semántica** (preservar decisiones, excepciones e incertidumbre) | **Pendiente — corrección principal antes de PG3** |
-| 11 | PI4 | Incluir `.py`, `test_offline_SM2.py` y el Cypher de PG2 con la entrega | `.py` y test adjuntos; **falta el Cypher** |
+| 11 | PI4 | Incluir `.py`, `test_offline_SM2.py` y el Cypher de PG2 con la entrega | `.py`, test y Cypher en el repo (`docs/fuentes/SM2/`, `docs/cypher/`) |
 
 > Criterio de fondo de la profesora: *el LLM no solamente debe usar datos de Neo4j, sino preservar las decisiones, las excepciones y la incertidumbre que el sistema experto representa.*
 
@@ -521,8 +521,8 @@ Python plano en vez de LangChain (por ahora); Ollama local (costo, privacidad, r
 
 | Ref. | Tema | Detalle | Acción |
 | --- | --- | --- | --- |
-| **A** | **Versión del código** | El `.py` adjunto parece **anterior** al descrito en el informe PI4. El informe cuenta cosas que **no están** en el archivo: descartar modelo/pedido que el usuario no escribió; exigir respaldo textual para cada filtro; verificación **por párrafo** y de «fuerza» citada; rechazo de «la regla que más pesó» sin reglas; campo `ampliabilidad_de_la_ram`; omitir reglas de fuerza < 0,10; resumen de L4 **aparte** (en el `.py` la fila de resumen va dentro de `resultados`, lo que reproduce el bug «10 sobre 11»); reglas 10–14 del prompt de explicación (el `.py` tiene 9 reglas y una regla 4/5 menos detalladas); ejemplos extra del prompt de extracción. Los tests son 27 en el archivo vs 49 en el informe | Confirmar con Mauricio cuál es la versión final; si no existe, **re-implementar** esas guardas (están descritas en el informe §g y §h) |
-| **B** | Archivos ausentes | `Grupo_2_PG2_U1.cypher`, informes PG0/PG1/PG2 y PI de SM1, SM3 y SM4 no están disponibles aquí | Adjuntarlos; hasta entonces, la sección 8 es deducción |
+| **A** | **Versión del código** | El `.py` adjunto parece **anterior** al descrito en el informe PI4. El informe cuenta cosas que **no están** en el archivo: descartar modelo/pedido que el usuario no escribió; exigir respaldo textual para cada filtro; verificación **por párrafo** y de «fuerza» citada; rechazo de «la regla que más pesó» sin reglas; campo `ampliabilidad_de_la_ram`; omitir reglas de fuerza < 0,10; resumen de L4 **aparte** (en el `.py` la fila de resumen va dentro de `resultados`, lo que reproduce el bug «10 sobre 11»); reglas 10–14 del prompt de explicación (el `.py` tiene 9 reglas y una regla 4/5 menos detalladas); ejemplos extra del prompt de extracción. Los tests son 27 en el archivo vs 49 en el informe | **Resuelto:** la versión final (53 KB, con esas guardas) está en `docs/fuentes/SM2/`; la de `PI/` (44 KB) era la anterior. Falta reconciliar las 27 verificaciones del archivo con las 49 del informe |
+| **B** | Archivos ausentes | `Grupo_2_PG2_U1.cypher`, informes PG0/PG1/PG2 y PI de SM1, SM3 y SM4 no están disponibles aquí | **Resuelto:** los scripts están en `docs/cypher/` y los PI4 de los cuatro en `docs/fuentes/` |
 | **C** | Cifras del peor caso | PI3 informa **81,1** (K con a = 0) y PG2/PI4 informan **81,46** para G (misma ρ = 0,5 y a = 0). Y 49,6 (PI3) vs 49,55 (K en grafo) y 49,58 (G mejor caso). Causa probable: discretización del centroide en el grafo `[?]` | **Resuelto** (`Contexto_PG1_PG2_Grupo_para_PG3.md` §15.2): vale **[49,58 ; 81,46]**; el 81,1 de PI3 no se reproduce con la discretización del grafo |
 | **D** | Reglas activadas de A | La respuesta de PI4 caso 6 dice REC-RD1 con fuerza 0,863; el resultado esperado de CP1 es 0,785 (grado de recomendación). Pueden ser magnitudes distintas (fuerza de regla vs grado) `[?]` | **Resuelto** (`Contexto_PG1_PG2_Grupo_para_PG3.md` §15.3): 0,863 es la fuerza de REC-RD1 y 0,785 el grado desborrosificado; no es contradicción |
 | **E** | Letra única por notebook | `normalizar_modelo` solo admite una letra; el catálogo real prevé 30 modelos | Cambiar normalización y prompt antes de cargar el catálogo completo |
@@ -531,6 +531,7 @@ Python plano en vez de LangChain (por ahora); Ollama local (costo, privacidad, r
 | **H** | Fixtures de los tests | Presupuesto 1000/600, grados VIRT 0,899 / GAM 0,313 salen de datos simulados «de las tablas de PG2» | Validar contra el grafo antes de citarlos |
 | **I** | Mensaje de virtualización | La intención `virtualizacion` no adjunta la advertencia de parámetros sin validar (consistente: no usa difuso) | Mantener, pero decidirlo en PG3 |
 | **J** | Corrección PI4 sobre la entrega | La profesora indicó que no recibió el código; ya está disponible parcialmente | Entregar el trío completo en el ZIP |
+| **K** | Consultas contra el grafo canónico | `Q_C2_RIESGO_RAM`, L2 y L3 leen `r.riesgo_*`, `r.suficiencia_rho` y `r.indice_ampliabilidad` desde `RAM`, y la pregunta desde `TIENE_PREGUNTA` (linaje A). En el canónico están en `Evaluacion` y `REQUIERE_ACLARACION` | Portar las consultas a `ev.*` (PG1/PG2 §10.4) |
 
 ---
 
