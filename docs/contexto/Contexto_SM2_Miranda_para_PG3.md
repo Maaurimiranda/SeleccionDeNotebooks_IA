@@ -361,7 +361,7 @@ Anchos σ, pesos de a y consecuentes son decisión del grupo; **B y K casi igual
 | C | 16 GB ampliable | 1,00 | 1,000 | FZ-R4 = 1,000 | 18,23 | bajo |
 
 ### 9.3 Virtualización de req_01
-**E** no soporta → «Descartada (REN-R1 + REC-R3)». **G** no informa → «Indeterminada: completar información». Las otras 7 cumplen. Alertas de G: REN-R13 («Información incompleta»), REN-R10 («Ampliabilidad no verificada»), FZ-R7 («Riesgo de obsolescencia alto»).
+**E** no soporta → «Descartada (REN-R1 + REC-R3)». **G** no informa → «Indeterminada: completar informacion». Las otras 7 cumplen. Alertas de G: REN-R13 («Información incompleta»), REN-R10 («Ampliabilidad no verificada»), FZ-R7 («Riesgo de obsolescencia alto»).
 
 ### 9.4 Otros datos
 Notebook A en req_01: recomendada, grado 0,785, «Alta» (CP1). Reglas activadas de A (L3): FZ-R4 (0,458), GM-RD1 (0,41), GM-RD2 (0,46), REC-RD1 (0,863 es la fuerza de REC-RD1; 0,785 es el grado de recomendación: magnitudes distintas).

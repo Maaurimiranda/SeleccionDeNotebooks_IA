@@ -407,7 +407,7 @@ Todo resultado que depende del perfil o del pedido vive en `(:Evaluacion)`, uno 
 
 Las reglas retiradas (REC-R1, R2, R6 y R12) se conservan como nodo, con `estado_validacion = 'reemplazada en PG2'` y `reemplazada_por = 'REC-RD1..REC-RD5'`, para la trazabilidad.
 
-**Parámetros crisp del SM4** (`(:Parametro)`, todos "provisional"): `P_INCREMENTO_PRIORIDAD = 0,20`, `P_MARGEN_EMPATE = 0,05` y `P_MAX_RECOMENDADAS = 3`.
+**Parámetros crisp del SM4** (`(:Parametro)`, todos "provisional"; D-06 los unifica en `'sin validar'`): `P_INCREMENTO_PRIORIDAD = 0,20`, `P_MARGEN_EMPATE = 0,05` y `P_MAX_RECOMENDADAS = 3`.
 
 **Agenda de validación con el técnico** (`(:ConsultaExperto)`, bloque 5.f, preguntas en términos del dominio):
 
@@ -445,11 +445,11 @@ Las reglas retiradas (REC-R1, R2, R6 y R12) se conservan como nodo, con `estado_
 | H | 0,811 | 0,626 | Recomendada (Media) | 0,811 | Puesto 2 (ampliabilidad alta) |
 | B | 0,813 | 0,632 | Recomendada (Media) | 1,161 | Puesto 3 (ampliabilidad baja; REC-R8) |
 | X | — | 0,534 | Recomendada (Media), excedente 5 % | 0,801 | Alternativa fuera de presupuesto, alerta GM-R8 |
-| M | [0,741 ; 0,908] | [0,504 ; 0,826] | Recomendada condicionada por falta de información | 0,842 | No entra en el ranking; alerta REC-R15 |
+| M | [0,741 ; 0,908] | [0,504 ; 0,826] | Recomendada condicionada por falta de informacion | 0,842 | No entra en el ranking; alerta REC-R15 |
 | E | 0,81 | 0,623 | Descartada (excluyente incumplido, REC-R3) | 0,827 | — |
 | K | — | — | Descartada | — | — |
 | C | — | — | Descartada (excedente de 20 %) | — | — |
-| G | — | — | Indeterminada: completar información | — | — |
+| G | — | — | Indeterminada: completar informacion | — | — |
 
 Para req_03, Notebook_K queda OFI, pesos 0,333 / 0,083 / 0,583, adecuación 0,659, grado 0,469, "Recomendada (Media)", sin alertas. La misma K está descartada para req_01: eso demuestra CP11.
 
@@ -596,7 +596,7 @@ Variables de entorno: `NEO4J_URI` (bolt://localhost:7687), `NEO4J_USER` (neo4j),
 | CP1 | ¿Qué le recomendamos al comprador_01? | recomendar → L1, Q1, Q2, Q3, Q6B, Q8 | A puesto 1 (0,785, Alta); H 2 y B 3 por REC-R8; X fuera de presupuesto (5 %, GM-R8); E y C descartadas, M condicionada, G indeterminada | Ranking completo |
 | CP2 | ¿Por qué la Notebook_E quedó afuera si tiene casi el mismo puntaje que la H? | explicar_notebook, corregida a comparar por Python → L1, Q6, Q6B | E 0,81 pero "Descartada (excluyente incumplido)", REC-R3; H 0,811, puesto 2 | Un excluyente no se compensa |
 | CP3 | ¿Por qué la H quedó antes que la B si la B es más barata? | explicar_notebook, corregida a comparar → L1, Q6, Q6B | H 0,626 ampliabilidad alta, puesto 2; B 0,632 baja, puesto 3; margen 0,05 | Desempate REC-R8 |
-| CP4 | Contame qué pasa con la Notebook_M, ¿se la puedo ofrecer? | explicar_notebook → L1, Q4, Q5 | "Recomendada condicionada", grado [0,504 ; 0,826], adecuación [0,741 ; 0,908], falta la autonomía, REC-R15, traza por escenario | Dato faltante como rango |
+| CP4 | Contame qué pasa con la Notebook_M, ¿se la puedo ofrecer? | explicar_notebook → L1, Q4, Q5 | "Recomendada condicionada por falta de informacion", grado [0,504 ; 0,826], adecuación [0,741 ; 0,908], falta la autonomía, REC-R15, traza por escenario | Dato faltante como rango |
 | CP5 | … ¿cuál es la de mejor relación precio-calidad de menos de 900 dólares? | costo_beneficio, precio_max 900 → L1, Q7 | B (700 USD, 1,161) y M (880 USD, 0,842, condicionada) | Filtros más REC-R9 |
 | CP6 | ¿Le sirve la Notebook_K al comprador_03? | explicar_notebook, req_03 → L1, Q4, Q5 | OFI, "Recomendada (Media)", grado 0,469, sin ranking (la misma K está descartada para req_01) | CP11: evaluación por pedido |
 | CP7* | ¿Qué le recomiendo al comprador_02? | recomendar → L1 | Perfil indeterminado, 0 evaluadas, pregunta pendiente | No se inventa un perfil (SM1) |
@@ -759,7 +759,7 @@ Pruebas funcionales del SM4 con resultado esperado y obtenido: la tabla 6.6 más
   - las fuerzas `[:ACTIVA]`: RD2 = 0,842 en el peor caso y RD1 = 1,0 en el mejor.
 - **Consulta ejecutada:** Q4_EXPLICAR_NOTEBOOK y Q5_TRAZA con `{requerimiento_id: "req_01", modelo: "Notebook_M"}`, registradas en la traza de `orquestar()`.
 - **Explicación generada:** "Sí, se la podés ofrecer, pero aclarándole al comprador que falta un dato… su grado va de 0,504 en el peor caso a 0,826 en el mejor (REC-R15)…". Pasa el verificador REC-R11.
-- **Validación de los parámetros:** `(:EtiquetaDifusa)` y `(:Parametro)` con `estado_validacion = 'provisional'`, más la pregunta de la agenda `(:ConsultaExperto)`.
+- **Validación de los parámetros:** `(:EtiquetaDifusa)` y `(:Parametro)` con `estado_validacion = 'sin validar'` (D-06; antes `'provisional'`), más la pregunta de la agenda `(:ConsultaExperto)`.
 
 ### 7.6 Evaluación del sistema (punto 6), desde el SM4
 

@@ -119,7 +119,7 @@ Evaluar notebooks, comparar precios, decidir la recomendación (SM4), evaluar CP
 | `[:TIENE_PREGUNTA]` → `(:Pregunta)` | `texto`, `regla_origen`, `estado='pendiente'` | INT-R13, INT-R14 |
 | `[:GENERA]` → `(:Alerta)` | `tipo`, `regla_origen`, `mensaje`, `submodulo_origen='SM1'` | «Dedicación desconocida», «Perfil indeterminado» |
 | `(:Actividad)` | `descripcion`, `tipo`, `evidencia`, `dedicacion_h`, `dedicacion_origen`, `peso_perfil` (o `_min`/`_max`) | `dedicacion_origen` ∈ {`declarada`, `léxico`, `desconocida`} |
-| `[:ACTIVA {escenario, fuerza}]` → `(:Regla)` | desde `Actividad` (INT-RD1..3) y desde `Requerimiento` (INT-RD4..7) | `escenario` ∈ {`unico`, `min`, `max`} |
+| `[:ACTIVA {escenario, fuerza}]` → `(:Regla)` | desde `Actividad` (INT-RD1..3) y desde `Requerimiento` (INT-RD4..7) | `escenario` ∈ {`unico`, `min`, `max`}. *En el canónico los escenarios son nodos `Lectura {escenario: 'peor' | 'mejor'}` y `ACTIVA` no lleva `escenario` (D-06)* |
 
 ### 3.5 Contratos con otros submódulos
 

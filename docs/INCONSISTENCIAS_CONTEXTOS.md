@@ -207,7 +207,27 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 **Opciones.** Un solo proveedor (Ollama), un modelo (`qwen2.5:7b`, o `3b`/`llama3.1:8b` si el hardware no da), temperatura 0 en las dos llamadas y un único cliente (`requests` o `ChatOllama`). *(Recomendada: Ollama con qwen2.5 a temperatura 0, con `requests`.)* SM1 tiene que migrar.
 **Archivos:** SM1 §9.2 y 13-H; SM3 §7; SM4 §6.5; README §5.
 
-### D-06 · Literales canónicos (estados, escenarios, validación, prioridad, parámetros)
+### D-06 · Literales canónicos (estados, escenarios, validación, prioridad, parámetros) — **RESUELTA (09/11/2026)**
+
+> **Decisión del grupo:** mandan los literales del grafo canónico, salvo `estado_validacion`, que se unifica.
+>
+> | Concepto | Literal canónico |
+> | --- | --- |
+> | Estados | `Recomendada (Alta)` · `Recomendada (Media)` · `Recomendada condicionada por falta de informacion` · `Indeterminada: completar informacion` · `Descartada (excluyente incumplido)` · `Descartada` (sin tildes: así están en el grafo; si la explicación los muestra con tilde, se decide en D-07) |
+> | Etiqueta y estado | `considerar` es la etiqueta lingüística y `Recomendada (Media)` el estado que ve el asesor (PG1/PG2 §15.12 resuelto) |
+> | Escenarios | `Lectura {escenario: 'peor' \| 'mejor'}`; `ACTIVA` no lleva escenario (SM1 usaba `min`/`max`) |
+> | `estado_validacion` | **`'sin validar'`** para todo lo que no validó el técnico (antes también había `'provisional'`); `'reemplazada en PG2'` para las reglas retiradas |
+> | Prioridad | `rendimiento` · `grafica` · `portabilidad` · `autonomia` · `precio` · `ninguna` |
+> | Parámetros | Se dejan como están (`umbral_exigencia`, `banda_frontera`, `entropia_max` y los `P_*`) |
+> | Relaciones | `APUNTA_A`, `REQUIERE_ACLARACION`, `ES_DE_GAMA`, `SALIDA_PI2`, `CONSULTA_POR` (PG1/PG2 §8.3) |
+> | `GamaGPU` | `nombre`, `indice` (1 a 5) e `indice_exigencia` (0 a 100) |
+> | `origen_respuesta` | Es del contrato del orquestador: D-07 |
+>
+> **Trabajo en el `.cypher`:**
+> 1. Pasar a `'sin validar'` las 3 sentencias que ponen `'provisional'` (parámetros crisp, léxico y gamas de GPU).
+> 2. **Bug de REC-R5:** la prioridad `grafica`, que SM1 extrae, no suma peso. Solo suman `rendimiento`, `portabilidad` y `autonomia`. El enunciado de la regla dice «se suma a ese peso», así que hay que agregar `grafica` → `peso_grafica`.
+>
+> **Contextos actualizados:** estados reemplazados en PG1/PG2 (14), SM2 (1) y SM4 (3); `'provisional'` anotado en PG1/PG2 §7 y SM4 §5.3 y §7.5; escenarios en SM1 §3.4. Lo de abajo describe la situación previa.
 
 | Concepto | Variantes |
 | --- | --- |
