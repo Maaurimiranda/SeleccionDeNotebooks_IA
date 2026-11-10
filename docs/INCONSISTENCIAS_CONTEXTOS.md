@@ -179,14 +179,16 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 ### D-05 · LLM y técnicas permitidas — **RESUELTA (09/11/2026)**
 
 > **Decisión del grupo:**
-> - **Ollama local** con **`qwen2.5:7b`** por defecto (A11, verde) y **`qwen2.5:3b`** como alternativa por `OLLAMA_MODEL`.
+> - **Ollama local** con **`qwen2.5:3b`** por defecto (amarillo) y **`qwen2.5:7b`** (A11, verde) como opción por `OLLAMA_MODEL`.
+>   **Cambio del 10/11/2026:** se invierte el orden original (7b por defecto). Con la entrega el 13/11, el 3b corre en todas las notebooks del grupo (~2 GB, ~4 GB de RAM) y es 2 a 3 veces más rápido. Sus debilidades (JSON del plan y redacción) se compensan con la salida estructurada (`format` + `enum` de intenciones), la validación en Python y el verificador con plantilla fija.
 > - **Temperatura 0** en extracción y en explicación.
 > - **HTTP directo a `/api/chat` con `requests`** (amarillo) y salida estructurada (`format`). **Sin LangChain.**
 > - **Se quitan** `rich`, `python-dotenv`, `langchain-*` y `ollama`. `pydantic` queda solo para la API y `httpx` solo para los tests.
 >
 > **Qué tiene que cambiar cada uno:**
 > - **SM1:** deja Groq y `langchain-openai`.
-> - **SM2:** cambia el modelo por defecto (`llama3.1:8b` → `qwen2.5:7b`).
+> - **SM2:** cambia el modelo por defecto (`llama3.1:8b` → `qwen2.5:3b`).
+> - **SM4:** cambia el modelo por defecto (`qwen2.5:7b` → `qwen2.5:3b`), que es con el que corrió PI4.
 > - **SM3:** deja LangChain y los extras, y la explicación pasa de 0,3 a 0.
 > - **SM4:** la explicación pasa de 0,2 a 0, y `urllib` se reemplaza por `requests`.
 >
@@ -482,7 +484,7 @@ Esto le corresponde a cada autor (SM3: de Coninck; SM4: Luconi).
 
 **Código de los PI4 → orquestador común:**
 - SM1: dejar Groq por Ollama/`requests` y extraer `requisitos_explicitos` (D-05, D-10).
-- SM2: consultas a `ev.*`, modelo `qwen2.5:7b`, sin `req_01` por defecto (D-01, D-05, D-07).
+- SM2: consultas a `ev.*`, modelo `qwen2.5:3b`, sin `req_01` por defecto (D-01, D-05, D-07).
 - SM3: sin LangChain, `rich` ni `python-dotenv`, temperatura 0 (D-05).
 - SM4: voseo, temperatura 0 y `requests` (D-05, D-07).
 - Todos se integran al contrato de D-07: intenciones, plan, evidencia, verificador y traza.

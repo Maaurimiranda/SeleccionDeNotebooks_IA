@@ -35,16 +35,20 @@ Está formado por cuatro submódulos que comparten una única base de conocimien
 
 ## 3. Arquitectura
 
-> **Pendiente.** Se define después de entender el problema completo y el contexto de los otros submódulos (SM1, SM3 y SM4). Lo que pide la consigna para esta sección está en [`docs/consigna/ConsignaPG3.md`](docs/consigna/ConsignaPG3.md) (sección 3.3).
+Definida en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md): router con prompt maestro, cuatro submódulos con un contrato común, explicador con verificador y traza. El plan de trabajo hasta la entrega (13/11/2026) está en [`docs/plan/PLAN_PG3.md`](docs/plan/PLAN_PG3.md).
 
 ## 4. Estructura del repositorio
 
-> **Pendiente.** Depende de la arquitectura. Por ahora:
+> La estructura final está en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §6. Por ahora:
 
 ```
 SeleccionDeNotebooks_IA/
 ├── README.md
+├── CLAUDE.md                       # reglas para agentes y personas; nota de sesión obligatoria
 └── docs/
+    ├── ARQUITECTURA.md             # arquitectura y contrato de PG3
+    ├── plan/                       # PLAN_PG3.md + issues/ (una tarea por archivo)
+    ├── sesiones/                   # explicación de cada sesión de trabajo, para el grupo
     ├── RESTRICCIONES.md            # qué técnicas y tecnologías se pueden usar
     ├── INCONSISTENCIAS_CONTEXTOS.md # inconsistencias entre contextos y decisiones pendientes (D-01 a D-13)
     ├── consigna/                   # ConsignaPG3.md: consigna de la cátedra y ejemplo de referencia
@@ -59,8 +63,8 @@ SeleccionDeNotebooks_IA/
 | --- | --- | --- |
 | Python | `[confirmar]` | La consigna pide el código en Python con `requirements.txt` |
 | Neo4j | 5.x `[confirmar]` | Base de conocimiento de PG2. Las consultas de SM2 usan subconsultas `EXISTS { … }` y el driver 5 |
-| LLM | Ollama local, `qwen2.5:7b` (alternativa `qwen2.5:3b`) | Temperatura 0 en las dos llamadas; HTTP directo a `/api/chat` con `requests`, sin LangChain (D-05) |
-| Memoria | `[completar]` | Depende del LLM elegido |
+| LLM | Ollama local, `qwen2.5:3b` (`qwen2.5:7b` opcional por `OLLAMA_MODEL`) | Temperatura 0 en las dos llamadas; HTTP directo a `/api/chat` con `requests`, sin LangChain (D-05) |
+| Memoria | ~4 GB libres para `qwen2.5:3b` (~8 GB con `7b`) | Más lo que use Neo4j |
 
 ## 6. Puesta en marcha
 
@@ -111,8 +115,9 @@ El contenido mínimo del ZIP (ítems a–l) está en [`docs/consigna/ConsignaPG3
 - [ ] SM2: verificación semántica (rangos, perfil indeterminado, afirmaciones sin respaldo) — **prioridad**
 - [ ] SM2: confirmar la versión final del script de PI4 (ver `docs/contexto/`)
 - [x] Consigna de PG3 en el repo (`docs/consigna/`)
-- [ ] Entender el contexto de SM1, SM3 y SM4
-- [ ] Definir la arquitectura y la estructura del repositorio
+- [x] Entender el contexto de SM1, SM3 y SM4 (unificados, D-01 a D-13)
+- [x] Definir la arquitectura y la estructura del repositorio (`docs/ARQUITECTURA.md`)
+- [x] Plan de PG3 con tareas, responsables y dependencias (`docs/plan/`)
 - [ ] Integrar SM1, SM3 y SM4
 - [ ] Prompt maestro con enrutamiento
 - [ ] API única con enrutamiento a varios submódulos

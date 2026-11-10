@@ -411,7 +411,7 @@ El LLM **nunca** escribe Cypher; las plantillas están en el `.py` (texto comple
 | Componente | Función |
 | --- | --- |
 | Constantes | `MAX_CARACTERES = 500`, `MAX_REGENERACIONES = 2`, `REQ_POR_DEFECTO = "req_01"`, `SUBMODULO = "SM2"`, `INTENCIONES` (6), `ETIQUETAS_RIESGO`, `TIPOS_RAM`, `ADVERTENCIA`, `MENSAJE_ALCANCE` |
-| Variables de entorno | `NEO4J_URI` (bolt://localhost:7687), `NEO4J_USER`, `NEO4J_PASSWORD`, `NEO4J_DATABASE`, `OLLAMA_URL` (http://localhost:11434), `OLLAMA_MODEL` (llama3.1:8b) — **D-05 (09/11/2026):** Ollama local con `qwen2.5:7b` (alternativa `qwen2.5:3b` por `OLLAMA_MODEL`), temperatura 0 en las dos llamadas y HTTP directo a `/api/chat` con `requests`, sin LangChain. Cambia el modelo por defecto (`llama3.1:8b` → `qwen2.5:7b`). |
+| Variables de entorno | `NEO4J_URI` (bolt://localhost:7687), `NEO4J_USER`, `NEO4J_PASSWORD`, `NEO4J_DATABASE`, `OLLAMA_URL` (http://localhost:11434), `OLLAMA_MODEL` (llama3.1:8b) — **D-05 (09/11/2026):** Ollama local con `qwen2.5:3b` (cambio del 10/11/2026; `qwen2.5:7b` opcional por `OLLAMA_MODEL`), temperatura 0 en las dos llamadas y HTTP directo a `/api/chat` con `requests`, sin LangChain. Cambia el modelo por defecto (`llama3.1:8b` → `qwen2.5:3b`). |
 | `prevalidar()` | Rechaza vacío, > 500 caracteres o sin letras (lanza `Aclaracion`) |
 | `normalizar_modelo()` / `normalizar_pedido()` | «la A», «nb c» → `Notebook_A`; «pedido 1» → `req_01`. **Solo acepta una letra** (límite 26 notebooks) |
 | `validar_extraccion()` | Valida intención, modelo en catálogo, pedido existente, filtros con valores cerrados; devuelve parámetros + advertencias |
