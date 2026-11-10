@@ -74,7 +74,28 @@ Qué contradice a los otros contextos:
 - **Contra SM4:** la corrección de REC-R9 con prioridad «precio» no está aplicada, y la prioridad `grafica` no suma peso en REC-R5.
 - **Contra PG1/PG2 §8.5 y SM2 §6.1 (tabla de requisitos):** OFI SSD 512, DEV RAM 16/32 y SSD 1024, DIS GPU 3, DATOS CPU alta, GPU 4 y **sin** virtualización excluyente. No hay `ssd_rec`.
 
-**Consecuencia:** la opción a) sigue siendo la recomendada, pero «sumarle lo de `v2`» es trabajo real del lado de SM1, no un detalle. Hace falta el `v2` (Olea) para medirlo, y la versión completa con el bloque 13 (Luconi).
+**Evidencia completa (09/11/2026, con los tres scripts en [`docs/cypher/`](cypher/) y los PI4 en [`docs/fuentes/`](fuentes/)).** No son tres versiones independientes, sino **dos linajes**:
+
+| Linaje | Archivos | Quién lo usa en PI4 | Rasgos |
+| --- | --- | --- | --- |
+| **A** | `Grupo_2_PG2_U1.cypher` (1159 líneas) | **SM1** (el notebook lo cita por ese nombre: el «`v2`» que menciona SM1 es este esquema) y **SM2** (lee `riesgo_*` desde `RAM`) | 61 reglas, `NB_A`, `ASOCIADO_A`, `LLEVA_A`, `TIENE_PREGUNTA`, Docker y VirtualBox, `orden_exigencia`, `necesita_virtualizacion`, INT-R14 con lecturas `min`/`max`. **Defecto C-A presente:** riesgo en `RAM`, `grado_gpu` y `adecuacion_grafica` en `Notebook`, y REC-R3 contamina entre pedidos |
+| **B** | `Grupo_2_PG2_U1_bloques_0a12.cypher` (1659) → **`Grupo_2_PG2_U1_corregido.cypher` (1739)** | **SM3** (`ES_DE_GAMA`, `ev.*`) y **SM4** (`REQUIERE_ACLARACION`, `CONSULTA_POR`, `ev.*`) | Lo descrito en la evidencia anterior. `corregido` = `bloques_0a12` + la corrección de REC-R9 con prioridad «precio» + el **bloque 13 (L1–L4)**. Es un superconjunto |
+
+**Recomendación:** canónico = **`Grupo_2_PG2_U1_corregido.cypher`**, portándole desde A las piezas de SM1, todas en los bloques 3, 5, 6, 7 y 10.a/10.b:
+- `ElementoMencionado`/`Software` (Docker, VirtualBox) con `ASOCIADO_A` y `exige_virtualizacion`, y `necesita_virtualizacion` en el `Requerimiento`.
+- `orden_exigencia` para INT-R12 (B desempata por `ram_min`).
+- INT-R14 con dos lecturas y `PERTENECE {grado_min, grado_max, estado}`.
+- Los nodos de INT-R2, R3, R4 y R6, y los parámetros `dedicacion_min_h`/`dedicacion_max_h`.
+- Unificar `APUNTA_A`/`LLEVA_A` y `REQUIERE_ACLARACION`/`TIENE_PREGUNTA` (decisión D-06).
+
+Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 11 a 13 y también los PI4 de SM3 y SM4, que ya funcionan sobre B.
+
+**Qué implica para el código:**
+- **SM1:** `REGLAS_SM1` del notebook se reescriben contra B, o B adopta los nombres de A.
+- **SM2:** tu PI4 (`docs/fuentes/SM2/`) pasa a leer riesgo, ρ e índice desde `Evaluacion`, como ya anticipaba PG1/PG2 §10.4.
+- **SM3 y SM4:** corren tal cual sobre `corregido`.
+
+**SM2, versión final del PI4:** la copia de `Documents/UTN Mendoza/5. IA/` (53 KB) tiene las guardas del informe (`ampliabilidad_de_la_ram`, umbral de fuerza 0,10, verificación por párrafo). La de `PI/` (44 KB) es la anterior. En el repo quedó la primera. Esto cierra la duda 14-A de SM2.
 
 **Al resolver, reescribir:** PG1/PG2 §6 (conteo de reglas), §8 (modelo), §9 (valores esperados), §10 (C-A: pendiente o hecha), §15–16; SM1 §7.4 y 13-A; SM2 §8 y §14-B; SM3 encabezado («alineada 100 %») y §3; SM4 §5.
 
