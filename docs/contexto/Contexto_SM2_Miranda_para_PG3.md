@@ -101,7 +101,7 @@ Grados de CPU, RAM, almacenamiento y rendimiento (0 a 1); clasificación de cada
 
 | Con | Contrato | Estado |
 | --- | --- | --- |
-| SM1 → SM2 | Perfiles ≥ 0,4, perfil dominante, `necesita_virtualizacion`, requisitos explícitos/institucionales. SM2 aplica virtualización si la pide el indicador **o** el perfil (VIRT, DATOS) | Pedir a SM1 el slot `requisitos_explicitos` (o confirmar que se mapea a institucionales) `[?]` |
+| SM1 → SM2 | Perfiles ≥ 0,4, perfil dominante, `necesita_virtualizacion`, requisitos explícitos/institucionales. SM2 aplica virtualización si la pide el indicador **o** el perfil (VIRT) | Pedir a SM1 el slot `requisitos_explicitos` (o confirmar que se mapea a institucionales) `[?]` |
 | SM2 → SM3 | Bandera `aviso_sm3 = "ancho_de_banda_reducido"` cuando GPU integrada + RAM en canal simple (REN-R11) o canal desconocido (REN-R14, con alerta). SM3 lo usa en GM-R15 | Propuesto por SM2 en PI2 (b.1.2); SM3 lo consume en GM-R15 según PI2/PI3. Confirmar el formato exacto del campo `[?]` |
 | SM2 → SM4 | JSON de resultados (ver 3.6). SM4 aplica MIN (REC-R3) sobre excluyentes y trata «no evaluado» como grado ausente, no como 0 | Confirmar con SM4 que aplica MIN sobre este formato `[?]` |
 | SM2 → asesor | Indirecto, a través de SM4 | — |
@@ -152,14 +152,14 @@ SP1 se ejecuta una vez por pedido; SP2–SP8 se repiten para cada notebook del c
 
 | ID | Regla (los números se citan por parámetro) | Tipo |
 | --- | --- | --- |
-| REN-R1 | SI `necesita_virtualizacion` (SM1) O algún perfil que impone requisitos la exige (VIRT, DATOS) ENTONCES requerir VT-x/AMD-V como **excluyente**; sin soporte → grado CPU 0 y marca; ficha sin dato → consultar fabricante y nota BIOS/UEFI | Determinístico, documental |
+| REN-R1 | SI `necesita_virtualizacion` (SM1) O algún perfil que impone requisitos la exige (VIRT) ENTONCES requerir VT-x/AMD-V como **excluyente**; sin soporte → grado CPU 0 y marca; ficha sin dato → consultar fabricante y nota BIOS/UEFI | Determinístico, documental |
 | REN-R2 | SI un perfil impone requisitos (grado ≥ P_UMBRAL_IMPONE = 0,4) ENTONCES usar mínimo y recomendado más exigentes de TAB_REQ_PERFIL; un explícito/institucional mayor pasa a ser el mínimo | Determinístico, documental |
 | REN-R3 | Brecha de gama: ≥ requerida → P_BRECHA_0 (1,0); un nivel menos → P_BRECHA_1 (0,6); dos → P_BRECHA_2 (0,2) | Heurístico |
-| REN-R4 | Núcleos < mínimo del perfil → restar P_PEN_NUCLEOS (0,2) | Heurístico |
+| REN-R4 | Núcleos < mínimo del perfil → restar P_PEN_NUCLEOS (0,2) | Heurístico. **Fuera de alcance del prototipo (D-02)** |
 | REN-R5 | Almacenamiento principal HDD → grado × P_FACTOR_HDD (0,3) y alerta `almacenamiento_hdd` | Heurístico |
 | REN-R6 | RAM soldada Y < recomendada → alerta `ram_no_ampliable` (excepción: mixta = ampliable) | Heurístico, predictivo |
 | REN-R7 | RAM < mínimo Y ampliable hasta alcanzarlo (`max_gb ≥ M` y ranuras suficientes) → grado = máx(calculado, P_GRADO_RAM_COND = 0,5), «cumple parcialmente, condicionado a ampliación», alerta `ram_condicionada_a_ampliacion`, costo = ⌈(M − RAM)/P_TAM_MODULO_GB (8)⌉ × P_COSTO_MODULO_USD (30) | Heurístico (casos) |
-| REN-R8 | Carga sostenida Y sufijo U o V → restar P_PEN_CARGA_SOST (0,3) y alerta `cpu_bajo_consumo_carga_sostenida` | Heurístico, predictivo |
+| REN-R8 | Carga sostenida Y sufijo U o V → restar P_PEN_CARGA_SOST (0,3) y alerta `cpu_bajo_consumo_carga_sostenida` | Heurístico, predictivo. **Fuera de alcance del prototipo (D-02)** |
 | REN-R9 | RAM ampliable → sumar P_BONIF_AMPLIABLE (0,1), máx. 1,0. **La regla con menos respaldo; candidata a eliminarse** | Supuesto del grupo |
 | REN-R10 | Ampliabilidad desconocida → asumir no ampliable + alerta `ampliabilidad_no_verificada` | Supuesto conservador |
 | REN-R11 | GPU integrada Y RAM canal simple → `aviso_sm3 = ancho_de_banda_reducido`; si REN-R7 completa el doble canal → nota `ampliacion_completa_doble_canal` | Heurístico, empírico |
@@ -191,6 +191,15 @@ Operadores: AND = MIN, OR = MAX, implicación Mamdani por mínimo, agregación M
 ## 6. Tablas de conocimiento y funciones de grado `[DOC]`
 
 ### 6.1 Requisitos por perfil (TAB_REQ_PERFIL; M = mínimo, R = recomendado)
+
+> **Tabla de PI1/PI2 (histórica).** La vigente es la del grafo canónico (`Contexto_PG1_PG2_Grupo_para_PG3.md` §8.6, decisión D-01). Diferencias:
+> - **OFI:** SSD mínimo 512 GB, no 256.
+> - **DEV:** RAM 16/32 GB y SSD mínimo 1024 GB (no 8/16 y 256). Coincide con el técnico de SM4: «programación: 16 GB, SSD 1 TB».
+> - **VID3D:** SSD mínimo 1024 GB, igual que en esta tabla.
+> - **DATOS:** CPU alta (no media), SSD mínimo 1024 GB.
+> - **SSD recomendado:** el canónico no guarda ninguno, solo el mínimo.
+>
+> **Decidido (D-02, 09/11/2026):** DATOS **no** exige virtualización (como en el canónico: REN-R1 aplica solo a VIRT). **Núcleos**, **carga sostenida** y **SSD recomendado** quedan fuera del alcance del prototipo: son diseño de PI1/PI2 no implementado (REN-R4 y REN-R8 incluidas), y el rendimiento sigue llegando por `SALIDA_PI2`.
 
 | Perfil | Gama CPU mín. | Núcleos | RAM M / R | SSD M / R | Virt. | Carga sost. |
 | --- | --- | --- | --- | --- | --- | --- |

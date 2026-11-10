@@ -307,8 +307,9 @@ Para el backend unificado de PG3, SM3 provee:
 
 ### 9.2 Integración en Casos de Uso E2E Cruzados de PG3
 * **Caso E2E 1 — Diseñador Gráfico / Modelador 3D (DIS / VID3D):**
-  - **SM1:** Deduce perfil, exige GPU dedicada gama $\ge 4$ y pantalla sRGB $\ge 95\%$.
-  - **SM2:** Exige CPU alta y RAM $\ge 16$ GB ampliable.
+  - **SM1:** Deduce el perfil. Según el grafo canónico (PG1/PG2 §8.6), DIS exige GPU gama $\ge 3$ y VID3D gama $\ge 4$. El sRGB $\ge 95\%$ de DIS figura solo en el `fundamento` del perfil, no como `Requisito`, y el filtro lo aplica `sm3_asistente.py` con `SRGB_DISENO = 95`.
+  - **SM2:** DIS exige CPU media y VID3D CPU alta; los dos piden RAM 16/32 GB y SSD mínimo 1024 GB.
+  - **Limitación del canónico:** solo hay `SALIDA_PI2` (rendimiento y pantalla) para VIRT, más K para OFI, así que un pedido DIS o VID3D **no evalúa ninguna notebook** hasta resolver D-03. Lo mismo vale para el E2E 2 (OFI), salvo K.
   - **SM3:** Evalúa `Notebook_C` (TGP 115 W, pantalla 98% sRGB, peso 2.3 kg) y `Notebook_X` (TGP 60 W, pantalla 95% sRGB, peso 1.8 kg, alerta `GM-R8`).
   - **SM4:** Contrasta con presupuesto y decide ranking.
 * **Caso E2E 2 — Estudiante Universitario con Alta Movilidad (OFI):**

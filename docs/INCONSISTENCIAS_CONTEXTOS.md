@@ -108,9 +108,16 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 
 **Al resolver, reescribir:** PG1/PG2 §6 (conteo de reglas), §8 (modelo), §9 (valores esperados), §10 (C-A: pendiente o hecha), §15–16; SM1 §7.4 y 13-A; SM2 §8 y §14-B; SM3 encabezado («alineada 100 %») y §3; SM4 §5.
 
-### D-02 · Tablas de perfiles: pesos y requisitos
+### D-02 · Tablas de perfiles: pesos y requisitos — **RESUELTA (09/11/2026)**
 
-> **Estado tras D-01:** el canónico usa los pesos de SM4 y la tabla de requisitos ya transcrita en PG1/PG2 §8.6. Lo de abajo describe la situación previa. Queda alinear SM2 §6.1 (DEV, DATOS) y SM3 §9.2 (DIS ≥ 4) con esa tabla, y decidir si núcleos y carga sostenida (solo en SM2) se cargan en el grafo o se declaran fuera de alcance.
+> **Decisión del grupo:**
+> - Vale la tabla del grafo canónico: pesos de SM4 y requisitos de PG1/PG2 §8.6.
+> - **DATOS no exige virtualización**, así que REN-R1 aplica solo a VIRT.
+> - **Núcleos, carga sostenida y SSD recomendado quedan fuera del alcance del prototipo**, junto con REN-R4 y REN-R8.
+>
+> Contextos actualizados: SM2 §3.5, §5.1 y §6.1 (nota sobre la tabla histórica de PI1/PI2), y SM3 §9.2 (gamas de DIS y VID3D).
+>
+> **Hallazgo nuevo para D-03:** el canónico solo tiene `SALIDA_PI2` para VIRT (y K–OFI), así que un pedido de otro perfil no evalúa ninguna notebook. Lo de abajo describe la situación previa.
 
 **Inconsistencia.**
 - **Pesos base:** PG1/PG2 (grafo) y SM4 (PI1) solo coinciden en VIRT y GAM. OFI: 0,30/0,10/0,60 vs 0,4/0,1/0,5; DEV 0,50/0,10/0,40 vs 0,6/0,1/0,3; DIS 0,35/0,45/0,20 vs 0,4/0,5/0,1; VID3D 0,40/0,50/0,10 vs 0,5/0,4/0,1; DATOS 0,50/0,40/0,10 vs 0,7/0,1/0,2. **Los pesos de `req_03` que informa SM4 (0,333/0,083/0,583) salen de la tabla de PI1, no de la de PG2**: con la de PG2 darían 0,25/0,083/0,667. Una de las dos no es la del grafo.
