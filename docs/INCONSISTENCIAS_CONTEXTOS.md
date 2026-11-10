@@ -487,13 +487,15 @@ Esto le corresponde a cada autor (SM3: de Coninck; SM4: Luconi).
 - SM4: voseo, temperatura 0 y `requests` (D-05, D-07).
 - Todos se integran al contrato de D-07: intenciones, plan, evidencia, verificador y traza.
 
-## 3. Verificaciones pendientes (necesitan el script, no una decisión)
+## 3. Verificaciones (cerradas el 09/11/2026)
 
-- **SM3, grado de GPU de X 0,55 y de C 0,916:** con las adecuaciones gráficas de PG2 para `req_01` (X 0,844, C 0,941, pantalla 1,0) darían ≈ 0,74 y ≈ 0,90. SM3 no dice para qué perfil son.
-- ~~**SM3, M con «movilidad `null`»**~~ **Resuelto en el canónico:** SM3 deja `adecuacion_movilidad` en `null` y SM4 arma el rango con las lecturas peor y mejor (REC-R15).
-- ~~**Alertas de SM3**~~ **Resuelto en el canónico:** solo existen GM-R8 y GM-R11, como dice SM4. GM-R12, GM-R15 y GM-R17 no generan alerta (D-04).
-- **SM2 PI4:** la versión final ya está confirmada (SM2 §14-A); falta reconciliar las 27 verificaciones del archivo con las 49 del informe.
-- **PG1/PG2 §15.10:** un pedido sin perfil que imponga requisitos deja `req_ram_min` en `null` y luego se divide por `null`.
+- **SM3, grado de GPU de X y de C:** recalculado con GM-RD4..RD6 y los parámetros del grafo. X da **0,74** en VIRT, DIS y GAM y **0,472** en VID3D y DATOS; C da **0,902**. Coinciden con las adecuaciones gráficas de PG2 (0,6 × 0,74 + 0,4 = 0,844; 0,6 × 0,902 + 0,4 = 0,941). Los 0,55 y 0,916 de SM3 no correspondían a ningún perfil; corregidos en SM3 §5.
+- **SM3, M con «movilidad `null`»:** resuelto en el canónico. SM3 deja `null` y SM4 arma el rango (REC-R15).
+- **Alertas de SM3:** resuelto en el canónico. Solo existen GM-R8 y GM-R11; el resto se implementa por D-04.
+- **SM2, tests:** la versión final tiene las **49** verificaciones del informe. Corrida del 09/11/2026: **47 OK, 0 fallas**; el bloque de la API no corrió porque `fastapi` no está instalado.
+- **PG1/PG2 §15.10 (división por `null`):** no aplica al canónico, porque ρ usa `ram_min` del perfil dominante. Un perfil que no impone requisitos se trata con dos escenarios (D-09).
+
+**Lo único que no se puede cerrar sin ejecutar Neo4j:** la regresión de CP1–CP11 sobre el canónico (PG1/PG2 §16) y la prueba de contaminación con `req_04` (E2E-4).
 
 ## 4. Material del repo y lo que todavía falta
 

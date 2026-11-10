@@ -192,13 +192,13 @@ Funciones gaussianas $\mu(x) = \exp\left(-\frac{(x - c)^2}{2\sigma^2}\right)$ co
 |---|:---:|:---:|:---:|:---:|:---:|:---:|---|
 | **`Notebook_A`** | $950 | 1.4 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 65% | 8.0 h (medida) | Movilidad media (0.625). |
 | **`Notebook_B`** | $700 | 1.3 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 62% | 10.0 h (medida) | **Campeona de Movilidad:** Adecuación 0.776, alta (`GM-RD1` fuerza 0.88). |
-| **`Notebook_C`** | $1200 | 2.3 kg | `'dedicada media'` (Verdadero) | **115 / 115 W** | QHD 144Hz 98% | 5.0 h (medida) | **Máxima Gráfica:** TGP pleno ($\text{potencia}=1.0$, grado GPU 0.916), pero pesada y movilidad baja (0.231). |
+| **`Notebook_C`** | $1200 | 2.3 kg | `'dedicada media'` (Verdadero) | **115 / 115 W** | QHD 144Hz 98% | 5.0 h (medida) | **Máxima Gráfica:** TGP pleno ($\text{potencia}=1.0$, grado GPU 0.902), pero pesada y movilidad baja (0.231). |
 | **`Notebook_E`** | $980 | 1.5 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 70% | 7.0 h (medida) | Movilidad media (0.547), pero SM2 la descarta por CPU sin virtualización. |
 | **`Notebook_G`** | $650 | 1.9 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 55% | **3.99 h (estimada)** | **Regla GM-R12:** 5.7 h declaradas castigadas al 70%. Pantalla básica (55% sRGB). |
 | **`Notebook_H`** | $1000 | 2.0 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 58% | 6.0 h (medida) | Movilidad media (0.430) y peso de 2.0 kg. |
 | **`Notebook_K`** | $900 | 1.6 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 60% | 7.5 h (medida) | Canal simple de RAM (dato `canal` cargado; la alerta `GM-R15` **no está implementada**, ver D-04). |
 | **`Notebook_M`** | $880 | 1.5 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 66% | **null (desconocida)** | **Incertidumbre:** Batería `null`, movilidad `null`, alerta `GM-R12`. |
-| **`Notebook_X`** | $1050 | 1.8 kg | `'dedicada media'` (Verdadero) | **60 / 115 W** | FHD 144Hz 95% | 7.0 h (medida) | **TGP Recortado:** Potencia relativa 0.522, grado GPU 0.55 y alerta `GM-R8`. Pantalla apta diseño. |
+| **`Notebook_X`** | $1050 | 1.8 kg | `'dedicada media'` (Verdadero) | **60 / 115 W** | FHD 144Hz 95% | 7.0 h (medida) | **TGP Recortado:** Potencia relativa 0.522, grado GPU 0.74 en VIRT, DIS y GAM (0.472 en VID3D y DATOS) y alerta `GM-R8`. Pantalla apta diseño. |
 
 ---
 
