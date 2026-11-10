@@ -18,7 +18,6 @@ Está formado por cuatro submódulos que comparten una única base de conocimien
 | **SM3** · Gráfica y movilidad | Evalúa GPU, pantalla, peso y autonomía | de Coninck, R. (49998)|
 | **SM4** · Integración y recomendación | Combina los grados, aplica los requisitos excluyentes y recomienda | Luconi Furque, M. (48889) |
 
-> Legajos y contactos de los demás integrantes: `[completar]`.
 
 ## 2. Principios de diseño
 
