@@ -13,7 +13,7 @@
 3. **Las consultas son plantillas fijas** de cada submódulo, parametrizadas, en sesión `READ_ACCESS`. La única escritura es la de `SM1.registrar_pedido` y `SM1.aclarar_pedido` (nivel 2, D-08).
 4. **Todo se verifica en código:** plan validado, cifras y modelos citados con respaldo en la evidencia y, si falla, plantilla fija.
 5. **La incertidumbre se conserva:** rangos, `desconocida` y perfil `indeterminado` viajan intactos hasta la respuesta.
-6. **Stack (D-05):** Python 3, `neo4j`, `requests` a Ollama `/api/chat` con `qwen2.5:3b` a temperatura 0 y `format` con esquema JSON, FastAPI + `uvicorn` y `unittest`. **Nada fuera de [`RESTRICCIONES.md`](RESTRICCIONES.md).**
+6. **Stack (D-05):** Python 3, `neo4j`, LangChain (`ChatOllama` de `langchain-ollama` y `ChatPromptTemplate` de `langchain-core`) contra Ollama `qwen2.5:3b` a temperatura 0 y salida estructurada (`with_structured_output`) en `asistente/llm.py`, y despacho a submódulos con `RunnableLambda` en `asistente/orquestador.py`; `requests` solo para la salud de Ollama; FastAPI + `uvicorn` y `unittest`. **Nada fuera de [`RESTRICCIONES.md`](RESTRICCIONES.md).**
 
 ## 2. Diagrama de componentes
 
@@ -40,14 +40,30 @@ flowchart LR
 | Interfaz | Entrada única: `POST /consultar`, `GET /salud` y consola | `asistente/api.py`, `asistente/cli.py` | Miranda |
 | Orquestador | Prevalida la entrada, pide el plan, ejecuta las consultas, arma la evidencia común, llama al explicador y registra la traza | `asistente/orquestador.py` | Miranda |
 | Router (prompt maestro) | Traduce la consulta a un plan JSON de intenciones cerradas y lo valida en Python | `asistente/router.py`, `prompts/maestro.txt` | Olea |
-| SM1 | Pedido interpretado (L1): perfiles con grado, perfil dominante, intensidad y preguntas pendientes | `asistente/submodulos/sm1.py`, `cypher/10_sm1.cypher` | Olea |
-| SM2 | Riesgo de RAM (C2, difuso FZ-R1..R5) y virtualización (C1, REN-R1) | `asistente/submodulos/sm2.py`, `cypher/20_sm2.cypher` | Miranda |
-| SM3 | Búsqueda por gráfica, movilidad o mixta, y ficha de un modelo | `asistente/submodulos/sm3.py`, `cypher/30_sm3.cypher` | de Coninck |
-| SM4 | Recomendación, explicación de una notebook (L2), comparación y costo-beneficio | `asistente/submodulos/sm4.py`, `cypher/40_sm4.cypher` | Luconi |
-| GRUPO | Traza de reglas (L3) y parámetros sin validar (L4) | `asistente/submodulos/grupo.py` | de Coninck |
+| SM1 | Pedido interpretado (L1): perfiles con grado, perfil dominante, intensidad y preguntas pendientes | `asistente/submodulos/sm1/`, `cypher/10_sm1.cypher` | Olea |
+| SM2 | Riesgo de RAM (C2, difuso FZ-R1..R5) y virtualización (C1, REN-R1) | `asistente/submodulos/sm2/`, `cypher/20_sm2.cypher` | Miranda |
+| SM3 | Búsqueda por gráfica, movilidad o mixta, y ficha de un modelo | `asistente/submodulos/sm3/`, `cypher/30_sm3.cypher` | de Coninck |
+| SM4 | Recomendación, explicación de una notebook (L2), comparación y costo-beneficio | `asistente/submodulos/sm4/`, `cypher/40_sm4.cypher` | Luconi |
+| GRUPO | Traza de reglas (L3) y parámetros sin validar (L4) | `asistente/submodulos/grupo/` | de Coninck |
 | Explicador | Un único prompt de explicación (base SM4, voseo, ≤ 180 palabras), verificador común y plantilla fija | `asistente/explicador.py`, `prompts/explicacion.txt` | Luconi |
 | Base de conocimiento | Grafo canónico de PG2, dividido por submódulo | `cypher/*.cypher`, `scripts/cargar_grafo.py` | Miranda (archivos comunes) y cada dueño (su archivo) |
 | Traza | Un registro por consulta del usuario (D-07 §9) | `asistente/traza.py`, `trazas/*.jsonl` | Miranda |
+
+### 2.1 Capas del backend
+
+El backend sigue un esquema **controlador → servicio → repositorio**, con los **esquemas** (forma de los datos) aparte. Se dice «esquemas» y no «modelos» porque en el dominio «modelo» ya es la notebook (`Notebook_G`) y también el modelo del LLM.
+
+| Capa | Sistema | Dentro de cada submódulo | Qué hace y qué **no** hace |
+| --- | --- | --- | --- |
+| **Controlador** | `api.py`, `cli.py` | `entrada.py` | Recibe, valida la entrada y despacha. Sin lógica ni Cypher |
+| **Servicio** | `orquestador.py`, `router.py`, `explicador.py` | `servicio.py` | Coordina y arma la evidencia (redondeo, rangos, literales D-06). **No recalcula ni decide**: eso lo hace el Cypher |
+| **Repositorio** | `grafo.py`, `llm.py` | `repositorio.py` | Acceso a datos: el Cypher fijo con `grafo.leer`. Es donde viven las reglas y el difuso |
+| **Esquemas** | `contrato.py` y los modelos Pydantic de la API | `esquemas.py` | Forma de parámetros, evidencia y respuesta. En los submódulos, `TypedDict` (biblioteca estándar); Pydantic solo en la API |
+
+Reglas:
+- Una capa solo llama a la de abajo: `entrada` → `servicio` → `repositorio`. El servicio nunca tiene Cypher y el repositorio nunca arma evidencia.
+- **No hay endpoints por submódulo.** La única entrada es `POST /consultar` (y la consola); todo pasa por el router, la traza y el explicador.
+- El router y el explicador quedan como archivos únicos: son servicios transversales, no submódulos de dominio.
 
 ## 3. Flujo de una consulta
 
@@ -93,12 +109,22 @@ Todo lo de esta sección queda en `asistente/contrato.py` (tarea PG3-01). **Nadi
 
 ### 4.1 Interfaz de cada submódulo
 
-Cada submódulo es un módulo Python con **una sola función pública** y su diccionario de consultas:
+Cada submódulo es un **paquete** Python con la misma forma (§2.1) y **una sola función pública**, `ejecutar`, que exporta su `__init__.py`:
+
+```
+asistente/submodulos/smX/
+├── __init__.py      # from .entrada import ejecutar  (nada más)
+├── entrada.py       # ejecutar(): valida parámetros y despacha cada intención a su función de servicio
+├── servicio.py      # una función por intención: pide filas al repositorio y arma la evidencia
+├── repositorio.py   # CONSULTAS = {"C2": "MATCH ..."} y funciones que llaman a grafo.leer(...)
+└── esquemas.py      # TypedDict de parámetros y evidencia de cada intención
+```
 
 ```python
-# asistente/submodulos/smX.py
+# asistente/submodulos/smX/repositorio.py
 CONSULTAS: dict[str, str] = {"C2": "MATCH ...", ...}   # nombre -> Cypher fijo con $parametros
 
+# asistente/submodulos/smX/entrada.py
 def ejecutar(intencion: str, parametros: dict, grafo: "Grafo") -> dict:
     """Devuelve {"consultas": [Consulta, ...], "evidencia": dict}.
     Lanza contrato.Aclaracion(mensaje) si faltan datos (modelo inexistente, pedido sin evaluar...)."""
@@ -138,14 +164,14 @@ Los modelos se normalizan a `Notebook_X` antes de llamar a `ejecutar`. El router
 ```json
 {
   "requerimiento_id": "req_01",
-  "consultas": [{"sm": "SM2", "intencion": "riesgo_ram", "parametros": {"modelos": ["Notebook_G"]}}],
+  "consultas": [{"intencion": "SM2.riesgo_ram", "parametros": {"modelos": ["Notebook_G"]}}],
   "evidencia": [{"dato": "modelo", "fragmento": "la G"}],
   "fuera_de_alcance": false,
   "aclaracion": null
 }
 ```
 
-- Con `qwen2.5:3b`, el esquema que se pasa en `format` usa un `enum` con las 13 intenciones (`"SM2.riesgo_ram"`, …) y **`maxItems: 3`** en `consultas`.
+- Con `qwen2.5:3b`, el esquema que se pasa en `format` usa un `enum` con las 13 intenciones (`"SM2.riesgo_ram"`, …) y **`maxItems: 3`** en `consultas`. La intención va con su prefijo de submódulo en un solo campo; `validar()` acepta también la forma `{"sm": "SM2", "intencion": "riesgo_ram"}`.
 - `validar()` rechaza:
   - intenciones fuera del `enum`;
   - modelos que no están en el catálogo;
@@ -179,10 +205,11 @@ class Grafo:
     def salud(self) -> dict
 
 # asistente/llm.py
-class LLM:
-    def json(self, sistema: str, usuario: str, esquema: dict) -> dict   # temperature 0, format=esquema
-    def texto(self, sistema: str, usuario: str) -> str                  # temperature 0
-    def salud(self) -> dict
+class LLM:  # envuelve ChatOllama (langchain-ollama); cadena ChatPromptTemplate | ChatOllama
+    def json(self, sistema: str, usuario: str, esquema: dict, variables: dict | None = None) -> dict  # with_structured_output
+    def texto(self, sistema: str, usuario: str, variables: dict | None = None) -> str               # temperature 0
+    # con `variables`, `sistema` es plantilla de ChatPromptTemplate ({var}; llaves literales como {{ }})
+    def salud(self) -> dict                                             # GET /api/tags con requests
 
 # asistente/explicador.py
 def explicar(texto: str, evidencia: dict, llm: LLM) -> dict   # {"respuesta","origen_respuesta","intentos":[{"texto","problemas"}]}
@@ -190,11 +217,25 @@ def verificar(respuesta: str, evidencia: dict) -> list[str]   # lista de problem
 def plantilla_fija(evidencia: dict) -> str
 
 # asistente/router.py
-def planificar(texto: str, sesion: dict, llm: LLM) -> dict
+def planificar(texto: str, sesion: dict, llm: LLM, catalogo: list[str] | None = None, pedidos: list[str] | None = None) -> dict
 def validar(plan: dict, texto: str, sesion: dict, catalogo: list[str], pedidos: list[str]) -> dict
 ```
 
 Excepciones de `contrato.py`: `Aclaracion(mensaje)`, `FueraDeAlcance`, `ErrorGrafo` y `ErrorLLM`. El orquestador las traduce a `origen_respuesta`.
+
+**Separación de responsabilidades** (lámina de la cátedra «Cada capa decide algo distinto»):
+
+| Capa | Responsabilidad | En este proyecto |
+| --- | --- | --- |
+| Neo4j | Estructura | Grafo canónico: conceptos, instancias, relaciones y evidencias |
+| Reglas | Infieren | Reglas crisp y difusas (Mamdani) en Cypher fijo, probadas con CP1–CP11 |
+| RAG | Documenta | **Graph RAG**: la evidencia son las filas del Cypher fijo y el explicador cita reglas y nodos. Sin embeddings |
+| Logs | Auditan | Traza JSONL: submódulo, parámetros, Cypher, filas, duración y respuesta |
+| LLM | Interpreta | Router (plan JSON) y explicador (texto acotado a la evidencia) |
+| LangChain | Coordina | `ChatPromptTemplate`, `with_structured_output` y despacho con `RunnableLambda`. Sin agentes ni *tool calling* |
+| FastAPI | Expone y valida | Modelos Pydantic, `response_model` y OpenAPI en `/docs` |
+
+Regla de diseño: el LLM conversa y explica; el conocimiento verificable sostiene la decisión.
 
 ### 4.6 Configuración (`.env`, ver `.env.example`)
 
@@ -241,12 +282,16 @@ SeleccionDeNotebooks_IA/
 │   ├── config.py  contrato.py  grafo.py  llm.py
 │   ├── router.py  orquestador.py  explicador.py  traza.py
 │   ├── api.py  cli.py
-│   └── submodulos/  sm1.py  sm2.py  sm3.py  sm4.py  grupo.py
+│   └── submodulos/            # un paquete por submódulo, todos con la misma forma (§2.1), y comun.py (leer_consulta, redondear, rango)
+│       ├── sm1/  sm2/  sm3/  sm4/  grupo/
+│       │   └── __init__.py  entrada.py  servicio.py  repositorio.py  esquemas.py
 ├── prompts/                   # maestro.txt, explicacion.txt (versionados)
 ├── cypher/                    # (f) 00_…90_*.cypher
-├── scripts/                   # cargar_grafo.py, verificar_grafo.py, correr_e2e.py, exportar_grafo.py, armar_zip.py
+├── scripts/                   # cargar_grafo.py, verificar_grafo.py, generar_fixtures.py, correr_e2e.py, exportar_grafo.py, armar_zip.py
 ├── tests/                     # unittest: test_contrato, test_router, test_smX, test_explicador, test_api, test_e2e
-│   └── fixtures/              # SMx.intencion.json: filas reales del grafo + evidencia esperada
+│   ├── comun.py               # GrafoFalso, fixture(), requiere_neo4j
+│   ├── datos/                 # consultas_router.csv
+│   └── fixtures/              # SMx.intencion.json: filas reales del grafo + evidencia esperada (scripts/generar_fixtures.py)
 ├── datos/                     # (j) datos de ejemplo y (i) exportación CSV del grafo
 ├── docs/
 │   ├── ARQUITECTURA.md  RESTRICCIONES.md  INCONSISTENCIAS_CONTEXTOS.md  MANUAL_DE_USO.md
@@ -259,7 +304,7 @@ SeleccionDeNotebooks_IA/
 ├── requirements.txt  .env.example  .gitignore  README.md  CLAUDE.md
 ```
 
-`requirements.txt` (nivel 1): `neo4j`, `requests`, `fastapi`, `uvicorn` y `httpx` (este solo para `test_api`). Nada más.
+`requirements.txt` (nivel 1): `neo4j`, `langchain-core`, `langchain-ollama`, `requests`, `fastapi`, `uvicorn` y `httpx` (este solo para `test_api`). Nada más.
 
 ## 7. Pruebas
 

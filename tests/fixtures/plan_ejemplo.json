@@ -1,0 +1,10 @@
+{
+  "requerimiento_id": "req_01",
+  "consultas": [
+    {"intencion": "SM4.explicar_notebook", "parametros": {"modelo": "Notebook_G"}},
+    {"intencion": "SM2.riesgo_ram", "parametros": {"modelos": ["Notebook_G"]}}
+  ],
+  "evidencia": [{"dato": "modelo", "fragmento": "la G"}, {"dato": "pedido", "fragmento": "req_01"}],
+  "fuera_de_alcance": false,
+  "aclaracion": null
+}

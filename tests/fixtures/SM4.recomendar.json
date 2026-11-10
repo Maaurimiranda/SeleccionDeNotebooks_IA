@@ -1,0 +1,6 @@
+{
+  "_nota": "Fixture de FORMA (PG3-01). Luconi lo reemplaza por filas reales del grafo en PG3-12.",
+  "parametros": {"requerimiento_id": "req_01"},
+  "consultas": [],
+  "evidencia": {"stub": true, "datos": "SM4.recomendar todavia no esta implementado (PG3-12)."}
+}

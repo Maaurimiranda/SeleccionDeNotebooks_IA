@@ -1,0 +1,152 @@
+{
+ "intencion": "SM2.virtualizacion",
+ "parametros": {
+  "requerimiento_id": "req_01"
+ },
+ "consultas": [
+  {
+   "nombre": "SM2.C1",
+   "cypher": "MATCH (c:Requerimiento {id:$requerimiento_id})-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(cpu:CPU)\nWHERE ($modelos IS NULL OR n.modelo IN $modelos)\nOPTIONAL MATCH (c)-[:TIENE_PERFIL_DOMINANTE]->(p:Perfil)-[:EXIGE]->(req:Requisito {criterio:'virtualizacion'})\nRETURN n.modelo AS notebook, ev.perfil AS perfil, coalesce(req.es_excluyente, false) AS excluyente,\n       cpu.virtualizacion AS virtualizacion_cpu, ev.excluyente_virtualizacion AS resultado,\n       ev.estado AS estado\nORDER BY resultado, notebook",
+   "parametros": {
+    "requerimiento_id": "req_01",
+    "modelos": null
+   },
+   "filas": [
+    {
+     "notebook": "Notebook_A",
+     "perfil": "VIRT",
+     "excluyente": true,
+     "virtualizacion_cpu": "soportada",
+     "resultado": "cumple",
+     "estado": "Recomendada (Alta)"
+    },
+    {
+     "notebook": "Notebook_B",
+     "perfil": "VIRT",
+     "excluyente": true,
+     "virtualizacion_cpu": "soportada",
+     "resultado": "cumple",
+     "estado": "Recomendada (Media)"
+    },
+    {
+     "notebook": "Notebook_C",
+     "perfil": "VIRT",
+     "excluyente": true,
+     "virtualizacion_cpu": "soportada",
+     "resultado": "cumple",
+     "estado": "Descartada"
+    },
+    {
+     "notebook": "Notebook_H",
+     "perfil": "VIRT",
+     "excluyente": true,
+     "virtualizacion_cpu": "soportada",
+     "resultado": "cumple",
+     "estado": "Recomendada (Media)"
+    },
+    {
+     "notebook": "Notebook_K",
+     "perfil": "VIRT",
+     "excluyente": true,
+     "virtualizacion_cpu": "soportada",
+     "resultado": "cumple",
+     "estado": "Descartada"
+    },
+    {
+     "notebook": "Notebook_M",
+     "perfil": "VIRT",
+     "excluyente": true,
+     "virtualizacion_cpu": "soportada",
+     "resultado": "cumple",
+     "estado": "Recomendada condicionada por falta de informacion"
+    },
+    {
+     "notebook": "Notebook_X",
+     "perfil": "VIRT",
+     "excluyente": true,
+     "virtualizacion_cpu": "soportada",
+     "resultado": "cumple",
+     "estado": "Recomendada (Media)"
+    },
+    {
+     "notebook": "Notebook_G",
+     "perfil": "VIRT",
+     "excluyente": true,
+     "virtualizacion_cpu": "no informada",
+     "resultado": "falta informacion",
+     "estado": "Indeterminada: completar informacion"
+    },
+    {
+     "notebook": "Notebook_E",
+     "perfil": "VIRT",
+     "excluyente": true,
+     "virtualizacion_cpu": "no soportada",
+     "resultado": "no cumple",
+     "estado": "Descartada (excluyente incumplido)"
+    }
+   ]
+  }
+ ],
+ "evidencia": {
+  "requerimiento_id": "req_01",
+  "perfil": "VIRT",
+  "excluyente": true,
+  "regla": "REN-R1 + REC-R3",
+  "notebooks": [
+   {
+    "notebook": "Notebook_A",
+    "virtualizacion_cpu": "soportada",
+    "resultado": "cumple",
+    "estado": "Recomendada (Alta)"
+   },
+   {
+    "notebook": "Notebook_B",
+    "virtualizacion_cpu": "soportada",
+    "resultado": "cumple",
+    "estado": "Recomendada (Media)"
+   },
+   {
+    "notebook": "Notebook_C",
+    "virtualizacion_cpu": "soportada",
+    "resultado": "cumple",
+    "estado": "Descartada"
+   },
+   {
+    "notebook": "Notebook_H",
+    "virtualizacion_cpu": "soportada",
+    "resultado": "cumple",
+    "estado": "Recomendada (Media)"
+   },
+   {
+    "notebook": "Notebook_K",
+    "virtualizacion_cpu": "soportada",
+    "resultado": "cumple",
+    "estado": "Descartada"
+   },
+   {
+    "notebook": "Notebook_M",
+    "virtualizacion_cpu": "soportada",
+    "resultado": "cumple",
+    "estado": "Recomendada condicionada por falta de informacion"
+   },
+   {
+    "notebook": "Notebook_X",
+    "virtualizacion_cpu": "soportada",
+    "resultado": "cumple",
+    "estado": "Recomendada (Media)"
+   },
+   {
+    "notebook": "Notebook_G",
+    "virtualizacion_cpu": "no informada",
+    "resultado": "falta informacion",
+    "estado": "Indeterminada: completar informacion"
+   },
+   {
+    "notebook": "Notebook_E",
+    "virtualizacion_cpu": "no soportada",
+    "resultado": "no cumple",
+    "estado": "Descartada (excluyente incumplido)"
+   }
+  ]
+ }
+}

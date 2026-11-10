@@ -101,7 +101,7 @@ La consigna de PG3 pide integrar: sistemas inteligentes, ingeniería del conocim
 | `neo4j` (driver de Python) | Conexión desde Python al grafo | A5 |
 | **Ollama** | Servidor local de LLM, sin costo de API | A11 |
 | Modelos abiertos en Ollama (`qwen2.5`) | Extracción y explicación, temperatura 0 | A11 |
-| **LangChain** (`langchain-community`, `Neo4jGraph`, `GraphCypherQAChain`) | Orquestar LLM y Neo4j | A11 |
+| **LangChain** (`langchain-community`, `Neo4jGraph`, `GraphCypherQAChain`) | Orquestar LLM y Neo4j | A11 y ejemplo de PG3 de la cátedra |
 | `scikit-fuzzy`, `numpy`, `matplotlib` | Modelado y gráficos de funciones de pertenencia | A6 |
 | **Xfuzzy** (`.xfl`, XFL3) | Diseño y simulación del FIS | A6 |
 | `pandas`, `numpy`, `matplotlib` | Datos tabulares y gráficos | A7, A9 |
@@ -124,8 +124,9 @@ La consigna de PG3 pide integrar: sistemas inteligentes, ingeniería del conocim
 | Tecnología | Rol permitido | Por qué está permitida |
 | --- | --- | --- |
 | **FastAPI** + `uvicorn` | API única de entrada (`POST /consultar`) | El ejemplo de PG3 de la cátedra usa FastAPI; PG0 la propone; SM2 y SM4 la usaron en PI4 |
-| `pydantic` | Modelos de entrada y salida de la API | Viene con FastAPI |
-| `requests` | Llamar a la API de Ollama (`/api/chat`) | Usado por SM2 en PI4 |
+| `pydantic` | Modelos de entrada y salida de la API (`response_model`, documentación OpenAPI en `/docs`) | Viene con FastAPI |
+| `langchain-core` + `langchain-ollama` (`ChatPromptTemplate`, `ChatOllama`) | **Cliente único del LLM** en `asistente/llm.py` (prompts con `ChatPromptTemplate`, temperatura 0, `with_structured_output` con esquema JSON) y **despacho a submódulos** con `RunnableLambda` en `asistente/orquestador.py`. Sin agentes ni *tool calling* | El ejemplo de PG3 de la cátedra extrae los datos con LangChain (`extraer_datos_llm`); A11 usa LangChain con Ollama; SM3 ya usó `ChatOllama` en PI4 (D-05, cambio del 10/11/2026) |
+| `requests` | Solo el chequeo de salud de Ollama (`GET /api/tags`) | Usado por SM2 en PI4 |
 | `httpx` | Solo para probar la API (cliente de pruebas de FastAPI) | Usado en los tests de SM2 |
 | Salida estructurada de Ollama (`format` con esquema JSON) | Forzar JSON válido en la extracción | Usado por SM2 y SM4 en PI4; extiende el «formato cerrado» de A10 |
 | Otros modelos abiertos en Ollama (`qwen2.5:3b`, `llama3.1:8b`) | Mismo rol que `qwen2.5:7b` | Usados en PI4 por limitaciones de hardware |
@@ -142,7 +143,7 @@ Ninguna de estas cosas se vio en la cátedra. Usarlas exige pasar por la [secci�
 | --- | --- | --- |
 | LLM pagos en la nube | API de OpenAI, Anthropic, Gemini, Groq | Ollama local (A11) |
 | Embeddings y bases vectoriales | Chroma, FAISS, Pinecone, índices vectoriales de Neo4j, `sentence-transformers` | Graph RAG sobre Cypher (A11); TF-IDF si hace falta texto (A9) |
-| Frameworks de agentes | LangGraph, CrewAI, AutoGen, LlamaIndex, agentes con herramientas de LangChain | Prompt maestro + orquestación en Python plano o `GraphCypherQAChain` (A10, A11) |
+| Frameworks de agentes | LangGraph, CrewAI, AutoGen, LlamaIndex, agentes con herramientas de LangChain (`AgentExecutor`, *tool calling*) | Prompt maestro + orquestación en Python plano con LangChain solo como cliente del LLM (A10, A11, ejemplo de PG3) |
 | Ajuste fino de modelos | Fine-tuning, LoRA, Hugging Face `transformers`, PyTorch | Prompt engineering (A10) |
 | PLN avanzado | spaCy, NER con modelos, transformers para sentimiento | `nltk`, BoW, TF-IDF (A9) o el propio LLM con prompt de extracción |
 | Plugins de Neo4j no vistos | APOC, Graph Data Science (GDS) | Cypher estándar (A5) |
@@ -185,4 +186,4 @@ Toda tecnología o técnica fuera de las listas verde y amarilla se registra ac�
 
 | Fecha | Tecnología o técnica | Para qué | Justificación (contenido de la materia) | Aprobada por |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 10/11/2026 | `langchain-ollama` (paquete no listado; `langchain-community` sí) y paso de `requests` a LangChain como cliente del LLM | `ChatOllama` en `asistente/llm.py` | Ejemplo de PG3 de la cátedra (campus virtual), que usa LangChain para extraer; A11 (LangChain + Ollama) | Grupo (D-05) |
