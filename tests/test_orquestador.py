@@ -17,7 +17,8 @@ def plan_fijo(plan):
 class TestOrquestador(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()
-        self.grafo = GrafoFalso(fixture("SM1.interpretacion_pedido"), fixture("SM2.riesgo_ram"))
+        self.grafo = GrafoFalso(fixture("SM1.interpretacion_pedido"), fixture("SM2.riesgo_ram"),
+                                fixture("SM4.explicar_notebook.G"))
         self.orq = Orquestador(self.grafo, LLMFalso(), planificar=plan_fijo(fixture("plan_ejemplo")),
                                dir_trazas=self.dir)
 
@@ -29,6 +30,8 @@ class TestOrquestador(unittest.TestCase):
         ev = r["traza"]["evidencia"]
         self.assertEqual(ev["pedido"]["perfil_dominante"], "VIRT")          # L1 agregada siempre
         self.assertEqual(ev["SM2"]["riesgo_ram"]["notebooks"][0]["riesgo"], {"min": 49.58, "max": 81.46})
+        self.assertEqual(ev["SM4"]["explicar_notebook"]["notebooks"][0]["estado"],
+                         "Indeterminada: completar informacion")           # SM4 real, con filas del grafo
         self.assertEqual(ev["advertencia"], ADVERTENCIA)
         # la traza quedó escrita, con submódulo y duración por consulta
         lineas = list(Path(self.dir).glob("*.jsonl"))[0].read_text(encoding="utf-8").splitlines()

@@ -1,6 +1,206 @@
 {
-  "_nota": "Fixture de FORMA (PG3-01). Luconi lo reemplaza por filas reales del grafo en PG3-12.",
-  "parametros": {"requerimiento_id": "req_01"},
-  "consultas": [],
-  "evidencia": {"stub": true, "datos": "SM4.costo_beneficio todavia no esta implementado (PG3-12)."}
+ "intencion": "SM4.costo_beneficio",
+ "parametros": {
+  "requerimiento_id": "req_01"
+ },
+ "consultas": [
+  {
+   "nombre": "SM4.Q7_COSTO_BENEFICIO",
+   "cypher": "MATCH (c:Requerimiento {id:$requerimiento_id})-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)\nWHERE ev.estado STARTS WITH 'Recomendada'\nMATCH (n)-[:POSEE]->(r:RAM)\nMATCH (q:Regla {id:'REC-R9'})\n\nCALL {\n  WITH ev, n\n  OPTIONAL MATCH (al:Alerta)\n  WHERE EXISTS { MATCH (ev)-[:GENERA]->(al) } OR EXISTS { MATCH (n)-[:GENERA]->(al) }\n  RETURN collect(DISTINCT CASE WHEN al IS NULL THEN null ELSE\n         {codigo:al.regla_origen, texto:al.mensaje} END) AS alertas\n}\n\nRETURN q.id AS regla, q.enunciado AS enunciado, q.estado_validacion AS validacion,\n       n.modelo AS notebook, n.precio_usd AS precio_usd, ev.estado AS estado,\n       ev.grado_recomendacion AS grado_recomendacion, ev.grado_recomendacion_min AS grado_recomendacion_min,\n       ev.grado_recomendacion_max AS grado_recomendacion_max,\n       ev.adecuacion_global AS adecuacion_global, ev.adecuacion_global_min AS adecuacion_global_min,\n       ev.adecuacion_global_max AS adecuacion_global_max,\n       ev.excedente_presupuesto AS excedente_presupuesto_pct,\n       ev.indice_costo_beneficio AS indice_costo_beneficio, r.nivel_ampliabilidad AS ampliabilidad_ram,\n       alertas\nORDER BY indice_costo_beneficio DESC, notebook",
+   "parametros": {
+    "requerimiento_id": "req_01"
+   },
+   "filas": [
+    {
+     "regla": "REC-R9",
+     "enunciado": "Indice costo-beneficio = adecuacion global / (precio / 1000); SI la prioridad es precio ENTONCES ordena por este indice",
+     "validacion": "sin validar",
+     "notebook": "Notebook_B",
+     "precio_usd": 700.0,
+     "estado": "Recomendada (Media)",
+     "grado_recomendacion": 0.632,
+     "grado_recomendacion_min": null,
+     "grado_recomendacion_max": null,
+     "adecuacion_global": 0.813,
+     "adecuacion_global_min": null,
+     "adecuacion_global_max": null,
+     "excedente_presupuesto_pct": 0.0,
+     "indice_costo_beneficio": 1.161,
+     "ampliabilidad_ram": "baja",
+     "alertas": []
+    },
+    {
+     "regla": "REC-R9",
+     "enunciado": "Indice costo-beneficio = adecuacion global / (precio / 1000); SI la prioridad es precio ENTONCES ordena por este indice",
+     "validacion": "sin validar",
+     "notebook": "Notebook_A",
+     "precio_usd": 950.0,
+     "estado": "Recomendada (Alta)",
+     "grado_recomendacion": 0.785,
+     "grado_recomendacion_min": null,
+     "grado_recomendacion_max": null,
+     "adecuacion_global": 0.862,
+     "adecuacion_global_min": null,
+     "adecuacion_global_max": null,
+     "excedente_presupuesto_pct": 0.0,
+     "indice_costo_beneficio": 0.907,
+     "ampliabilidad_ram": "alta",
+     "alertas": []
+    },
+    {
+     "regla": "REC-R9",
+     "enunciado": "Indice costo-beneficio = adecuacion global / (precio / 1000); SI la prioridad es precio ENTONCES ordena por este indice",
+     "validacion": "sin validar",
+     "notebook": "Notebook_M",
+     "precio_usd": 880.0,
+     "estado": "Recomendada condicionada por falta de informacion",
+     "grado_recomendacion": null,
+     "grado_recomendacion_min": 0.504,
+     "grado_recomendacion_max": 0.826,
+     "adecuacion_global": null,
+     "adecuacion_global_min": 0.741,
+     "adecuacion_global_max": 0.908,
+     "excedente_presupuesto_pct": 0.0,
+     "indice_costo_beneficio": 0.842,
+     "ampliabilidad_ram": "alta",
+     "alertas": [
+      {
+       "codigo": "REC-R15",
+       "texto": "La ficha no informa la autonomia: la adecuacion global se informa como rango"
+      }
+     ]
+    },
+    {
+     "regla": "REC-R9",
+     "enunciado": "Indice costo-beneficio = adecuacion global / (precio / 1000); SI la prioridad es precio ENTONCES ordena por este indice",
+     "validacion": "sin validar",
+     "notebook": "Notebook_H",
+     "precio_usd": 1000.0,
+     "estado": "Recomendada (Media)",
+     "grado_recomendacion": 0.626,
+     "grado_recomendacion_min": null,
+     "grado_recomendacion_max": null,
+     "adecuacion_global": 0.811,
+     "adecuacion_global_min": null,
+     "adecuacion_global_max": null,
+     "excedente_presupuesto_pct": 0.0,
+     "indice_costo_beneficio": 0.811,
+     "ampliabilidad_ram": "alta",
+     "alertas": []
+    },
+    {
+     "regla": "REC-R9",
+     "enunciado": "Indice costo-beneficio = adecuacion global / (precio / 1000); SI la prioridad es precio ENTONCES ordena por este indice",
+     "validacion": "sin validar",
+     "notebook": "Notebook_X",
+     "precio_usd": 1050.0,
+     "estado": "Recomendada (Media)",
+     "grado_recomendacion": 0.534,
+     "grado_recomendacion_min": null,
+     "grado_recomendacion_max": null,
+     "adecuacion_global": 0.841,
+     "adecuacion_global_min": null,
+     "adecuacion_global_max": null,
+     "excedente_presupuesto_pct": 5.0,
+     "indice_costo_beneficio": 0.801,
+     "ampliabilidad_ram": "alta",
+     "alertas": [
+      {
+       "codigo": "GM-R8",
+       "texto": "El TGP configurado (60 W de 115 W) reduce el rendimiento de la GPU respecto de su gama"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "evidencia": {
+  "requerimiento_id": "req_01",
+  "regla": {
+   "id": "REC-R9",
+   "enunciado": "Indice costo-beneficio = adecuacion global / (precio / 1000); SI la prioridad es precio ENTONCES ordena por este indice",
+   "validacion": "sin validar"
+  },
+  "notebooks": [
+   {
+    "posicion": 1,
+    "notebook": "Notebook_B",
+    "estado": "Recomendada (Media)",
+    "grado": 0.632,
+    "precio_usd": 700.0,
+    "adecuacion_global": 0.813,
+    "excedente_presupuesto_pct": 0.0,
+    "indice_costo_beneficio": 1.161,
+    "ampliabilidad_ram": "baja",
+    "alertas": []
+   },
+   {
+    "posicion": 2,
+    "notebook": "Notebook_A",
+    "estado": "Recomendada (Alta)",
+    "grado": 0.785,
+    "precio_usd": 950.0,
+    "adecuacion_global": 0.862,
+    "excedente_presupuesto_pct": 0.0,
+    "indice_costo_beneficio": 0.907,
+    "ampliabilidad_ram": "alta",
+    "alertas": []
+   },
+   {
+    "posicion": 3,
+    "notebook": "Notebook_M",
+    "estado": "Recomendada condicionada por falta de informacion",
+    "grado": {
+     "min": 0.504,
+     "max": 0.826
+    },
+    "precio_usd": 880.0,
+    "adecuacion_global": {
+     "min": 0.741,
+     "max": 0.908
+    },
+    "excedente_presupuesto_pct": 0.0,
+    "indice_costo_beneficio": 0.842,
+    "ampliabilidad_ram": "alta",
+    "indice_con_peor_caso": true,
+    "alertas": [
+     {
+      "codigo": "REC-R15",
+      "texto": "La ficha no informa la autonomia: la adecuacion global se informa como rango",
+      "notebook": "Notebook_M"
+     }
+    ]
+   },
+   {
+    "posicion": 4,
+    "notebook": "Notebook_H",
+    "estado": "Recomendada (Media)",
+    "grado": 0.626,
+    "precio_usd": 1000.0,
+    "adecuacion_global": 0.811,
+    "excedente_presupuesto_pct": 0.0,
+    "indice_costo_beneficio": 0.811,
+    "ampliabilidad_ram": "alta",
+    "alertas": []
+   },
+   {
+    "posicion": 5,
+    "notebook": "Notebook_X",
+    "estado": "Recomendada (Media)",
+    "grado": 0.534,
+    "precio_usd": 1050.0,
+    "adecuacion_global": 0.841,
+    "excedente_presupuesto_pct": 5.0,
+    "indice_costo_beneficio": 0.801,
+    "ampliabilidad_ram": "alta",
+    "alertas": [
+     {
+      "codigo": "GM-R8",
+      "texto": "El TGP configurado (60 W de 115 W) reduce el rendimiento de la GPU respecto de su gama",
+      "notebook": "Notebook_X"
+     }
+    ]
+   }
+  ]
+ }
 }

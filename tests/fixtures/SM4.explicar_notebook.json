@@ -1,6 +1,110 @@
 {
-  "_nota": "Fixture de FORMA (PG3-01). Luconi lo reemplaza por filas reales del grafo en PG3-12.",
-  "parametros": {"requerimiento_id": "req_01"},
-  "consultas": [],
-  "evidencia": {"stub": true, "datos": "SM4.explicar_notebook todavia no esta implementado (PG3-12)."}
+ "intencion": "SM4.explicar_notebook",
+ "parametros": {
+  "requerimiento_id": "req_01",
+  "modelo": "Notebook_M"
+ },
+ "consultas": [
+  {
+   "nombre": "SM4.Q4_EXPLICAR_NOTEBOOK",
+   "cypher": "MATCH (c:Requerimiento {id:$requerimiento_id})-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)\nWHERE n.modelo = $modelo\nMATCH (n)-[:POSEE]->(r:RAM)\nMATCH (mx:Parametro {nombre:'P_MAX_RECOMENDADAS'}), (me:Parametro {nombre:'P_MARGEN_EMPATE'})\nOPTIONAL MATCH (c)-[:RECIBE]->(:Recomendacion)-[p:PROPONE|PROPONE_FUERA_DE_PRESUPUESTO]->(n)\nOPTIONAL MATCH (c)-[cp:CONSULTA_POR]->(n)\n\nCALL {\n  WITH ev, n\n  OPTIONAL MATCH (al:Alerta)\n  WHERE EXISTS { MATCH (ev)-[:GENERA]->(al) } OR EXISTS { MATCH (n)-[:GENERA]->(al) }\n  RETURN collect(DISTINCT CASE WHEN al IS NULL THEN null ELSE\n         {codigo:al.regla_origen, texto:al.mensaje} END) AS alertas\n}\n\nMATCH (c)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)\nMATCH (n)-[:POSEE]->(b:Bateria)\n\nCALL {\n  WITH ev\n  OPTIONAL MATCH (ev)-[a:ACTIVA]->(q:Regla)\n  WHERE q.id IN ['REC-RD4', 'REC-RD5']\n  RETURN q.id AS regla_descarte ORDER BY a.fuerza DESC, q.id LIMIT 1\n}\nWITH *, CASE\n  WHEN ev.excluyente_virtualizacion = 'no cumple' THEN\n       {regla:'REC-R3', motivo:'La CPU no soporta virtualizacion por hardware: requisito excluyente del perfil'}\n  WHEN ev.excluyente_virtualizacion = 'falta informacion' THEN\n       {regla:'REC-R3', motivo:'La ficha no informa si la CPU soporta virtualizacion: no se puede comparar'}\n  WHEN ev.estado = 'Descartada' THEN\n       {regla:regla_descarte, motivo:'El grado de recomendacion queda en descartar'}\n  WHEN NOT ev.estado STARTS WITH 'Recomendada' THEN\n       {regla:'REC-R15', motivo:'El resultado depende de un dato que falta: ' + coalesce(ev.dato_faltante, 'no informado')}\n  WHEN p IS NOT NULL THEN null\n  WHEN cp IS NOT NULL THEN\n       {regla:null, motivo:'Es una consulta puntual por esta notebook: se responde con su evaluacion, sin ranking'}\n  WHEN ev.excedente_presupuesto > 0 THEN\n       {regla:null, motivo:'Supera el presupuesto: solo se ofrece una alternativa fuera de presupuesto'}\n  ELSE {regla:'REC-R8', motivo:'Quedo fuera de los primeros ' + toString(toInteger(mx.valor)) + ' puestos del ranking'}\nEND AS m\n\nRETURN pf.codigo AS perfil, c.presupuesto_usd AS presupuesto_usd,\n       {rendimiento:ev.peso_rendimiento, grafica:ev.peso_grafica, movilidad:ev.peso_movilidad} AS pesos,\n       ev.dato_faltante AS dato_faltante,\n       CASE type(p) WHEN 'PROPONE' THEN 'puesto ' + toString(p.orden)\n                    WHEN 'PROPONE_FUERA_DE_PRESUPUESTO' THEN 'alternativa fuera de presupuesto'\n                    ELSE CASE WHEN cp IS NOT NULL THEN 'consulta puntual: se responde con su evaluacion, sin ranking'\n                              ELSE 'no figura en la recomendacion' END END AS en_la_recomendacion, m.motivo AS motivo, m.regla AS regla,\n       [x IN [\n         CASE WHEN ev.excluyente_virtualizacion = 'cumple' THEN 'La CPU soporta virtualizacion por hardware' END,\n         CASE WHEN r.ram_gb >= pf.ram_min THEN 'La RAM alcanza el minimo del perfil (' + toString(r.ram_gb) + ' GB)' END,\n         CASE WHEN r.nivel_ampliabilidad = 'alta' THEN 'La RAM se puede ampliar y queda un slot M.2 libre' END,\n         CASE WHEN ev.excedente_presupuesto = 0.0 THEN 'El precio esta dentro del presupuesto' END\n       ] WHERE x IS NOT NULL] AS cumple,\n       [x IN [\n         CASE WHEN ev.excluyente_virtualizacion = 'no cumple' THEN 'La CPU no soporta virtualizacion: requisito excluyente' END,\n         CASE WHEN r.ram_gb < pf.ram_min THEN 'La RAM (' + toString(r.ram_gb) + ' GB) no llega al minimo del perfil (' + toString(pf.ram_min) + ' GB)' END,\n         CASE WHEN ev.riesgo_etiqueta = 'alto' THEN 'Riesgo alto de quedarse corta de RAM' END,\n         CASE WHEN ev.excedente_presupuesto > 0 THEN 'El precio supera el presupuesto en ' + toString(ev.excedente_presupuesto) + ' %' END\n       ] WHERE x IS NOT NULL] AS no_cumple,\n       [x IN [\n         CASE WHEN ev.excluyente_virtualizacion = 'falta informacion' THEN 'La ficha no informa si la CPU soporta virtualizacion' END,\n         CASE WHEN r.ampliabilidad = 'desconocida' THEN 'La ficha no informa si la RAM es ampliable' END,\n         CASE WHEN b.tipo_dato = 'estimada' THEN 'La autonomia es estimada, no medida' END,\n         CASE WHEN b.tipo_dato = 'desconocida' THEN 'La ficha no informa la autonomia: la adecuacion se informa como rango' END\n       ] WHERE x IS NOT NULL] AS falta_verificar,\n       n.modelo AS notebook, n.precio_usd AS precio_usd, ev.estado AS estado,\n       ev.grado_recomendacion AS grado_recomendacion, ev.grado_recomendacion_min AS grado_recomendacion_min,\n       ev.grado_recomendacion_max AS grado_recomendacion_max,\n       ev.adecuacion_global AS adecuacion_global, ev.adecuacion_global_min AS adecuacion_global_min,\n       ev.adecuacion_global_max AS adecuacion_global_max,\n       ev.excedente_presupuesto AS excedente_presupuesto_pct,\n       ev.indice_costo_beneficio AS indice_costo_beneficio, r.nivel_ampliabilidad AS ampliabilidad_ram,\n       alertas\nORDER BY notebook",
+   "parametros": {
+    "requerimiento_id": "req_01",
+    "modelo": "Notebook_M"
+   },
+   "filas": [
+    {
+     "perfil": "VIRT",
+     "presupuesto_usd": 1000.0,
+     "pesos": {
+      "rendimiento": 0.75,
+      "grafica": 0.083,
+      "movilidad": 0.167
+     },
+     "dato_faltante": "adecuacion_movilidad (autonomia no informada)",
+     "en_la_recomendacion": "no figura en la recomendacion",
+     "motivo": "Quedo fuera de los primeros 3 puestos del ranking",
+     "regla": "REC-R8",
+     "cumple": [
+      "La CPU soporta virtualizacion por hardware",
+      "La RAM alcanza el minimo del perfil (16 GB)",
+      "La RAM se puede ampliar y queda un slot M.2 libre",
+      "El precio esta dentro del presupuesto"
+     ],
+     "no_cumple": [],
+     "falta_verificar": [
+      "La ficha no informa la autonomia: la adecuacion se informa como rango"
+     ],
+     "notebook": "Notebook_M",
+     "precio_usd": 880.0,
+     "estado": "Recomendada condicionada por falta de informacion",
+     "grado_recomendacion": null,
+     "grado_recomendacion_min": 0.504,
+     "grado_recomendacion_max": 0.826,
+     "adecuacion_global": null,
+     "adecuacion_global_min": 0.741,
+     "adecuacion_global_max": 0.908,
+     "excedente_presupuesto_pct": 0.0,
+     "indice_costo_beneficio": 0.842,
+     "ampliabilidad_ram": "alta",
+     "alertas": [
+      {
+       "codigo": "REC-R15",
+       "texto": "La ficha no informa la autonomia: la adecuacion global se informa como rango"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "evidencia": {
+  "requerimiento_id": "req_01",
+  "perfil": "VIRT",
+  "presupuesto_usd": 1000.0,
+  "notebooks": [
+   {
+    "notebook": "Notebook_M",
+    "estado": "Recomendada condicionada por falta de informacion",
+    "grado": {
+     "min": 0.504,
+     "max": 0.826
+    },
+    "precio_usd": 880.0,
+    "adecuacion_global": {
+     "min": 0.741,
+     "max": 0.908
+    },
+    "excedente_presupuesto_pct": 0.0,
+    "indice_costo_beneficio": 0.842,
+    "ampliabilidad_ram": "alta",
+    "indice_con_peor_caso": true,
+    "alertas": [
+     {
+      "codigo": "REC-R15",
+      "texto": "La ficha no informa la autonomia: la adecuacion global se informa como rango",
+      "notebook": "Notebook_M"
+     }
+    ],
+    "motivo": "Quedo fuera de los primeros 3 puestos del ranking",
+    "regla": "REC-R8",
+    "dato_faltante": "adecuacion_movilidad (autonomia no informada)",
+    "en_la_recomendacion": "no figura en la recomendacion",
+    "pesos": {
+     "rendimiento": 0.75,
+     "grafica": 0.083,
+     "movilidad": 0.167
+    },
+    "cumple": [
+     "La CPU soporta virtualizacion por hardware",
+     "La RAM alcanza el minimo del perfil (16 GB)",
+     "La RAM se puede ampliar y queda un slot M.2 libre",
+     "El precio esta dentro del presupuesto"
+    ],
+    "no_cumple": [],
+    "falta_verificar": [
+     "La ficha no informa la autonomia: la adecuacion se informa como rango"
+    ]
+   }
+  ]
+ }
 }
