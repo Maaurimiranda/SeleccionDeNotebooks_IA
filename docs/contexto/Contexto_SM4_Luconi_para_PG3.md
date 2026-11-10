@@ -407,7 +407,7 @@ Todo resultado que depende del perfil o del pedido vive en `(:Evaluacion)`, uno 
 
 Las reglas retiradas (REC-R1, R2, R6 y R12) se conservan como nodo, con `estado_validacion = 'reemplazada en PG2'` y `reemplazada_por = 'REC-RD1..REC-RD5'`, para la trazabilidad.
 
-**Parámetros crisp del SM4** (`(:Parametro)`, todos "provisional"): `P_INCREMENTO_PRIORIDAD = 0,20`, `P_MARGEN_EMPATE = 0,05` y `P_MAX_RECOMENDADAS = 3`.
+**Parámetros crisp del SM4** (`(:Parametro)`, todos "provisional"; D-06 los unifica en `'sin validar'`): `P_INCREMENTO_PRIORIDAD = 0,20`, `P_MARGEN_EMPATE = 0,05` y `P_MAX_RECOMENDADAS = 3`.
 
 **Agenda de validación con el técnico** (`(:ConsultaExperto)`, bloque 5.f, preguntas en términos del dominio):
 
@@ -445,11 +445,11 @@ Las reglas retiradas (REC-R1, R2, R6 y R12) se conservan como nodo, con `estado_
 | H | 0,811 | 0,626 | Recomendada (Media) | 0,811 | Puesto 2 (ampliabilidad alta) |
 | B | 0,813 | 0,632 | Recomendada (Media) | 1,161 | Puesto 3 (ampliabilidad baja; REC-R8) |
 | X | — | 0,534 | Recomendada (Media), excedente 5 % | 0,801 | Alternativa fuera de presupuesto, alerta GM-R8 |
-| M | [0,741 ; 0,908] | [0,504 ; 0,826] | Recomendada condicionada por falta de información | 0,842 | No entra en el ranking; alerta REC-R15 |
+| M | [0,741 ; 0,908] | [0,504 ; 0,826] | Recomendada condicionada por falta de informacion | 0,842 | No entra en el ranking; alerta REC-R15 |
 | E | 0,81 | 0,623 | Descartada (excluyente incumplido, REC-R3) | 0,827 | — |
 | K | — | — | Descartada | — | — |
 | C | — | — | Descartada (excedente de 20 %) | — | — |
-| G | — | — | Indeterminada: completar información | — | — |
+| G | — | — | Indeterminada: completar informacion | — | — |
 
 Para req_03, Notebook_K queda OFI, pesos 0,333 / 0,083 / 0,583, adecuación 0,659, grado 0,469, "Recomendada (Media)", sin alertas. La misma K está descartada para req_01: eso demuestra CP11.
 
@@ -485,10 +485,17 @@ Archivos en `/mnt/project-files/PI4/` (en el repo: `docs/fuentes/SM4/` y `docs/c
 4. **Generación de consultas (Python):** según la intención elige plantillas Cypher parametrizadas. **El LLM nunca escribe Cypher.**
 5. **Recuperación (Neo4j):** sesiones de solo lectura (`routing_="r"`). Devuelve lo que el grafo ya infirió.
 6. **Paquete de evidencia:** un único JSON, lo único que ve el segundo prompt. Siempre trae la `advertencia` de parámetros sin validar.
-7. **Explicación (LLM):** respuesta empática y justificada solo con esa evidencia, a temperatura 0,2.
+7. **Explicación (LLM):** respuesta empática y justificada solo con esa evidencia, a temperatura 0,2. *D-05 (09/11/2026): Ollama local con `qwen2.5:7b` (alternativa `qwen2.5:3b` por `OLLAMA_MODEL`), temperatura 0 en las dos llamadas y HTTP directo a `/api/chat` con `requests`, sin LangChain. La explicación pasa de 0,2 a 0, y `urllib` se reemplaza por `requests`.*
 8. **Verificación REC-R11 (Python):** si la respuesta menciona modelos, reglas o números ausentes de la evidencia, se regenera indicando el problema (hasta 2 veces). Si sigue fallando, responde una **plantilla fija** determinista.
 
 ### 6.2 Consultas Cypher del SM4 (diccionario `CONSULTAS`)
+
+> **Contrato común (D-07):**
+> - Quedan `SM4.recomendar`, `SM4.explicar_notebook`, `SM4.comparar` y `SM4.costo_beneficio`.
+> - Q5 pasa a `GRUPO.traza_reglas` y Q8 a `GRUPO.parametros`; `desconocida` pasa a `fuera_de_alcance`.
+> - Se elimina `req_01` como pedido por defecto: vale el de la sesión, o se pregunta.
+>
+> Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
 
 | Id | Pregunta que responde | Origen en PG2 | Parámetros |
 |---|---|---|---|
@@ -555,7 +562,7 @@ Esquema de salida:
 | Componente | Elección | Por qué |
 |---|---|---|
 | Orquestación | Python 3 con funciones propias (`orquestar()`) | El flujo es fijo, no un agente: así cada control queda explícito y se puede probar |
-| LLM | Ollama local, **qwen2.5:3b** en las corridas de PI4 (el `.py` trae `qwen2.5:7b` por defecto; se configura con `OLLAMA_MODEL`) | Gratis, local y con salida estructurada. Se usó 3B porque el 7B colgaba la PC de prueba por RAM y disco |
+| LLM | Ollama local, **qwen2.5:3b** en las corridas de PI4 (el `.py` trae `qwen2.5:7b` por defecto; se configura con `OLLAMA_MODEL`) | Gratis, local y con salida estructurada. Se usó 3B porque el 7B colgaba la PC de prueba por RAM y disco. **PG3 (D-05):** `qwen2.5:7b`, alternativa `3b`, temperatura 0 | |
 | Base de conocimiento | Neo4j 5.x (probado en 5.26) con el driver `neo4j` (6.4.1), solo lectura | El grafo de PG2 es la base: el prototipo no escribe ni recalcula |
 | Consultas | Plantillas parametrizadas | Evitan Text2Cypher, con el que el LLM podría consultar otra cosa, inventar filtros o modificar el grafo |
 | Verificador | `verificar_explicacion()` + `plantilla_fija()` | REC-R11 automático: el control no depende de que el modelo obedezca |
@@ -596,7 +603,7 @@ Variables de entorno: `NEO4J_URI` (bolt://localhost:7687), `NEO4J_USER` (neo4j),
 | CP1 | ¿Qué le recomendamos al comprador_01? | recomendar → L1, Q1, Q2, Q3, Q6B, Q8 | A puesto 1 (0,785, Alta); H 2 y B 3 por REC-R8; X fuera de presupuesto (5 %, GM-R8); E y C descartadas, M condicionada, G indeterminada | Ranking completo |
 | CP2 | ¿Por qué la Notebook_E quedó afuera si tiene casi el mismo puntaje que la H? | explicar_notebook, corregida a comparar por Python → L1, Q6, Q6B | E 0,81 pero "Descartada (excluyente incumplido)", REC-R3; H 0,811, puesto 2 | Un excluyente no se compensa |
 | CP3 | ¿Por qué la H quedó antes que la B si la B es más barata? | explicar_notebook, corregida a comparar → L1, Q6, Q6B | H 0,626 ampliabilidad alta, puesto 2; B 0,632 baja, puesto 3; margen 0,05 | Desempate REC-R8 |
-| CP4 | Contame qué pasa con la Notebook_M, ¿se la puedo ofrecer? | explicar_notebook → L1, Q4, Q5 | "Recomendada condicionada", grado [0,504 ; 0,826], adecuación [0,741 ; 0,908], falta la autonomía, REC-R15, traza por escenario | Dato faltante como rango |
+| CP4 | Contame qué pasa con la Notebook_M, ¿se la puedo ofrecer? | explicar_notebook → L1, Q4, Q5 | "Recomendada condicionada por falta de informacion", grado [0,504 ; 0,826], adecuación [0,741 ; 0,908], falta la autonomía, REC-R15, traza por escenario | Dato faltante como rango |
 | CP5 | … ¿cuál es la de mejor relación precio-calidad de menos de 900 dólares? | costo_beneficio, precio_max 900 → L1, Q7 | B (700 USD, 1,161) y M (880 USD, 0,842, condicionada) | Filtros más REC-R9 |
 | CP6 | ¿Le sirve la Notebook_K al comprador_03? | explicar_notebook, req_03 → L1, Q4, Q5 | OFI, "Recomendada (Media)", grado 0,469, sin ranking (la misma K está descartada para req_01) | CP11: evaluación por pedido |
 | CP7* | ¿Qué le recomiendo al comprador_02? | recomendar → L1 | Perfil indeterminado, 0 evaluadas, pregunta pendiente | No se inventa un perfil (SM1) |
@@ -683,12 +690,14 @@ Puntos a verificar o corregir en el SM4 antes de integrar:
            amp DESC, ev.indice_costo_beneficio DESC
   ```
 
-  Cuando la prioridad es "precio", también se agrega `[:ACTIVA]` de la recomendación a la regla REC-R9, para que quede en la traza. Para probarlo hace falta un pedido de prueba con prioridad "precio" (por ejemplo, un req_04 VIRT de 1000 USD): el puesto 1 tiene que ser la recomendada con mayor índice costo-beneficio. Los resultados de req_01, req_02 y req_03 no cambian, porque ninguno tiene esa prioridad.
+  Cuando la prioridad es "precio", también se agrega `[:ACTIVA]` de la recomendación a la regla REC-R9, para que quede en la traza. Para probarlo hace falta un pedido de prueba con prioridad "precio" (por ejemplo, un req_04 VIRT de 1000 USD): el puesto 1 tiene que ser la recomendada con mayor índice costo-beneficio. Los resultados de req_01, req_02 y req_03 no cambian, porque ninguno tiene esa prioridad. *(D-11: ese pedido de prueba es `req_05`.)*
 - **REC-R7 y REC-R13** solo miran la RAM (`ram_sobra` y `ram_min`). Los otros componentes quedan en SM2 y SM3. `ram_sobra` es nulo en DEV, VIRT, VID3D y DATOS (P11 pendiente).
 - **El índice costo-beneficio** usa precio/1000, no precio/presupuesto como en PI1. Dejarlo explícito.
 - **Funcionamiento.** Verificar con `MATCH (:Recomendacion)-[p:PROPONE]->(n) RETURN p.orden, n.modelo ORDER BY p.orden` → 1 A, 2 H, 3 B.
 
 ### 7.2 Integración y prompt maestro (punto 2 y tabla de productos)
+
+> **Adoptado en D-07:** el prompt de explicación de SM4 es la base de la explicación común, pasado a voseo y a máximo 180 palabras, y `verificar_explicacion()` es la base del verificador común. Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
 
 - **Principio que el prompt maestro debe respetar:** "Neo4j maneja la verdad". El SM4 ya lo aplica:
   - el LLM no decide, no calcula y no escribe Cypher;
@@ -731,6 +740,8 @@ Ver `PI4/flujo_orquestacion_SM4.png`.
 
 ### 7.4 Casos de uso integrados que cruzan submódulos (puntos 4 y 5; mínimo 3 E2E)
 
+> **Lista oficial de E2E de PG3 (D-12):** ver `docs/INCONSISTENCIAS_CONTEXTOS.md`. Los de esta sección son candidatos del submódulo.
+
 1. **Recomendación completa para req_01** (SM1 → SM2 → SM3 → SM4):
    - SM1: perfil VIRT 0,899 y prioridad rendimiento;
    - SM2: excluyente de virtualización (E descartada), riesgo de RAM y ampliabilidad;
@@ -759,7 +770,7 @@ Pruebas funcionales del SM4 con resultado esperado y obtenido: la tabla 6.6 más
   - las fuerzas `[:ACTIVA]`: RD2 = 0,842 en el peor caso y RD1 = 1,0 en el mejor.
 - **Consulta ejecutada:** Q4_EXPLICAR_NOTEBOOK y Q5_TRAZA con `{requerimiento_id: "req_01", modelo: "Notebook_M"}`, registradas en la traza de `orquestar()`.
 - **Explicación generada:** "Sí, se la podés ofrecer, pero aclarándole al comprador que falta un dato… su grado va de 0,504 en el peor caso a 0,826 en el mejor (REC-R15)…". Pasa el verificador REC-R11.
-- **Validación de los parámetros:** `(:EtiquetaDifusa)` y `(:Parametro)` con `estado_validacion = 'provisional'`, más la pregunta de la agenda `(:ConsultaExperto)`.
+- **Validación de los parámetros:** `(:EtiquetaDifusa)` y `(:Parametro)` con `estado_validacion = 'sin validar'` (D-06; antes `'provisional'`), más la pregunta de la agenda `(:ConsultaExperto)`.
 
 ### 7.6 Evaluación del sistema (punto 6), desde el SM4
 
@@ -822,3 +833,30 @@ Pruebas funcionales del SM4 con resultado esperado y obtenido: la tabla 6.6 más
 - Qwen Team (2024). Qwen2.5 Technical Report.
 - Documentación de Neo4j (Cypher Manual, Python Driver), Ollama (`/api/chat`, Structured outputs), FastAPI y LangChain.
 - Fuentes de datos: Notebookcheck, RTINGS, r/SuggestALaptop, fichas de Lenovo, Dell, HP, ASUS, Acer, MSI y Apple, Mercado Libre Argentina y BNA.
+
+---
+
+## Anexo · Estado de unificación (D-13, 09/11/2026)
+
+**Etiquetas de procedencia** (plantilla común con SM1 y SM2):
+
+| Etiqueta | Significa |
+| --- | --- |
+| `[DOC]` | Escrito en los informes PI1–PI4, en las correcciones o en la consigna |
+| `[CÓD]` | Se lee en el código del PI4 (`docs/fuentes/SM4/Luconi_Martina_PI4_U4.py`) o en el grafo canónico (`docs/cypher/Grupo_2_PG2_U1_corregido.cypher`) |
+| `[DED]` | Deducido de lo anterior |
+| `[?]` | No confirmado |
+
+*Este documento todavía no lleva etiquetas por dato: queda a cargo de Luconi.*
+
+**Correcciones de la profesora a PI1–PI4:** **pendiente de completar por Luconi**. No figuran en ningún archivo del repo.
+
+**Discrepancias encontradas en la revisión del 09/11/2026** (detalle y decisiones en `docs/INCONSISTENCIAS_CONTEXTOS.md`):
+
+- El script de referencia pasa a ser el canónico `Grupo_2_PG2_U1_corregido.cypher`, con REC-R9 ya corregido (D-01).
+- Los pesos por perfil de §2.7 son los del canónico. La tabla de PG1/PG2 que difería quedó reemplazada (D-01/D-02).
+- `estado_validacion = 'provisional'` se unifica en `'sin validar'` (D-06).
+- La explicación iba a temperatura 0,2 y con `urllib`; ahora es temperatura 0 con `requests`, y el prompt pasa del tuteo al voseo (D-05, D-07).
+- Se elimina `req_01` como pedido de sesión por defecto (D-07).
+- El pedido de prueba de REC-R9 pasa a llamarse `req_05`; `req_04` es el OFI de la prueba de dos compradores (D-11).
+- Los casos de PI4 se citan como `SM4-PI4-CPn`, y CP11 del grafo como `PG2-CP11` (D-12).

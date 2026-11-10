@@ -40,6 +40,13 @@ En el flujo principal de recomendación (cuando el usuario pide una sugerencia g
 4. **SM4** combina las adecuaciones de SM2 y SM3 con el presupuesto y formula la recomendación final.
 
 ### 2.2 Flujo Conversacional Especialista (Enrutamiento por Prompt Maestro)
+
+> **Contrato común (D-07):**
+> - Las intenciones pasan a ser `SM3.buscar` (con `orden`: `grafica`, `movilidad` o `mixta`) y `SM3.ficha` (antes `modelo`).
+> - `fuera_de_alcance` **ya no deriva a SM2**: lo decide el router del prompt maestro.
+> - La explicación es una sola, común a los cuatro submódulos, en voseo y con hasta 180 palabras.
+>
+> Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
 Cuando el usuario realiza una pregunta orientada a aspectos visuales, gráficos o de traslado, el **System Prompt Maestro de PG3** deriva la consulta directamente a SM3:
 
 | Intención del Usuario | Palabras Clave / Criterios | Submódulo Destino |
@@ -61,6 +68,13 @@ Cuando el usuario realiza una pregunta orientada a aspectos visuales, gráficos 
 > - Sin autonomía, `adecuacion_movilidad` queda en `null` y el rango [0 ; 1] lo arma SM4 (REC-R15).
 > - La gama mínima de GPU sale de `Perfil.gama_gpu_min` (DIS 3, GAM 3, VID3D 4), no de la intensidad de SM1.
 > - `entrena_modelos_gpu` y `req_gama_gpu` no existen.
+> - `grado_pantalla` no se calcula en el grafo: llega como dato por par notebook-perfil (`SALIDA_PI2`). **D-03:** SM3 completa los 6 perfiles que faltan en `docs/cypher/salida_pi2.csv` con sus reglas de PI2 y documenta el método.
+>
+> **D-04 (09/11/2026), se implementan en el canónico:**
+> - **GM-R14:** una GPU dos o más gamas por debajo del perfil es un **excluyente** y deja la notebook «Descartada (excluyente incumplido)» vía REC-R3. En VID3D y DATOS solo C y X lo superan.
+> - **GM-R15:** la alerta de ancho de banda reducido a partir del aviso de SM2.
+> - **GM-R16:** con monitor externo, la pantalla vale 1,0.
+> - **GM-R1/GM-R2:** si GAM impone requisitos, la gama mínima sale de la intensidad gráfica de SM1 (baja 2, media 3, alta 4).
 >
 > Ver D-04 y D-10 en `docs/INCONSISTENCIAS_CONTEXTOS.md`.
 
@@ -178,13 +192,13 @@ Funciones gaussianas $\mu(x) = \exp\left(-\frac{(x - c)^2}{2\sigma^2}\right)$ co
 |---|:---:|:---:|:---:|:---:|:---:|:---:|---|
 | **`Notebook_A`** | $950 | 1.4 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 65% | 8.0 h (medida) | Movilidad media (0.625). |
 | **`Notebook_B`** | $700 | 1.3 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 62% | 10.0 h (medida) | **Campeona de Movilidad:** Adecuación 0.776, alta (`GM-RD1` fuerza 0.88). |
-| **`Notebook_C`** | $1200 | 2.3 kg | `'dedicada media'` (Verdadero) | **115 / 115 W** | QHD 144Hz 98% | 5.0 h (medida) | **Máxima Gráfica:** TGP pleno ($\text{potencia}=1.0$, grado GPU 0.916), pero pesada y movilidad baja (0.231). |
+| **`Notebook_C`** | $1200 | 2.3 kg | `'dedicada media'` (Verdadero) | **115 / 115 W** | QHD 144Hz 98% | 5.0 h (medida) | **Máxima Gráfica:** TGP pleno ($\text{potencia}=1.0$, grado GPU 0.902), pero pesada y movilidad baja (0.231). |
 | **`Notebook_E`** | $980 | 1.5 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 70% | 7.0 h (medida) | Movilidad media (0.547), pero SM2 la descarta por CPU sin virtualización. |
 | **`Notebook_G`** | $650 | 1.9 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 55% | **3.99 h (estimada)** | **Regla GM-R12:** 5.7 h declaradas castigadas al 70%. Pantalla básica (55% sRGB). |
 | **`Notebook_H`** | $1000 | 2.0 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 58% | 6.0 h (medida) | Movilidad media (0.430) y peso de 2.0 kg. |
 | **`Notebook_K`** | $900 | 1.6 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 60% | 7.5 h (medida) | Canal simple de RAM (dato `canal` cargado; la alerta `GM-R15` **no está implementada**, ver D-04). |
 | **`Notebook_M`** | $880 | 1.5 kg | `'integrada moderna'` (Falso) | — | FHD 60Hz 66% | **null (desconocida)** | **Incertidumbre:** Batería `null`, movilidad `null`, alerta `GM-R12`. |
-| **`Notebook_X`** | $1050 | 1.8 kg | `'dedicada media'` (Verdadero) | **60 / 115 W** | FHD 144Hz 95% | 7.0 h (medida) | **TGP Recortado:** Potencia relativa 0.522, grado GPU 0.55 y alerta `GM-R8`. Pantalla apta diseño. |
+| **`Notebook_X`** | $1050 | 1.8 kg | `'dedicada media'` (Verdadero) | **60 / 115 W** | FHD 144Hz 95% | 7.0 h (medida) | **TGP Recortado:** Potencia relativa 0.522, grado GPU 0.74 en VIRT, DIS y GAM (0.472 en VID3D y DATOS) y alerta `GM-R8`. Pantalla apta diseño. |
 
 ---
 
@@ -277,7 +291,8 @@ class Extraccion(BaseModel):
 
 ### 7.3 System Prompts
 * **Extracción (`prompts/extraccion.txt`):** Parser semántico puro (temperature 0). Heurísticas: gamer $\rightarrow$ dedicada gama $\ge 4$; liviana $\rightarrow$ peso $\le 1.5$ kg; buena batería $\rightarrow$ batería $\ge 8.0$ h; diseño $\rightarrow$ sRGB $\ge 95\%$.
-* **Explicación (`prompts/explicacion.txt`):** Asesor técnico empático (temperature 0.3). Prohibición estricta de inventar datos; justificación obligatoria con peso, horas efectivas, TGP en Watts, reglas `GM-RDx` y alertas preventivas.
+* **Explicación (`prompts/explicacion.txt`):** Asesor técnico empático (temperature 0.3). Prohibición estricta de inventar datos; justificación obligatoria con peso, horas efectivas, TGP en Watts, reglas `GM-RDx` y alertas preventivas. 
+  > **D-05 (09/11/2026):** Ollama local con `qwen2.5:7b` (alternativa `qwen2.5:3b` por `OLLAMA_MODEL`), temperatura 0 en las dos llamadas y HTTP directo a `/api/chat` con `requests`, sin LangChain. La explicación pasa de 0,3 a 0. Se quitan `langchain-*`, `ollama`, `rich` y `python-dotenv`; `httpx` queda solo para los tests y `pydantic` solo para la API.
 
 ---
 
@@ -306,9 +321,12 @@ Para el backend unificado de PG3, SM3 provee:
 * `responder(pregunta: str) -> Traza`: Función pública que ejecuta el sándwich completo si el Prompt Maestro le transfiere el control.
 
 ### 9.2 Integración en Casos de Uso E2E Cruzados de PG3
+
+> **Lista oficial de E2E de PG3 (D-12):** ver `docs/INCONSISTENCIAS_CONTEXTOS.md`. Los de esta sección son candidatos del submódulo.
 * **Caso E2E 1 — Diseñador Gráfico / Modelador 3D (DIS / VID3D):**
-  - **SM1:** Deduce perfil, exige GPU dedicada gama $\ge 4$ y pantalla sRGB $\ge 95\%$.
-  - **SM2:** Exige CPU alta y RAM $\ge 16$ GB ampliable.
+  - **SM1:** Deduce el perfil. Según el grafo canónico (PG1/PG2 §8.6), DIS exige GPU gama $\ge 3$ y VID3D gama $\ge 4$. El sRGB $\ge 95\%$ de DIS figura solo en el `fundamento` del perfil, no como `Requisito`, y el filtro lo aplica `sm3_asistente.py` con `SRGB_DISENO = 95`.
+  - **SM2:** DIS exige CPU media y VID3D CPU alta; los dos piden RAM 16/32 GB y SSD mínimo 1024 GB.
+  - **Limitación del canónico:** solo hay `SALIDA_PI2` (rendimiento y pantalla) para VIRT, más K para OFI, así que un pedido DIS o VID3D **no evalúa ninguna notebook** hasta resolver D-03. Lo mismo vale para el E2E 2 (OFI), salvo K.
   - **SM3:** Evalúa `Notebook_C` (TGP 115 W, pantalla 98% sRGB, peso 2.3 kg) y `Notebook_X` (TGP 60 W, pantalla 95% sRGB, peso 1.8 kg, alerta `GM-R8`).
   - **SM4:** Contrasta con presupuesto y decide ranking.
 * **Caso E2E 2 — Estudiante Universitario con Alta Movilidad (OFI):**
@@ -316,3 +334,29 @@ Para el backend unificado de PG3, SM3 provee:
   - **SM2:** Verifica RAM básica (8 o 16 GB).
   - **SM3:** Rankea primera a `Notebook_B` (1.3 kg, 10 h, adecuación 0.776) y alerta sobre `Notebook_G` por batería baja estimada y pantalla pobre.
   - **SM4:** Recomienda `Notebook_B` como la opción más costo-eficiente.
+
+---
+
+## Anexo · Estado de unificación (D-13, 09/11/2026)
+
+**Etiquetas de procedencia** (plantilla común con SM1 y SM2):
+
+| Etiqueta | Significa |
+| --- | --- |
+| `[DOC]` | Escrito en los informes PI1–PI4, en las correcciones o en la consigna |
+| `[CÓD]` | Se lee en el código del PI4 (`docs/fuentes/SM3/sm3_asistente.py`) o en el grafo canónico (`docs/cypher/Grupo_2_PG2_U1_corregido.cypher`) |
+| `[DED]` | Deducido de lo anterior |
+| `[?]` | No confirmado |
+
+*Este documento todavía no lleva etiquetas por dato: queda a cargo de de Coninck.*
+
+**Correcciones de la profesora a PI1–PI4:** **pendiente de completar por de Coninck**. No figuran en ningún archivo del repo.
+
+**Discrepancias encontradas en la revisión del 09/11/2026** (detalle y decisiones en `docs/INCONSISTENCIAS_CONTEXTOS.md`):
+
+- Las movilidades de §5 no se reproducían; se recalcularon (S-05).
+- Afirmaba GM-R14, GM-R15, GM-R16, `margen_gama = 'excluye'` y `entrena_modelos_gpu`, que el grafo no tiene. Se implementan GM-R14, R15 y R16 (D-04); `entrena_modelos_gpu` se descarta (D-10).
+- El caso E2E 1 exigía para DIS gama ≥ 4 y CPU alta; el grafo pide gama 3 y CPU media (D-02).
+- La explicación iba a temperatura 0,3 y con LangChain, `rich` y `python-dotenv`; ahora es temperatura 0 con `requests` (D-05).
+- Las intenciones pasan a `SM3.buscar` y `SM3.ficha`; `fuera_de_alcance` ya no deriva a SM2 (D-07).
+- Pendiente: completar `grado_pantalla` para 6 perfiles en `docs/cypher/salida_pi2.csv` (D-03).

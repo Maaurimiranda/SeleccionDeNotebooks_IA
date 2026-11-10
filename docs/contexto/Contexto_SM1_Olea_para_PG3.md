@@ -119,7 +119,7 @@ Evaluar notebooks, comparar precios, decidir la recomendación (SM4), evaluar CP
 | `[:TIENE_PREGUNTA]` → `(:Pregunta)` | `texto`, `regla_origen`, `estado='pendiente'` | INT-R13, INT-R14 |
 | `[:GENERA]` → `(:Alerta)` | `tipo`, `regla_origen`, `mensaje`, `submodulo_origen='SM1'` | «Dedicación desconocida», «Perfil indeterminado» |
 | `(:Actividad)` | `descripcion`, `tipo`, `evidencia`, `dedicacion_h`, `dedicacion_origen`, `peso_perfil` (o `_min`/`_max`) | `dedicacion_origen` ∈ {`declarada`, `léxico`, `desconocida`} |
-| `[:ACTIVA {escenario, fuerza}]` → `(:Regla)` | desde `Actividad` (INT-RD1..3) y desde `Requerimiento` (INT-RD4..7) | `escenario` ∈ {`unico`, `min`, `max`} |
+| `[:ACTIVA {escenario, fuerza}]` → `(:Regla)` | desde `Actividad` (INT-RD1..3) y desde `Requerimiento` (INT-RD4..7) | `escenario` ∈ {`unico`, `min`, `max`}. *En el canónico los escenarios son nodos `Lectura {escenario: 'peor' | 'mejor'}` y `ACTIVA` no lleva `escenario` (D-06)* |
 
 ### 3.5 Contratos con otros submódulos
 
@@ -459,6 +459,8 @@ Un único asistente con: base en Neo4j, razonamiento por reglas, componentes dif
 
 ### 12.2 Intenciones de SM1 para el prompt maestro (propuesta) `[DED]`
 
+> **Contrato común (D-07):** quedan `SM1.registrar_pedido`, `SM1.aclarar_pedido` y `SM1.interpretacion_pedido`, dentro del plan multisubmódulo del router. Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
+
 | Intención | Cuándo | Qué ejecuta | Escribe en el grafo |
 | --- | --- | --- | --- |
 | `registrar_pedido` | El usuario describe un pedido nuevo (actividades, programas, juegos, presupuesto) | Extracción → validación → alta + `REGLAS_SM1` → `Q_RESULTADO` | **Sí** (Requerimiento nuevo) |
@@ -492,6 +494,8 @@ Endpoints que SM1 necesita (en la API común, no propia): `POST /consultar {text
 6. Mover `requerimiento_id` de `pi4_<timestamp>` a un formato común del grupo (por ejemplo `req_<n>`) y asociar el comprador real.
 
 ### 12.5 Casos E2E donde participa SM1 (candidatos; validar contra el grafo) `[DED]`
+
+> **Lista oficial de E2E de PG3 (D-12):** ver `docs/INCONSISTENCIAS_CONTEXTOS.md`. Los de esta sección son candidatos del submódulo.
 - **E2E-1 · Pedido nuevo completo:** «La necesito para trabajar con Docker y los fines de semana juego al Cyberpunk 2077. Tengo 1500 USD.» → SM1 (VIRT 0,899, GAM 0,388 preferencia, intensidad media 0,584, virtualización) → SM2 (REN-R1 excluyente, riesgo RAM) → SM3 (GAM no impone: ¿qué gama exige?) → SM4 (ranking con presupuesto 1500).
 - **E2E-2 · Dato faltante que atraviesa módulos:** «Quiero usar Docker principalmente y jugar al Cyberpunk 2077, tengo 1200 USD» → SM1 deja GAM en rango e intensidad incierta y pregunta; tras «10 h por semana» → GAM 0,604 impone, intensidad alta → SM3 exige gama 4 → SM4 recomienda. Muestra la conversación en dos turnos.
 - **E2E-3 · Perfil indeterminado:** req_02 / «para la facu, 600 USD» → SM1 indeterminado + pregunta; SM2–SM4 **no** evalúan (CP10). Verifica que no se asume OFI.
@@ -518,13 +522,13 @@ Endpoints que SM1 necesita (en la API común, no propia): `POST /consultar {text
 | Ref. | Tema | Detalle | Acción |
 | --- | --- | --- | --- |
 | **A** | Versión del Cypher | Existen dos archivos de PG2: el original (inconsistente con el informe) y `Grupo_2_PG2_U1_v2.cypher` (reescrito, sin `$`, el que corrió en Aura). **Usar v2** | **Resuelto (D-01):** el canónico es `docs/cypher/Grupo_2_PG2_U1_corregido.cypher`; el esquema de SM1 se porta desde el linaje A (`docs/cypher/Grupo_2_PG2_U1.cypher`) |
-| **B** | `requisitos_explicitos` | SM2 los espera de SM1; SM1 no los extrae ni los guarda en el grafo | Decidir si se agregan al prompt y al Requerimiento, o documentar que no están |
-| **C** | Reglas no implementadas | INT-R8 (carrera), INT-R9 (contradicción), banda de frontera y entropía de INT-R5 (PI3) | Implementar o declararlas fuera del prototipo en el informe |
+| **B** | `requisitos_explicitos` | SM2 los espera de SM1; SM1 no los extrae ni los guarda en el grafo | Decidir si se agregan al prompt y al Requerimiento, o documentar que no están **Resuelto (D-10):** SM1 los extrae con evidencia literal y los guarda con `origen` `explicito` o `institucional`. |
+| **C** | Reglas no implementadas | INT-R8 (carrera), INT-R9 (contradicción), banda de frontera y entropía de INT-R5 (PI3) | **D-04: se implementan las tres.** INT-R8 con la condición de la profesora: la carrera no fija el perfil como conocimiento, solo sirve de pista para preguntar o de supuesto marcado con alerta. INT-R9 depende de que SM1 extraiga requisitos explícitos (D-10). `banda_frontera` ya está en el canónico (`PERTENECE.en_frontera`); `entropia_max` está cargado pero falta usarlo |
 | **D** | Perfil por descripción | En PG2 `programar → VIRT` estaba fijo; en PI4 depende de `necesita_virtualizacion` (si no, DEV) | Unificar (PI4 es la versión vigente) |
-| **E** | Dominante con rango | Ordena por `grado_min` (CP1 salió GAM) | Ver 12.4-2 |
+| **E** | Dominante con rango | Ordena por `grado_min` (CP1 salió GAM) | Ver 12.4-2 **Resuelto (D-09):** dominante provisional y evaluación en los dos escenarios. |
 | **F** | Fallo CP1 | El `req_01` de PG2 da VIRT 0,899 porque las actividades están escritas a mano; vía LLM salió indeterminado | Corregir la extracción antes de usar CP1 como E2E |
-| **G** | Aclaración | Hoy se reprocesa todo el texto y se crea **otro** Requerimiento; no se actualiza el original ni se marca la pregunta como respondida | Para la API: actualizar el mismo pedido y cerrar la `Pregunta` |
-| **H** | Proveedor de LLM | PI4 corrió con Groq (plan gratuito, límite por minuto); Ollama Cloud pidió créditos (402) y Gemini dio 503 | Acordar un único proveedor para el grupo (SM2 usa Ollama local) |
+| **G** | Aclaración | Hoy se reprocesa todo el texto y se crea **otro** Requerimiento; no se actualiza el original ni se marca la pregunta como respondida | Para la API: actualizar el mismo pedido y cerrar la `Pregunta` **Resuelto (D-08):** se actualiza el mismo `Requerimiento` y la `Pregunta` pasa a `respondida`. |
+| **H** | Proveedor de LLM | PI4 corrió con Groq (plan gratuito, límite por minuto); Ollama Cloud pidió créditos (402) y Gemini dio 503 | Acordar un único proveedor para el grupo (SM2 usa Ollama local) **Resuelto:** **D-05 (09/11/2026):** Ollama local con `qwen2.5:7b` (alternativa `qwen2.5:3b` por `OLLAMA_MODEL`), temperatura 0 en las dos llamadas y HTTP directo a `/api/chat` con `requests`, sin LangChain. SM1 deja Groq y `langchain-openai`; su notebook ya traía Ollama como opción por defecto. |
 | **I** | Escritura en el grafo | SM1 es el único submódulo que **crea** nodos por cada consulta; los otros solo leen en PI4 | La API necesita sesión de escritura para SM1 y lectura para el resto |
 | **J** | Validación | Ningún parámetro de SM1 validado; no hubo entrevista a un asesor | Declararlo en evaluación y trazabilidad |
 | **K** | Devolución de PI4 | Aún sin corrección de la profesora | Revisar cuando llegue |

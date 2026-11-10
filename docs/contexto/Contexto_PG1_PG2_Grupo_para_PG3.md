@@ -142,7 +142,7 @@ Entradas: pedido del comprador, catálogo (previsto de **30** notebooks, precios
 | P2. Consolidar requisitos | SM2 y SM3 | Requisito más exigente por criterio |
 | P3. Evaluar rendimiento y capacidad | SM2 | Adecuación de rendimiento, excluyentes, alertas, **aviso de ancho de banda a SM3** |
 | P4. Evaluar gráfica y movilidad | SM3 | Adecuaciones gráfica y de movilidad, excluyentes, alertas |
-| P5a. Filtrar | SM4 | Descarta por presupuesto o excluyente; excluyente con "falta información" → *Indeterminada: completar información* |
+| P5a. Filtrar | SM4 | Descarta por presupuesto o excluyente; excluyente con "falta información" → *Indeterminada: completar informacion* |
 | P5b. Ordenar y recomendar | SM4 | Pondera, umbrales, desempate, alertas; dato que solo ordena → rango + recomendación condicionada |
 | P6. Explicar | LLM controlado por SM4 | Explicación verificada para el asesor |
 
@@ -232,8 +232,8 @@ P3 y P4 se repiten **por notebook**, y P3 va primero porque avisa a P4 del ancho
 - **REN-R10 + FZ-R6:** ampliabilidad desconocida ⇒ dos `Lectura` con a = 0 (peor) y a = 1 (mejor) ⇒ riesgo en rango + alerta. **FZ-R7:** riesgo *alto* en el peor caso ⇒ alerta (no es "regla activada").
 - **REN-R7:** RAM < mínimo pero ampliable hasta cumplirlo ⇒ alerta "Condicionado a ampliación" (**no descarta**).
 - **GM-R12:** autonomía medida; o 0,7 × declarada (*estimada*); ninguna ⇒ `desconocida`, movilidad en [0 ; 1].
-- **REC-R3:** excluyente incumplido ⇒ *Descartada (excluyente)*; excluyente sin dato ⇒ *Indeterminada: completar información*. Una adecuación alta **no** compensa.
-- **REC-R15:** falta un dato que solo ordena ⇒ rango y *Recomendada condicionada*, ordenada por el **peor** caso.
+- **REC-R3:** excluyente incumplido ⇒ *Descartada (excluyente incumplido)*; excluyente sin dato ⇒ *Indeterminada: completar informacion*. Una adecuación alta **no** compensa.
+- **REC-R15:** falta un dato que solo ordena ⇒ rango y *Recomendada condicionada por falta de informacion*, ordenada por el **peor** caso.
 - **REC-R8:** si la diferencia de grado < `margen_empate` (0,05) gana la más ampliable (`nivel_ampliabilidad`: alta < media < baja < desconocida).
 
 ---
@@ -262,7 +262,7 @@ P3 y P4 se repiten **por notebook**, y P3 va primero porque avisa a P4 del ancho
 
 **Quedan crisp (hechos verificables de la ficha):** gama de CPU y GPU (ordinal), suficiencia de almacenamiento, virtualización, tipo de disco, cobertura sRGB, condición de excluyente.
 
-**Parámetros crisp del canónico (15) [CÓD]** (más 15 `centros_y_sigmas_*`; total **30** `:Parametro`, con `estado_validacion = 'provisional'`): `umbral_exigencia` 0,40 · `banda_frontera` 0,05 · `entropia_max` 0,60 · `P_COSTO_MODULO_RAM_USD` 30 · `P_PESO_RANURAS_AMPLIABILIDAD` 0,50 · `P_RANURAS_REFERENCIA` 2 · `P_DIF_ALERTA_TGP` 0,20 · `P_GRADO_GPU_UN_NIVEL_ABAJO` 0,50 · `P_PESO_GPU_GRAFICA` 0,60 · `P_PESO_PANTALLA_GRAFICA` 0,40 · `P_ALFA_ALERTA_AUTONOMIA` 0,50 · `P_FACTOR_AUTONOMIA` 0,70 · `P_INCREMENTO_PRIORIDAD` 0,20 · `P_MARGEN_EMPATE` 0,05 · `P_MAX_RECOMENDADAS` 3. *El linaje A tenía 12 base (incluidos `dedicacion_min_h`, `dedicacion_max_h`, `potencia_min_desconocida` y `factor_movilidad_monitor`, que el canónico no tiene) + 47 `mf_*` = 59.*
+**Parámetros crisp del canónico (15) [CÓD]** (más 15 `centros_y_sigmas_*`; total **30** `:Parametro`, con `estado_validacion = 'provisional'`, que D-06 unifica en `'sin validar'`): `umbral_exigencia` 0,40 · `banda_frontera` 0,05 · `entropia_max` 0,60 · `P_COSTO_MODULO_RAM_USD` 30 · `P_PESO_RANURAS_AMPLIABILIDAD` 0,50 · `P_RANURAS_REFERENCIA` 2 · `P_DIF_ALERTA_TGP` 0,20 · `P_GRADO_GPU_UN_NIVEL_ABAJO` 0,50 · `P_PESO_GPU_GRAFICA` 0,60 · `P_PESO_PANTALLA_GRAFICA` 0,40 · `P_ALFA_ALERTA_AUTONOMIA` 0,50 · `P_FACTOR_AUTONOMIA` 0,70 · `P_INCREMENTO_PRIORIDAD` 0,20 · `P_MARGEN_EMPATE` 0,05 · `P_MAX_RECOMENDADAS` 3. *El linaje A tenía 12 base (incluidos `dedicacion_min_h`, `dedicacion_max_h`, `potencia_min_desconocida` y `factor_movilidad_monitor`, que el canónico no tiene) + 47 `mf_*` = 59.*
 
 **Cómo se calcula el riesgo de RAM (SM2) [CÓD]:** ρ = `ram_gb` ÷ `req_ram_min` (tope 3) · índice a = 0,25 × ranuras libres (máx. 2) + 0,5 × min(1, (max_gb − ram_gb) ÷ `req_ram_rec`) · FZ-R1..R5 con MIN/MAX · centroide.
 
@@ -353,7 +353,7 @@ Alertas que dependen del pedido cuelgan de `Evaluacion`: riesgo de obsolescencia
 | G | 650 | entrada, 4, **no informada** | 8 **desconocida**, —, —, desconocido | 512 / no | integrada moderna | FHD 60 Hz 55 % | 5,7 h declarada (3,99 usada) | 0,55 / 0,80 |
 | M | 880 | alta, 8, soportada | 16 mixta, 1, 64, doble | 1024 / sí | integrada moderna | FHD 60 Hz 66 % | **no informada** | 0,88 / 0,95 |
 
-El rendimiento y la pantalla **no se calculan**: se cargan por par notebook-perfil en `SALIDA_PI2` («salidas crisp que SM2 y SM3 ya producían en PI2»). Solo hay pares para VIRT, más **K–OFI (0,80 / 0,90), que es un supuesto del grupo para CP11, pendiente de que SM2 lo recalcule**. Sin un par, la notebook no se evalúa para ese perfil (D-03).
+El rendimiento y la pantalla **no se calculan**: se cargan por par notebook-perfil en `SALIDA_PI2` («salidas crisp que SM2 y SM3 ya producían en PI2»). Solo hay pares para VIRT, más **K–OFI (0,80 / 0,90), que es un supuesto del grupo para CP11, pendiente de que SM2 lo recalcule**. Sin un par, la notebook no se evalúa para ese perfil. **D-03 (resuelta):** se completan los 7 perfiles; SM2 calcula el rendimiento y SM3 la pantalla con sus reglas de PI2, sobre la planilla `docs/cypher/salida_pi2.csv`. Hasta cargarlos, solo VIRT y K–OFI son evaluables.
 
 ### 8.6 Perfiles (valores provisionales, sin validar) [CÓD]
 
@@ -367,7 +367,7 @@ El rendimiento y la pantalla **no se calculan**: se cargan por par notebook-perf
 | GAM | 16 / 32 / 32 | 512 | media / 3 | no | 0,30 / 0,60 / 0,10 |
 | DATOS | 16 / 32 / — | 1024 | alta / 4 | no | 0,70 / 0,10 / 0,20 |
 
-Los pesos son los del Anexo D de SM4 (P7). No hay `ssd_rec` ni `orden_exigencia`. Solo el `Requisito` de virtualización de VIRT es excluyente; el de `gama_gpu` no lo es (actúa vía GM-R4 con dos o más gamas abajo). La gama mínima de GPU sale **solo del perfil dominante**: la intensidad gráfica de SM1 se calcula, pero no la modifica.
+Los pesos son los del Anexo D de SM4 (P7). No hay `ssd_rec` ni `orden_exigencia`. Solo el `Requisito` de virtualización de VIRT es excluyente; el de `gama_gpu` no lo es (actúa vía GM-R4 con dos o más gamas abajo). La gama mínima de GPU sale **solo del perfil dominante**: la intensidad gráfica de SM1 se calcula, pero no la modifica. **D-04:** se implementa GM-R1/GM-R2 (la gama sale de la intensidad cuando GAM impone requisitos) y el requisito `gama_gpu` pasa a excluyente con dos o más gamas abajo (GM-R14).
 
 ### 8.7 Pedidos cargados [CÓD]
 
@@ -385,7 +385,7 @@ Los pesos son los del Anexo D de SM4 (P7). No hay `ssd_rec` ni `orden_exigencia`
 | Virtualización del pedido | `necesita_virtualizacion` (INT-R3) | Sale de `Perfil.requiere_virtualizacion` del dominante | Portar |
 | Empate de perfiles (INT-R12) | `orden_exigencia` | `ram_min` | Portar |
 | Dedicación desconocida (INT-R14) | Dos lecturas de 0 h y 40 h; `PERTENECE {grado_min, grado_max, estado}` | No hay lecturas; `PERTENECE {impone_requisitos, en_frontera}` | Portar |
-| Reglas | 61 nodos | 57 (sin INT-R2, R3, R4, R6, REN-R2, REN-R13, GM-R14, GM-R16 ni REC-R16; suma INT-R11, GM-R3, REC-R7, REC-R9, REC-R13 y GM-R10 como retirada) | Portar o declarar fuera de alcance (D-04) |
+| Reglas | 61 nodos | 57 (sin INT-R2, R3, R4, R6, REN-R2, REN-R13, GM-R14, GM-R16 ni REC-R16; suma INT-R11, GM-R3, REC-R7, REC-R9, REC-R13 y GM-R10 como retirada) | **Portar e implementar** (D-04: INT-R2/R3/R4/R6 de SM1, REN-R2, REN-R11, REN-R13, REN-R14, GM-R1/R2, GM-R14, GM-R15, GM-R16, REC-R16, INT-R8, INT-R9 y la entropía) |
 | Parámetros | 12 base + 47 `mf_*` = 59 | 15 crisp + 15 `centros_y_sigmas_*` = 30 | — |
 | Nombres | `LLEVA_A`, `TIENE_PREGUNTA`, `ACTIVA {escenario}` | `APUNTA_A`, `REQUIERE_ACLARACION`, escenario en `Lectura` | Unificar (D-06) |
 
@@ -419,11 +419,11 @@ Todos sobre `req_01` (perfil VIRT). Reproducibles ejecutando el script completo.
 | B | 700 | 0,80 | medio | 1,000 | 0,776 | 0,813 | 0 % | 0,632 | Recomendada (Media) | puesto 3 |
 | H | 1000 | 0,88 | bajo | 0,960 | 0,430 | 0,811 | 0 % | 0,626 | Recomendada (Media) | puesto 2 |
 | X | 1050 | 0,92 | bajo | 0,844 | 0,486 | 0,841 | 5 % | 0,534 | Recomendada (Media) | fuera de presupuesto |
-| M | 880 | 0,88 | bajo | 0,980 | sin dato | [0,741 ; 0,908] | 0 % | [0,504 ; 0,826] | Recomendada condicionada | — |
+| M | 880 | 0,88 | bajo | 0,980 | sin dato | [0,741 ; 0,908] | 0 % | [0,504 ; 0,826] | Recomendada condicionada por falta de informacion | — |
 | K | 900 | 0,50 | medio | 0,960 | 0,537 | 0,544 | 0 % | 0,244 | Descartada (alerta REN-R7) | — |
 | C | 1200 | 0,95 | bajo | 0,941 | 0,231 | 0,829 | 20 % | 0,191 | Descartada | — |
-| E | 980 | 0,85 | bajo | 0,980 | 0,547 | 0,810 | 0 % | — | Descartada (excluyente) | — |
-| G | 650 | 0,55 | [medio ; alto] | 0,920 | 0,239 | 0,529 | 0 % | — | Indeterminada: completar información | — |
+| E | 980 | 0,85 | bajo | 0,980 | 0,547 | 0,810 | 0 % | — | Descartada (excluyente incumplido) | — |
+| G | 650 | 0,55 | [medio ; alto] | 0,920 | 0,239 | 0,529 | 0 % | — | Indeterminada: completar informacion | — |
 
 **Recomendación final:** 1.º **A** (0,785) · 2.º **H** (0,626; empata con B dentro de 0,05 y gana por ampliabilidad) · 3.º **B** (0,632; mejor costo-beneficio 1,161, RAM soldada) · aparte, fuera de presupuesto: **X** (0,534). "Recomendada (Media)" = etiqueta *considerar*. Ejemplo de cálculo [PG2]: A = 0,750×0,90 + 0,083×1,000 + 0,167×0,625 = 0,862.
 
@@ -432,7 +432,7 @@ Todos sobre `req_01` (perfil VIRT). Reproducibles ejecutando el script completo.
 | # | Situación | Esperado | Obtenido |
 | --- | --- | --- | --- |
 | CP1 | A cumple todo | Recomendada con el mayor grado | 0,785, Alta, puesto 1 |
-| CP2 | E con 0,810 sin virtualización | Descartada | `INCUMPLE`, Descartada (excluyente) |
+| CP2 | E con 0,810 sin virtualización | Descartada | `INCUMPLE`, Descartada (excluyente incumplido) |
 | CP3 | X con 0,841 pero 5 % sobre presupuesto | Alternativa, no primera | 0,534, fuera de presupuesto |
 | CP4 | G sin virtualización ni ampliabilidad | No descartar; rango y pedir el dato | Indeterminada, [49,58 ; 81,46], **3 alertas** (REN-R13, REN-R10, FZ-R7). *En el canónico no existe REN-R13: quedan 2 (REN-R10 y FZ-R7)* |
 | CP5 | K con 8 GB y ranura libre | Riesgo medio, no alto | 49,55, medio; alerta "Condicionado a ampliación" |
@@ -487,7 +487,7 @@ La profesora señala tres propiedades (riesgo, adecuación gráfica, grado de GP
 ### 10.3 Contaminación cruzada por REC-R3 [DED, por lectura del código; no ejecutado]
 En el bloque 10.e el estado de cada `Evaluacion` se decide con:
 `EXISTS { MATCH (n)-[:INCUMPLE {excluyente:true}]->(:Requisito) }` y `EXISTS { MATCH (n)-[:NO_VERIFICADO]->(:Requisito {es_excluyente:true}) }`.
-Esas condiciones **no restringen el `Requisito` al perfil del requerimiento evaluado**. Consecuencia: si `req_01` (VIRT) marca `Notebook_E -[:INCUMPLE]-> Requisito(VIRT, virtualizacion)`, entonces **cualquier otro pedido** (por ejemplo uno de perfil OFI, que no exige virtualización) también verá a E como *Descartada (excluyente)*. Lo mismo para G (*Indeterminada*). Es el caso inverso al de Notebook_E de PG2 y es exactamente lo que la prueba C-C debe detectar.
+Esas condiciones **no restringen el `Requisito` al perfil del requerimiento evaluado**. Consecuencia: si `req_01` (VIRT) marca `Notebook_E -[:INCUMPLE]-> Requisito(VIRT, virtualizacion)`, entonces **cualquier otro pedido** (por ejemplo uno de perfil OFI, que no exige virtualización) también verá a E como *Descartada (excluyente incumplido)*. Lo mismo para G (*Indeterminada*). Es el caso inverso al de Notebook_E de PG2 y es exactamente lo que la prueba C-C debe detectar.
 
 ### 10.4 Impacto en el código de PI4 de SM2 [CÓD]
 En `Miranda_Mauricio_PI4_U4.py` las consultas `Q_C2_RIESGO_RAM`, `Q_L2_EXPLICAR` y `Q_L3_TRAZA` empiezan con `MATCH (c:Requerimiento {id:$req})-[:EVALUA]->(:Evaluacion)-[:SOBRE]->(n)...`, lo que **parece** acotar al pedido, pero luego leen `r.riesgo_valor/min/max/etiqueta`, `r.suficiencia_rho`, `r.indice_ampliabilidad`, `n.riesgo_rango` y `ACTIVA` desde `ram`. Esos valores son **los del último pedido evaluado, sin importar `$req`**. Es peor que un error visible: la respuesta saldría bien formada, citando una regla y un número **de otro comprador**, y el verificador (que solo compara contra la evidencia) **no lo detectaría**.
@@ -517,7 +517,7 @@ Riesgo de RAM esperado por perfil (recalculado con el modelo reproducido, valida
 | C | 18,23 (bajo) | **14,05** (bajo) |
 | G | [49,58 ; 81,46] (alto, peor caso) | **[18,23 ; 50,00]** (medio, peor caso) |
 
-**Qué debe verificar la prueba:** (1) tras evaluar `req_03`, `req_01` sigue dando exactamente los valores de §9 (B 50,00; K 49,55; G [49,58 ; 81,46]); (2) **Notebook_E no queda "Descartada (excluyente)" para `req_03`** (hoy lo estaría, §10.3); (3) **Notebook_G no queda "Indeterminada" para `req_03`** (OFI no exige virtualización; hoy lo estaría por el mismo bug de §10.3); su RAM de ampliabilidad desconocida solo afecta al rango de riesgo; (4) cada respuesta del asistente cita las reglas y valores de **su** requerimiento. *Estos valores salen de reproducir el modelo en Python, no de ejecutar Neo4j; confirmarlos al correr el script refactorizado.*
+**Qué debe verificar la prueba:** (1) tras evaluar `req_03`, `req_01` sigue dando exactamente los valores de §9 (B 50,00; K 49,55; G [49,58 ; 81,46]); (2) **Notebook_E no queda "Descartada (excluyente incumplido)" para `req_03`** (hoy lo estaría, §10.3); (3) **Notebook_G no queda "Indeterminada" para `req_03`** (OFI no exige virtualización; hoy lo estaría por el mismo bug de §10.3); su RAM de ampliabilidad desconocida solo afecta al rango de riesgo; (4) cada respuesta del asistente cita las reglas y valores de **su** requerimiento. *Estos valores salen de reproducir el modelo en Python, no de ejecutar Neo4j; confirmarlos al correr el script refactorizado.*
 
 ---
 
@@ -559,7 +559,7 @@ La profesora no dice cuál es el valor correcto: dice que **lo diga el técnico*
 | **L3** Traza de reglas | Citar reglas activadas | ídem | regla, antecedente, consecuente, nodo, escenario, fuerza |
 | **L4** Parámetros | Decir qué está validado | — | variable, etiqueta, centro, sigma, estado |
 
-**Formato de salida esperado** (ejemplo Notebook_M [PG2]): `{requerimiento, perfil_dominante, notebook, estado:"Recomendada condicionada", grado_recomendacion:[0.504,0.826], adecuacion_global:[0.741,0.908], cumple:[…], no_cumple:[], falta_verificar:["autonomía"], alertas:[{tipo:"Autonomía no informada", regla:"GM-R12"}], reglas:[{id:"REC-RD2", escenario:"peor", fuerza:0.842},{id:"REC-RD1", escenario:"mejor", fuerza:1.0}], advertencia:"Los parámetros del modelo difuso están sin validar por el técnico."}`
+**Formato de salida esperado** (ejemplo Notebook_M [PG2]): `{requerimiento, perfil_dominante, notebook, estado:"Recomendada condicionada por falta de informacion", grado_recomendacion:[0.504,0.826], adecuacion_global:[0.741,0.908], cumple:[…], no_cumple:[], falta_verificar:["autonomía"], alertas:[{tipo:"Autonomía no informada", regla:"GM-R12"}], reglas:[{id:"REC-RD2", escenario:"peor", fuerza:0.842},{id:"REC-RD1", escenario:"mejor", fuerza:1.0}], advertencia:"Los parámetros del modelo difuso están sin validar por el técnico."}`
 
 **Qué necesita el LLM para explicar [PG2]:** (1) estado y **etiqueta** lingüística; (2) los **tres bloques de REC-R11** (cumple / no cumple / falta verificar); (3) alertas con su regla de origen; (4) la regla de mayor fuerza por escenario; (5) la advertencia de parámetros sin validar. **Si el resultado es un rango o un perfil indeterminado, el LLM lo dice así y no completa el dato.** Si la explicación menciona algo ausente de la traza: regenerar hasta 2 veces y luego **plantilla fija** (REC-R11).
 
@@ -585,15 +585,18 @@ La profesora no dice cuál es el valor correcto: dice que **lo diga el técnico*
 
 ## 14. Casos E2E sugeridos con valores esperados
 
+> **Lista oficial de E2E de PG3 (D-12):** ver `docs/INCONSISTENCIAS_CONTEXTOS.md`. Los de esta sección son candidatos del submódulo.
+> **D-11:** la prueba de dos compradores usa `req_04` (OFI, catálogo completo), no el `req_03` del canónico, que es una consulta puntual. «Todos los días» = 14 h → grado 0,630 ≥ 0,4, así que OFI impone requisitos.
+
 Cada caso cruza submódulos y usa valores de §9 (verificables contra el grafo). **[a validar]**: la redacción de la consulta depende del router que se diseñe.
 
 | ID | Consulta del usuario (ejemplo) | Submódulos | Debe devolver |
 | --- | --- | --- | --- |
 | **E2E-1** | `req_01`: "¿Cuál me conviene y por qué?" | SM1 + SM2 + SM3 + SM4 | A (0,785) puesto 1; H puesto 2; B puesto 3; X fuera de presupuesto; explicación en 3 bloques y advertencia de parámetros sin validar |
-| **E2E-2** | "¿Por qué la Notebook_M quedó condicionada?" | SM3 + SM4 (+ SM2) | *Recomendada condicionada*; grado [0,504 ; 0,826]; global [0,741 ; 0,908]; falta verificar: **autonomía**; alerta GM-R12; no inventa una autonomía |
-| **E2E-3** | "¿Qué pasa con la Notebook_G?" | SM2 + SM4 | *Indeterminada: completar información*; riesgo [49,58 ; 81,46]; alertas REN-R13, REN-R10, FZ-R7; **no** dice "no soporta virtualización" ni "no ampliable" |
+| **E2E-2** | "¿Por qué la Notebook_M quedó condicionada?" | SM3 + SM4 (+ SM2) | *Recomendada condicionada por falta de informacion*; grado [0,504 ; 0,826]; global [0,741 ; 0,908]; falta verificar: **autonomía**; alerta GM-R12; no inventa una autonomía |
+| **E2E-3** | "¿Qué pasa con la Notebook_G?" | SM2 + SM4 | *Indeterminada: completar informacion*; riesgo [49,58 ; 81,46]; alertas REN-R13, REN-R10, FZ-R7; **no** dice "no soporta virtualización" ni "no ampliable" |
 | **E2E-4** | `req_02`: "Quiero una notebook para la facu, 600 USD" | SM1 (+ router) | Perfil **indeterminado**, 0 evaluadas, pregunta de aclaración; **no asume OFI** |
-| **E2E-5** | "Explicame por qué E no se recomienda, si tiene casi la misma adecuación que B" | SM2 + SM4 | *Descartada (excluyente)*; REN-R1 + REC-R3; adecuación 0,810 ≈ B 0,813; una adecuación alta no compensa |
+| **E2E-5** | "Explicame por qué E no se recomienda, si tiene casi la misma adecuación que B" | SM2 + SM4 | *Descartada (excluyente incumplido)*; REN-R1 + REC-R3; adecuación 0,810 ≈ B 0,813; una adecuación alta no compensa |
 | **E2E-6** | **Dos compradores, misma notebook** (`req_01` VIRT y `req_03` OFI sobre B, K y G) | SM1 + SM2 + SM4 | Valores de §10.6 independientes por pedido; E **no** descartada para `req_03`; cada explicación cita las reglas de **su** pedido (**responde a C-C**) |
 | **E2E-7** | "¿Qué parámetros del modelo están validados?" | L4 (parámetros) | 47 etiquetas en 15 variables, todas **sin validar** (L4 devuelve solo etiquetas; los 12 parámetros base también están sin validar); no afirma validación |
 | **E2E-8** | "¿Cuál es la capital de Francia?" | ninguno | Respuesta fija de fuera de alcance, sin consultar el grafo |
@@ -616,7 +619,7 @@ Cada caso cruza submódulos y usa valores de §9 (verificables contra el grafo).
 | 7 | **`rend` y `pantalla` crisp** | SM2 no calcula la adecuación de rendimiento; la recibe. Si el informe de PG3 dice que SM2 "evalúa CPU, RAM y almacenamiento", aclarar que hoy solo calcula virtualización y riesgo de RAM [DED]. En el canónico llegan por perfil en `SALIDA_PI2` (D-03) |
 | 8 | **Reglas sin nodo ni implementación** | §6.2: p. ej. REN-R11/R14 y GM-R15 (aviso de canal simple a SM3) no existen en el script. El informe PG1 las describe como vigentes |
 | 9 | **`Carrera` sin datos** | INT-R8 y el frame `Carrera` no tienen nodos |
-| 10 | **Pedido sin ningún perfil que imponga requisitos** | Si todos los perfiles de un pedido quedan "solo preferencia" (grado < 0,4) pero hay perfil dominante, REN-R2 no consolida requisitos y `req_ram_min`/`req_ram_rec` quedan `null`; luego 10.c divide `ram_gb / null` [DED por lectura; no ejecutado: confirmar con un pedido de prueba] |
+| 10 | **Pedido sin ningún perfil que imponga requisitos** | Si todos los perfiles de un pedido quedan "solo preferencia" (grado < 0,4) pero hay perfil dominante, REN-R2 no consolida requisitos y `req_ram_min`/`req_ram_rec` quedan `null`; luego 10.c divide `ram_gb / null` [DED por lectura; no ejecutado: confirmar con un pedido de prueba]. **Resuelto en el canónico:** ρ usa `ram_min` del perfil dominante, que nunca es nulo; el caso de un perfil que no impone requisitos se trata con dos escenarios (D-09) |
 | 11 | **Un solo mensaje por vez** | El bloque 10 corre sobre todos los requerimientos a la vez; no hay forma de "evaluar un pedido nuevo" sin re-ejecutar y borrar todo (`MATCH (n) DETACH DELETE n`). Para PG3 necesitamos un procedimiento incremental o un script de carga separado de uno de inferencia |
 | 12 | **Estado "Recomendada (Media)" vs "considerar"** | Mismo concepto con dos nombres; unificar en la explicación |
 | 13 | **Ranking sin contrastar con los 30 modelos** | La pregunta abierta de PG1 ("¿los pesos dan rankings razonables en los 30 modelos?") sigue sin respuesta: hay 9 notebooks |

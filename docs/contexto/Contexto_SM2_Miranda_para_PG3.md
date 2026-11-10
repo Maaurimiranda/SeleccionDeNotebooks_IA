@@ -101,12 +101,14 @@ Grados de CPU, RAM, almacenamiento y rendimiento (0 a 1); clasificación de cada
 
 | Con | Contrato | Estado |
 | --- | --- | --- |
-| SM1 → SM2 | Perfiles ≥ 0,4, perfil dominante, `necesita_virtualizacion`, requisitos explícitos/institucionales. SM2 aplica virtualización si la pide el indicador **o** el perfil (VIRT, DATOS) | Pedir a SM1 el slot `requisitos_explicitos` (o confirmar que se mapea a institucionales) `[?]` |
+| SM1 → SM2 | Perfiles ≥ 0,4, perfil dominante, `necesita_virtualizacion`, requisitos explícitos/institucionales. SM2 aplica virtualización si la pide el indicador **o** el perfil (VIRT) | Pedir a SM1 el slot `requisitos_explicitos` (o confirmar que se mapea a institucionales) `[?]` **D-10:** SM1 extrae `requisitos_explicitos` (los institucionales van con `origen: 'institucional'`). |
 | SM2 → SM3 | Bandera `aviso_sm3 = "ancho_de_banda_reducido"` cuando GPU integrada + RAM en canal simple (REN-R11) o canal desconocido (REN-R14, con alerta). SM3 lo usa en GM-R15 | Propuesto por SM2 en PI2 (b.1.2); SM3 lo consume en GM-R15 según PI2/PI3. Confirmar el formato exacto del campo `[?]` |
 | SM2 → SM4 | JSON de resultados (ver 3.6). SM4 aplica MIN (REC-R3) sobre excluyentes y trata «no evaluado» como grado ausente, no como 0 | Confirmar con SM4 que aplica MIN sobre este formato `[?]` |
 | SM2 → asesor | Indirecto, a través de SM4 | — |
 
 ### 3.6 JSON de resultados SM2 → SM4 (ejemplo de la Notebook K, PI1) `[DOC]`
+
+> **D-10:** este JSON no se usa en el prototipo. La interfaz entre submódulos es el grafo (`Evaluacion`) y la evidencia común de D-07.
 
 ```json
 {
@@ -128,6 +130,8 @@ Desde PI2 el resultado suma también `version_cuaderno`, `parametros_sin_validar
 ---
 
 ## 4. Flujo de proceso SP1–SP8 `[DOC]`
+
+> **En el prototipo (D-02 y D-03):** SM2 no corre SP1–SP8 en el grafo. Entrega `adecuacion_rendimiento` como dato por par notebook-perfil (`SALIDA_PI2`), calculado con sus reglas de PI2. **Pendiente:** completar los 6 perfiles que faltan (OFI, DEV, DIS, VID3D, GAM, DATOS) en `docs/cypher/salida_pi2.csv` y reemplazar el supuesto K–OFI 0,80. Hay que documentar el método, porque la fórmula de SP6 sin núcleos ni carga sostenida no reproduce los valores de VIRT: K da 0,75 en vez de 0,50 y G da 0,41 en vez de 0,55.
 
 SP1 se ejecuta una vez por pedido; SP2–SP8 se repiten para cada notebook del catálogo.
 
@@ -152,16 +156,16 @@ SP1 se ejecuta una vez por pedido; SP2–SP8 se repiten para cada notebook del c
 
 | ID | Regla (los números se citan por parámetro) | Tipo |
 | --- | --- | --- |
-| REN-R1 | SI `necesita_virtualizacion` (SM1) O algún perfil que impone requisitos la exige (VIRT, DATOS) ENTONCES requerir VT-x/AMD-V como **excluyente**; sin soporte → grado CPU 0 y marca; ficha sin dato → consultar fabricante y nota BIOS/UEFI | Determinístico, documental |
+| REN-R1 | SI `necesita_virtualizacion` (SM1) O algún perfil que impone requisitos la exige (VIRT) ENTONCES requerir VT-x/AMD-V como **excluyente**; sin soporte → grado CPU 0 y marca; ficha sin dato → consultar fabricante y nota BIOS/UEFI | Determinístico, documental |
 | REN-R2 | SI un perfil impone requisitos (grado ≥ P_UMBRAL_IMPONE = 0,4) ENTONCES usar mínimo y recomendado más exigentes de TAB_REQ_PERFIL; un explícito/institucional mayor pasa a ser el mínimo | Determinístico, documental |
 | REN-R3 | Brecha de gama: ≥ requerida → P_BRECHA_0 (1,0); un nivel menos → P_BRECHA_1 (0,6); dos → P_BRECHA_2 (0,2) | Heurístico |
-| REN-R4 | Núcleos < mínimo del perfil → restar P_PEN_NUCLEOS (0,2) | Heurístico |
+| REN-R4 | Núcleos < mínimo del perfil → restar P_PEN_NUCLEOS (0,2) | Heurístico. **Fuera de alcance del prototipo (D-02)** |
 | REN-R5 | Almacenamiento principal HDD → grado × P_FACTOR_HDD (0,3) y alerta `almacenamiento_hdd` | Heurístico |
-| REN-R6 | RAM soldada Y < recomendada → alerta `ram_no_ampliable` (excepción: mixta = ampliable) | Heurístico, predictivo |
+| REN-R6 | RAM soldada Y < recomendada → alerta `ram_no_ampliable` (excepción: mixta = ampliable) | Heurístico, predictivo. **Retirada en el canónico** (→ FZ-R3 y FZ-R7) |
 | REN-R7 | RAM < mínimo Y ampliable hasta alcanzarlo (`max_gb ≥ M` y ranuras suficientes) → grado = máx(calculado, P_GRADO_RAM_COND = 0,5), «cumple parcialmente, condicionado a ampliación», alerta `ram_condicionada_a_ampliacion`, costo = ⌈(M − RAM)/P_TAM_MODULO_GB (8)⌉ × P_COSTO_MODULO_USD (30) | Heurístico (casos) |
-| REN-R8 | Carga sostenida Y sufijo U o V → restar P_PEN_CARGA_SOST (0,3) y alerta `cpu_bajo_consumo_carga_sostenida` | Heurístico, predictivo |
-| REN-R9 | RAM ampliable → sumar P_BONIF_AMPLIABLE (0,1), máx. 1,0. **La regla con menos respaldo; candidata a eliminarse** | Supuesto del grupo |
-| REN-R10 | Ampliabilidad desconocida → asumir no ampliable + alerta `ampliabilidad_no_verificada` | Supuesto conservador |
+| REN-R8 | Carga sostenida Y sufijo U o V → restar P_PEN_CARGA_SOST (0,3) y alerta `cpu_bajo_consumo_carga_sostenida` | Heurístico, predictivo. **Fuera de alcance del prototipo (D-02)** |
+| REN-R9 | RAM ampliable → sumar P_BONIF_AMPLIABLE (0,1), máx. 1,0. **La regla con menos respaldo; candidata a eliminarse** | Supuesto del grupo. **Retirada en el canónico** (→ FZ-R4: no contar dos veces la ampliabilidad) |
+| REN-R10 | Ampliabilidad desconocida → **conservar «desconocida»**, no descartar y alertar `ampliabilidad_no_verificada`; el riesgo se informa como rango (FZ-R6). *En PI1/PI2 decía «asumir no ampliable»: la profesora lo corrigió (PG1, P1-1) y así está en el canónico* | Determinístico |
 | REN-R11 | GPU integrada Y RAM canal simple → `aviso_sm3 = ancho_de_banda_reducido`; si REN-R7 completa el doble canal → nota `ampliacion_completa_doble_canal` | Heurístico, empírico |
 | REN-R12 | ≥ P_UMBRAL_CUMPLE (0,7) cumple; ≥ P_UMBRAL_PARCIAL (0,3) parcial; resto no cumple (con REN-R7: «condicionado») | Determinístico (umbral del grupo) |
 | REN-R13 | Excluyentes: virtualización (1 ó 0) y RAM mínima (su grado). Si alguno vale 0 → «requisito excluyente no cumplido» para que SM4 aplique MIN | Determinístico, documental |
@@ -182,7 +186,15 @@ Operadores: AND = MIN, OR = MAX, implicación Mamdani por mínimo, agregación M
 | FZ-R6 | (Control, crisp) ampliabilidad de la ficha **desconocida** → evaluar FZ-R1..R5 con a = 0 y a = 1; informar riesgo como **rango [mejor ; peor]** y alerta `ampliabilidad_no_verificada` | — | REN-R10, REC-R15 |
 | FZ-R7 | (Control, crisp) etiqueta dominante (o del peor caso) = alto → alerta «Riesgo de obsolescencia alto» con `regla_origen = FZ-R7` | — | REN-R6 (alerta) |
 
-**REN-R6, R7 y R9 siguen vigentes** hasta validar el modelo difuso (para no consolidar como experto lo que es provisional). Los excluyentes no cambian: un riesgo bajo nunca compensa un excluyente incumplido (REC-R3).
+*PI3 proponía mantener REN-R6, R7 y R9 vigentes hasta validar el modelo difuso. En el grafo canónico **REN-R7 sigue vigente**, y **REN-R6 y REN-R9 están retiradas** (`reemplazada en PG2`), para no contar dos veces la ampliabilidad.*
+
+> **D-04 (09/11/2026), se implementan en el canónico:**
+> - **REN-R11:** GPU integrada y canal simple generan la alerta de ancho de banda reducido que consume SM3 (GM-R15).
+> - **REN-R14:** canal desconocido genera la alerta `canal_memoria_no_verificado`, **sin tratarlo como simple** (desconocido ≠ simple, corrección P1-1).
+> - **REN-R13:** alerta de virtualización no informada.
+> - **REN-R2:** los requisitos salen del más exigente entre todos los perfiles que imponen requisitos, no solo del dominante.
+>
+> Hoy ninguna de las cuatro está en el grafo (PG1/PG2 §8.8). Los excluyentes no cambian: un riesgo bajo nunca compensa un excluyente incumplido (REC-R3).
 
 > Nota: FZ-R7 **origina una alerta**; no es una «regla activada» con fuerza. Esa confusión fue un error real del LLM en PI4 (sección 11.7).
 
@@ -191,6 +203,15 @@ Operadores: AND = MIN, OR = MAX, implicación Mamdani por mínimo, agregación M
 ## 6. Tablas de conocimiento y funciones de grado `[DOC]`
 
 ### 6.1 Requisitos por perfil (TAB_REQ_PERFIL; M = mínimo, R = recomendado)
+
+> **Tabla de PI1/PI2 (histórica).** La vigente es la del grafo canónico (`Contexto_PG1_PG2_Grupo_para_PG3.md` §8.6, decisión D-01). Diferencias:
+> - **OFI:** SSD mínimo 512 GB, no 256.
+> - **DEV:** RAM 16/32 GB y SSD mínimo 1024 GB (no 8/16 y 256). Coincide con el técnico de SM4: «programación: 16 GB, SSD 1 TB».
+> - **VID3D:** SSD mínimo 1024 GB, igual que en esta tabla.
+> - **DATOS:** CPU alta (no media), SSD mínimo 1024 GB.
+> - **SSD recomendado:** el canónico no guarda ninguno, solo el mínimo.
+>
+> **Decidido (D-02, 09/11/2026):** DATOS **no** exige virtualización (como en el canónico: REN-R1 aplica solo a VIRT). **Núcleos**, **carga sostenida** y **SSD recomendado** quedan fuera del alcance del prototipo: son diseño de PI1/PI2 no implementado (REN-R4 y REN-R8 incluidas), y el rendimiento sigue llegando por `SALIDA_PI2`.
 
 | Perfil | Gama CPU mín. | Núcleos | RAM M / R | SSD M / R | Virt. | Carga sost. |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -342,7 +363,7 @@ Anchos σ, pesos de a y consecuentes son decisión del grupo; **B y K casi igual
 | C | 16 GB ampliable | 1,00 | 1,000 | FZ-R4 = 1,000 | 18,23 | bajo |
 
 ### 9.3 Virtualización de req_01
-**E** no soporta → «Descartada (REN-R1 + REC-R3)». **G** no informa → «Indeterminada: completar información». Las otras 7 cumplen. Alertas de G: REN-R13 («Información incompleta»), REN-R10 («Ampliabilidad no verificada»), FZ-R7 («Riesgo de obsolescencia alto»).
+**E** no soporta → «Descartada (REN-R1 + REC-R3)». **G** no informa → «Indeterminada: completar informacion». Las otras 7 cumplen. Alertas de G: REN-R13 («Información incompleta»), REN-R10 («Ampliabilidad no verificada»), FZ-R7 («Riesgo de obsolescencia alto»).
 
 ### 9.4 Otros datos
 Notebook A en req_01: recomendada, grado 0,785, «Alta» (CP1). Reglas activadas de A (L3): FZ-R4 (0,458), GM-RD1 (0,41), GM-RD2 (0,46), REC-RD1 (0,863 es la fuerza de REC-RD1; 0,785 es el grado de recomendación: magnitudes distintas).
@@ -365,6 +386,13 @@ Salidas anticipadas: aclaración / fuera_de_alcance / error → no se consulta e
 
 ### 10.2 Intención → consulta `[CÓD]`
 
+> **Contrato común (D-07):**
+> - Quedan `SM2.riesgo_ram` y `SM2.virtualizacion`.
+> - `explicar_notebook` pasa a `SM4.explicar_notebook` (era la misma L2); `traza_reglas` y `parametros` pasan a `GRUPO.traza_reglas` y `GRUPO.parametros`.
+> - Se eliminan `REQ_POR_DEFECTO = "req_01"`, el límite de 500 caracteres (ahora 1500, sin recorte) y la excepción que omitía la advertencia en `virtualizacion`.
+>
+> Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
+
 | Intención | Consulta | Parámetros | Notas |
 | --- | --- | --- | --- |
 | `riesgo_ram` | C2 | `$req`, `$modelo`, `$tipo_ram`, `$ram_min`, `$etiqueta` (opcionales los 4 últimos) | Orden: riesgo desc. Reglas: top 3 por fuerza. Alertas: solo `submodulo_origen='SM2'` |
@@ -383,7 +411,7 @@ El LLM **nunca** escribe Cypher; las plantillas están en el `.py` (texto comple
 | Componente | Función |
 | --- | --- |
 | Constantes | `MAX_CARACTERES = 500`, `MAX_REGENERACIONES = 2`, `REQ_POR_DEFECTO = "req_01"`, `SUBMODULO = "SM2"`, `INTENCIONES` (6), `ETIQUETAS_RIESGO`, `TIPOS_RAM`, `ADVERTENCIA`, `MENSAJE_ALCANCE` |
-| Variables de entorno | `NEO4J_URI` (bolt://localhost:7687), `NEO4J_USER`, `NEO4J_PASSWORD`, `NEO4J_DATABASE`, `OLLAMA_URL` (http://localhost:11434), `OLLAMA_MODEL` (llama3.1:8b) |
+| Variables de entorno | `NEO4J_URI` (bolt://localhost:7687), `NEO4J_USER`, `NEO4J_PASSWORD`, `NEO4J_DATABASE`, `OLLAMA_URL` (http://localhost:11434), `OLLAMA_MODEL` (llama3.1:8b) — **D-05 (09/11/2026):** Ollama local con `qwen2.5:7b` (alternativa `qwen2.5:3b` por `OLLAMA_MODEL`), temperatura 0 en las dos llamadas y HTTP directo a `/api/chat` con `requests`, sin LangChain. Cambia el modelo por defecto (`llama3.1:8b` → `qwen2.5:7b`). |
 | `prevalidar()` | Rechaza vacío, > 500 caracteres o sin letras (lanza `Aclaracion`) |
 | `normalizar_modelo()` / `normalizar_pedido()` | «la A», «nb c» → `Notebook_A`; «pedido 1» → `req_01`. **Solo acepta una letra** (límite 26 notebooks) |
 | `validar_extraccion()` | Valida intención, modelo en catálogo, pedido existente, filtros con valores cerrados; devuelve parámetros + advertencias |
@@ -451,7 +479,7 @@ Fila `riesgo_ram`: `{notebook, ram_gb, tipo_ram, suficiencia_rho, indice_ampliab
 Sentido de la frase («riesgo alto» donde dice «medio»); frases vagas sin respaldo («no hay reglas que pesen en contra» siendo que B tiene una de fuerza 1,0); redundancias y tuteo.
 
 ### 11.5 Pruebas offline (`test_offline_SM2.py`) `[CÓD]`
-LLM y grafo simulados con datos de PG2. **27 verificaciones** (el informe habla de 49). Cubren: respuesta verificada del LLM, rango de G conservado, ampliabilidad desconocida, filtro `soldada`, intención virtualización → C1, inyección → plantilla fija (3 rechazos), fuera de alcance sin grafo, modelo inexistente, falta modelo, entrada sin palabras/vacía/larga, req_02 (INT-R13), req_99, plantilla fija para 3 intenciones, verificador unitario, `requests` simulado (esquema rechazado → `format=json`; JSON reparado; JSON inválido dos veces; Ollama caído) y la API (`/salud`, `/consultar`). Uso: `pip install requests neo4j fastapi httpx && python test_offline_SM2.py`.
+LLM y grafo simulados con datos de PG2. **49 verificaciones**, como dice el informe; el «27» era de la versión anterior. Corrida del 09/11/2026: **47 OK, 0 fallas**, y el bloque de la API no corrió porque `fastapi` no está instalado en esa PC. Cubren: respuesta verificada del LLM, rango de G conservado, ampliabilidad desconocida, filtro `soldada`, intención virtualización → C1, inyección → plantilla fija (3 rechazos), fuera de alcance sin grafo, modelo inexistente, falta modelo, entrada sin palabras/vacía/larga, req_02 (INT-R13), req_99, plantilla fija para 3 intenciones, verificador unitario, `requests` simulado (esquema rechazado → `format=json`; JSON reparado; JSON inválido dos veces; Ollama caído) y la API (`/salud`, `/consultar`). Uso: `pip install requests neo4j fastapi httpx && python test_offline_SM2.py`.
 
 ### 11.6 Explicabilidad y trazabilidad `[DOC]`
 Cadena reconstruible para K: ficha (8 GB, ampliable, 1 ranura) → ρ 0,50 y a 0,625 → regla FZ-R2 (0,786) vía `[:ACTIVA]` → riesgo 49,55 «medio» + alerta REN-R7 → advertencia de parámetros sin validar. Para auditar una respuesta: pregunta, JSON extraído, parámetros validados, Cypher ejecutado, filas, evidencia, intentos de explicación con problemas y origen final (todo en el log `--log .jsonl`).
@@ -521,7 +549,7 @@ Python plano en vez de LangChain (por ahora); Ollama local (costo, privacidad, r
 
 | Ref. | Tema | Detalle | Acción |
 | --- | --- | --- | --- |
-| **A** | **Versión del código** | El `.py` adjunto parece **anterior** al descrito en el informe PI4. El informe cuenta cosas que **no están** en el archivo: descartar modelo/pedido que el usuario no escribió; exigir respaldo textual para cada filtro; verificación **por párrafo** y de «fuerza» citada; rechazo de «la regla que más pesó» sin reglas; campo `ampliabilidad_de_la_ram`; omitir reglas de fuerza < 0,10; resumen de L4 **aparte** (en el `.py` la fila de resumen va dentro de `resultados`, lo que reproduce el bug «10 sobre 11»); reglas 10–14 del prompt de explicación (el `.py` tiene 9 reglas y una regla 4/5 menos detalladas); ejemplos extra del prompt de extracción. Los tests son 27 en el archivo vs 49 en el informe | **Resuelto:** la versión final (53 KB, con esas guardas) está en `docs/fuentes/SM2/`; la de `PI/` (44 KB) era la anterior. Falta reconciliar las 27 verificaciones del archivo con las 49 del informe |
+| **A** | **Versión del código** | El `.py` adjunto parece **anterior** al descrito en el informe PI4. El informe cuenta cosas que **no están** en el archivo: descartar modelo/pedido que el usuario no escribió; exigir respaldo textual para cada filtro; verificación **por párrafo** y de «fuerza» citada; rechazo de «la regla que más pesó» sin reglas; campo `ampliabilidad_de_la_ram`; omitir reglas de fuerza < 0,10; resumen de L4 **aparte** (en el `.py` la fila de resumen va dentro de `resultados`, lo que reproduce el bug «10 sobre 11»); reglas 10–14 del prompt de explicación (el `.py` tiene 9 reglas y una regla 4/5 menos detalladas); ejemplos extra del prompt de extracción. Los tests son 27 en el archivo vs 49 en el informe | **Resuelto:** la versión final (53 KB, con esas guardas) está en `docs/fuentes/SM2/`; la de `PI/` (44 KB) era la anterior. La versión final tiene las 49 verificaciones del informe (47 corrieron OK el 09/11/2026; las de la API necesitan `fastapi`) |
 | **B** | Archivos ausentes | `Grupo_2_PG2_U1.cypher`, informes PG0/PG1/PG2 y PI de SM1, SM3 y SM4 no están disponibles aquí | **Resuelto:** los scripts están en `docs/cypher/` y los PI4 de los cuatro en `docs/fuentes/` |
 | **C** | Cifras del peor caso | PI3 informa **81,1** (K con a = 0) y PG2/PI4 informan **81,46** para G (misma ρ = 0,5 y a = 0). Y 49,6 (PI3) vs 49,55 (K en grafo) y 49,58 (G mejor caso). Causa probable: discretización del centroide en el grafo `[?]` | **Resuelto** (`Contexto_PG1_PG2_Grupo_para_PG3.md` §15.2): vale **[49,58 ; 81,46]**; el 81,1 de PI3 no se reproduce con la discretización del grafo |
 | **D** | Reglas activadas de A | La respuesta de PI4 caso 6 dice REC-RD1 con fuerza 0,863; el resultado esperado de CP1 es 0,785 (grado de recomendación). Pueden ser magnitudes distintas (fuerza de regla vs grado) `[?]` | **Resuelto** (`Contexto_PG1_PG2_Grupo_para_PG3.md` §15.3): 0,863 es la fuerza de REC-RD1 y 0,785 el grado desborrosificado; no es contradicción |
@@ -538,6 +566,8 @@ Python plano en vez de LangChain (por ahora); Ollama local (costo, privacidad, r
 ## 15. Sugerencias de diseño para PG3 (propuestas, **no** decisiones del grupo)
 
 ### 15.1 Orquestación
+
+> **Adoptado en D-07:** plan multisubmódulo, evidencia con espacio de nombres por submódulo, una sola explicación y verificador común. Ver `docs/INCONSISTENCIAS_CONTEXTOS.md` D-07.
 - **Un solo `Orquestador` maestro** que: (1) pre-valida, (2) llama al LLM con el **prompt maestro** para obtener un plan de enrutamiento, (3) valida el plan en código, (4) ejecuta uno o varios **adaptadores de submódulo**, (5) fusiona las evidencias con un *namespace* por submódulo, (6) una sola explicación con verificación global y por submódulo, (7) plantilla fija si falla.
 - **Adaptador SM2** = el `Orquestador` actual partido en `extraer/validar → recuperar → construir_evidencia` para que el enrutador reutilice la recuperación sin la segunda llamada al LLM.
 - **Contrato del plan** (ejemplo): `{"submodulos": ["SM2","SM3","SM4"], "consultas": [{"sm":"SM2","intencion":"riesgo_ram","modelo":"Notebook_K"}, ...], "requerimiento_id": null | "req_01"}`. Cada submódulo valida su parte (intenciones cerradas, parámetros contra el grafo).
@@ -552,6 +582,8 @@ Python plano en vez de LangChain (por ahora); Ollama local (costo, privacidad, r
 5. Decidir cómo mostrar el rango de riesgo con SM4 (REC-R11 y REC-R15).
 
 ### 15.3 Casos E2E candidatos (cruzan submódulos; **validar contra el grafo**)
+
+> **Lista oficial de E2E de PG3 (D-12):** ver `docs/INCONSISTENCIAS_CONTEXTOS.md`. Los de esta sección son candidatos del submódulo.
 - **E2E-1 · Explicar una recomendación completa:** «¿Por qué la Notebook A quedó recomendada y qué riesgo de RAM tiene?» → SM2 (FZ-R4, riesgo bajo 23,02), SM3 (GM-RD1/RD2), SM4 (REC-RD1, 0,785). Usa L3 y L2.
 - **E2E-2 · Dato faltante que atraviesa módulos:** «¿Por qué la G quedó indeterminada y qué debo completar?» → SM2 (virtualización no informada, ampliabilidad desconocida, rango [49,58 ; 81,46]) + SM4 (estado «Indeterminada» y condición). Exige conservar «desconocida» y el rango.
 - **E2E-3 · Perfil indeterminado:** req_02 → SM1 (pregunta pendiente INT-R13) + SM2 (no evalúa el catálogo). Extensión: tras responder la pregunta, registrar el pedido (requiere permisos de escritura y bloque 7 de PG2).
