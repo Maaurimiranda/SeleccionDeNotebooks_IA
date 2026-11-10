@@ -367,7 +367,7 @@ El rendimiento y la pantalla **no se calculan**: se cargan por par notebook-perf
 | GAM | 16 / 32 / 32 | 512 | media / 3 | no | 0,30 / 0,60 / 0,10 |
 | DATOS | 16 / 32 / — | 1024 | alta / 4 | no | 0,70 / 0,10 / 0,20 |
 
-Los pesos son los del Anexo D de SM4 (P7). No hay `ssd_rec` ni `orden_exigencia`. Solo el `Requisito` de virtualización de VIRT es excluyente; el de `gama_gpu` no lo es (actúa vía GM-R4 con dos o más gamas abajo). La gama mínima de GPU sale **solo del perfil dominante**: la intensidad gráfica de SM1 se calcula, pero no la modifica.
+Los pesos son los del Anexo D de SM4 (P7). No hay `ssd_rec` ni `orden_exigencia`. Solo el `Requisito` de virtualización de VIRT es excluyente; el de `gama_gpu` no lo es (actúa vía GM-R4 con dos o más gamas abajo). La gama mínima de GPU sale **solo del perfil dominante**: la intensidad gráfica de SM1 se calcula, pero no la modifica. **D-04:** se implementa GM-R1/GM-R2 (la gama sale de la intensidad cuando GAM impone requisitos) y el requisito `gama_gpu` pasa a excluyente con dos o más gamas abajo (GM-R14).
 
 ### 8.7 Pedidos cargados [CÓD]
 
@@ -385,7 +385,7 @@ Los pesos son los del Anexo D de SM4 (P7). No hay `ssd_rec` ni `orden_exigencia`
 | Virtualización del pedido | `necesita_virtualizacion` (INT-R3) | Sale de `Perfil.requiere_virtualizacion` del dominante | Portar |
 | Empate de perfiles (INT-R12) | `orden_exigencia` | `ram_min` | Portar |
 | Dedicación desconocida (INT-R14) | Dos lecturas de 0 h y 40 h; `PERTENECE {grado_min, grado_max, estado}` | No hay lecturas; `PERTENECE {impone_requisitos, en_frontera}` | Portar |
-| Reglas | 61 nodos | 57 (sin INT-R2, R3, R4, R6, REN-R2, REN-R13, GM-R14, GM-R16 ni REC-R16; suma INT-R11, GM-R3, REC-R7, REC-R9, REC-R13 y GM-R10 como retirada) | Portar o declarar fuera de alcance (D-04) |
+| Reglas | 61 nodos | 57 (sin INT-R2, R3, R4, R6, REN-R2, REN-R13, GM-R14, GM-R16 ni REC-R16; suma INT-R11, GM-R3, REC-R7, REC-R9, REC-R13 y GM-R10 como retirada) | **Portar e implementar** (D-04: INT-R2/R3/R4/R6 de SM1, REN-R2, REN-R11, REN-R13, REN-R14, GM-R1/R2, GM-R14, GM-R15, GM-R16, REC-R16, INT-R8, INT-R9 y la entropía) |
 | Parámetros | 12 base + 47 `mf_*` = 59 | 15 crisp + 15 `centros_y_sigmas_*` = 30 | — |
 | Nombres | `LLEVA_A`, `TIENE_PREGUNTA`, `ACTIVA {escenario}` | `APUNTA_A`, `REQUIERE_ACLARACION`, escenario en `Lectura` | Unificar (D-06) |
 

@@ -159,11 +159,11 @@ SP1 se ejecuta una vez por pedido; SP2–SP8 se repiten para cada notebook del c
 | REN-R3 | Brecha de gama: ≥ requerida → P_BRECHA_0 (1,0); un nivel menos → P_BRECHA_1 (0,6); dos → P_BRECHA_2 (0,2) | Heurístico |
 | REN-R4 | Núcleos < mínimo del perfil → restar P_PEN_NUCLEOS (0,2) | Heurístico. **Fuera de alcance del prototipo (D-02)** |
 | REN-R5 | Almacenamiento principal HDD → grado × P_FACTOR_HDD (0,3) y alerta `almacenamiento_hdd` | Heurístico |
-| REN-R6 | RAM soldada Y < recomendada → alerta `ram_no_ampliable` (excepción: mixta = ampliable) | Heurístico, predictivo |
+| REN-R6 | RAM soldada Y < recomendada → alerta `ram_no_ampliable` (excepción: mixta = ampliable) | Heurístico, predictivo. **Retirada en el canónico** (→ FZ-R3 y FZ-R7) |
 | REN-R7 | RAM < mínimo Y ampliable hasta alcanzarlo (`max_gb ≥ M` y ranuras suficientes) → grado = máx(calculado, P_GRADO_RAM_COND = 0,5), «cumple parcialmente, condicionado a ampliación», alerta `ram_condicionada_a_ampliacion`, costo = ⌈(M − RAM)/P_TAM_MODULO_GB (8)⌉ × P_COSTO_MODULO_USD (30) | Heurístico (casos) |
 | REN-R8 | Carga sostenida Y sufijo U o V → restar P_PEN_CARGA_SOST (0,3) y alerta `cpu_bajo_consumo_carga_sostenida` | Heurístico, predictivo. **Fuera de alcance del prototipo (D-02)** |
-| REN-R9 | RAM ampliable → sumar P_BONIF_AMPLIABLE (0,1), máx. 1,0. **La regla con menos respaldo; candidata a eliminarse** | Supuesto del grupo |
-| REN-R10 | Ampliabilidad desconocida → asumir no ampliable + alerta `ampliabilidad_no_verificada` | Supuesto conservador |
+| REN-R9 | RAM ampliable → sumar P_BONIF_AMPLIABLE (0,1), máx. 1,0. **La regla con menos respaldo; candidata a eliminarse** | Supuesto del grupo. **Retirada en el canónico** (→ FZ-R4: no contar dos veces la ampliabilidad) |
+| REN-R10 | Ampliabilidad desconocida → **conservar «desconocida»**, no descartar y alertar `ampliabilidad_no_verificada`; el riesgo se informa como rango (FZ-R6). *En PI1/PI2 decía «asumir no ampliable»: la profesora lo corrigió (PG1, P1-1) y así está en el canónico* | Determinístico |
 | REN-R11 | GPU integrada Y RAM canal simple → `aviso_sm3 = ancho_de_banda_reducido`; si REN-R7 completa el doble canal → nota `ampliacion_completa_doble_canal` | Heurístico, empírico |
 | REN-R12 | ≥ P_UMBRAL_CUMPLE (0,7) cumple; ≥ P_UMBRAL_PARCIAL (0,3) parcial; resto no cumple (con REN-R7: «condicionado») | Determinístico (umbral del grupo) |
 | REN-R13 | Excluyentes: virtualización (1 ó 0) y RAM mínima (su grado). Si alguno vale 0 → «requisito excluyente no cumplido» para que SM4 aplique MIN | Determinístico, documental |
@@ -184,7 +184,15 @@ Operadores: AND = MIN, OR = MAX, implicación Mamdani por mínimo, agregación M
 | FZ-R6 | (Control, crisp) ampliabilidad de la ficha **desconocida** → evaluar FZ-R1..R5 con a = 0 y a = 1; informar riesgo como **rango [mejor ; peor]** y alerta `ampliabilidad_no_verificada` | — | REN-R10, REC-R15 |
 | FZ-R7 | (Control, crisp) etiqueta dominante (o del peor caso) = alto → alerta «Riesgo de obsolescencia alto» con `regla_origen = FZ-R7` | — | REN-R6 (alerta) |
 
-**REN-R6, R7 y R9 siguen vigentes** hasta validar el modelo difuso (para no consolidar como experto lo que es provisional). Los excluyentes no cambian: un riesgo bajo nunca compensa un excluyente incumplido (REC-R3).
+*PI3 proponía mantener REN-R6, R7 y R9 vigentes hasta validar el modelo difuso. En el grafo canónico **REN-R7 sigue vigente**, y **REN-R6 y REN-R9 están retiradas** (`reemplazada en PG2`), para no contar dos veces la ampliabilidad.*
+
+> **D-04 (09/11/2026), se implementan en el canónico:**
+> - **REN-R11:** GPU integrada y canal simple generan la alerta de ancho de banda reducido que consume SM3 (GM-R15).
+> - **REN-R14:** canal desconocido genera la alerta `canal_memoria_no_verificado`, **sin tratarlo como simple** (desconocido ≠ simple, corrección P1-1).
+> - **REN-R13:** alerta de virtualización no informada.
+> - **REN-R2:** los requisitos salen del más exigente entre todos los perfiles que imponen requisitos, no solo del dominante.
+>
+> Hoy ninguna de las cuatro está en el grafo (PG1/PG2 §8.8). Los excluyentes no cambian: un riesgo bajo nunca compensa un excluyente incumplido (REC-R3).
 
 > Nota: FZ-R7 **origina una alerta**; no es una «regla activada» con fuerza. Esa confusión fue un error real del LLM en PI4 (sección 11.7).
 

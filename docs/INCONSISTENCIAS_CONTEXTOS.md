@@ -146,7 +146,25 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 - a) Implementar en Cypher el cálculo de SM2 (cambian los valores de §9).
 - b) Declararlo dato de entrada, fuera del prototipo, y reescribir SM2 §3.4, §4 y §5.1 como diseño no implementado. *(Recomendada si no hay tiempo: es lo honesto y no mueve las pruebas.)*
 
-### D-04 · Reglas descritas como vigentes que no están en el grafo
+### D-04 · Reglas descritas como vigentes que no están en el grafo — **RESUELTA (09/11/2026)**
+
+> **Decisión del grupo:** se implementan en el canónico **todas** las reglas pendientes. Ya estaban resueltas por D-01 REC-R7, REC-R9 (con prioridad «precio») y REC-R13. Se alinearon a lo que dice el canónico REN-R6 y REN-R9 (retiradas) y REN-R10 (conservar «desconocida»).
+>
+> | Regla | Qué implementar en `Grupo_2_PG2_U1_corregido.cypher` | Condición |
+> | --- | --- | --- |
+> | REN-R11 + GM-R15 | Alerta de ancho de banda reducido con GPU integrada y `canal = 'simple'` (K) | No cambia estados ni grados |
+> | REN-R14 | Alerta `canal_memoria_no_verificado` con `canal = 'desconocido'` (G) | **No** tratar desconocido como simple (P1-1) |
+> | REN-R13 | Alerta de virtualización no informada | Lo esperaba CP4 (3 alertas para G) |
+> | REN-R2 | Requisitos = el más exigente entre los perfiles que imponen requisitos | Cambia pedidos mixtos; `req_01` no (solo VIRT impone) |
+> | GM-R14 | `gama_gpu` excluyente con 2+ gamas abajo; REC-R3 lo tiene que leer junto con la virtualización | En VID3D y DATOS solo C y X lo superan |
+> | GM-R1/GM-R2 | Gama mínima de GPU = f(intensidad) si GAM impone requisitos (baja 2, media 3, alta 4) | Qué hacer con intensidad `incierta`: D-09 |
+> | GM-R16 + REC-R16 | Monitor externo: pantalla 1,0 y peso de movilidad × `factor` | SM1 ya extrae `usa_monitor_externo` |
+> | INT-R8 | Carrera como pista | **No** fijar el perfil por carrera como conocimiento (pedido de la profesora): solo pregunta o supuesto con alerta |
+> | INT-R9 | «Posible contradicción» entre un requisito explícito y el recomendado | Depende de D-10 (`requisitos_explicitos`) |
+> | Entropía (INT-R5) | Usar `entropia_max`, que hoy está cargado y sin uso | — |
+> | INT-R2/R3/R4/R6 | Se portan desde el linaje A junto con el resto de SM1 (D-01) | — |
+>
+> Contextos actualizados: SM1 13-C, SM2 §5.1 y nota, SM3 §3 y PG1/PG2 §8.6 y §8.8. Lo de abajo describe la situación previa.
 
 | Regla | Qué dicen los contextos | Opciones |
 | --- | --- | --- |

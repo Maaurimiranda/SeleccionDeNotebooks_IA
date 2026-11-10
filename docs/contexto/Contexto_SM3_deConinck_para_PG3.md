@@ -63,6 +63,12 @@ Cuando el usuario realiza una pregunta orientada a aspectos visuales, gráficos 
 > - `entrena_modelos_gpu` y `req_gama_gpu` no existen.
 > - `grado_pantalla` no se calcula en el grafo: llega como dato por par notebook-perfil (`SALIDA_PI2`). **D-03:** SM3 completa los 6 perfiles que faltan en `docs/cypher/salida_pi2.csv` con sus reglas de PI2 y documenta el método.
 >
+> **D-04 (09/11/2026), se implementan en el canónico:**
+> - **GM-R14:** una GPU dos o más gamas por debajo del perfil es un **excluyente** y deja la notebook «Descartada (excluyente incumplido)» vía REC-R3. En VID3D y DATOS solo C y X lo superan.
+> - **GM-R15:** la alerta de ancho de banda reducido a partir del aviso de SM2.
+> - **GM-R16:** con monitor externo, la pantalla vale 1,0.
+> - **GM-R1/GM-R2:** si GAM impone requisitos, la gama mínima sale de la intensidad gráfica de SM1 (baja 2, media 3, alta 4).
+>
 > Ver D-04 y D-10 en `docs/INCONSISTENCIAS_CONTEXTOS.md`.
 
 La base de datos oficial del proyecto implementa una distinción clave surgida de las devoluciones de PG2:
