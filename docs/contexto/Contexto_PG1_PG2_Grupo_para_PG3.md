@@ -2,8 +2,9 @@
 
 > **Proyecto:** Asistente Experto para la Selección Personalizada de Notebooks · **Grupo 2 · Comisión 5K09 · UTN FRM · Ciclo 2026**
 > **Para qué sirve este archivo:** que cualquier persona o asistente de IA entienda, sin haber leído nada más, qué se entregó en PG1 y PG2, qué corrigió la profesora, cuál es el estado real de la base de conocimiento en Neo4j y qué falta hacer para PG3.
-> **Complementa a:** `CONTEXTO_PROYECTO_SM2_PARA_PG3.md` (detalle del submódulo SM2 y de PI4). Este archivo cubre lo **grupal**; no repite el detalle de SM2.
+> **Complementa a:** `Contexto_SM2_Miranda_para_PG3.md` (detalle del submódulo SM2 y de PI4). Este archivo cubre lo **grupal**; no repite el detalle de SM2.
 > **Generado:** 09/11/2026, a partir de `Grupo_2_PG1_U1` (docx), `Grupo_2_PG2_U1` (docx), `Grupo_2_PG2_U1.cypher` y las devoluciones de la profesora a PG1 y PG2.
+> **Grafo canónico (D-01, 09/11/2026):** `docs/cypher/Grupo_2_PG2_U1_corregido.cypher`, descrito en §8. Las §5, §6, §7, §9 y §10 se escribieron sobre `Grupo_2_PG2_U1.cypher` (linaje A) y llevan una nota donde el canónico difiere.
 
 ---
 
@@ -26,7 +27,7 @@ Cada dato importante lleva una etiqueta, porque la profesora pidió separar lo d
 - **Verificación realizada [DED]:** reproduje en Python el modelo difuso de SM2 (gaussianas, FZ-R1..R5, centroide sobre 0–100) y **coincide con el informe en los seis valores de riesgo** (A 23,02 · B 50,00 · H 19,31 · K 49,55 · C 18,23 · G [49,58 ; 81,46]). Eso respalda los cálculos nuevos de §10.6.
 
 ### 0.3 Las cinco cosas más importantes para PG3
-1. **Hay un defecto de diseño que la profesora ya detectó y que es más amplio de lo que ella dijo** (§10): los resultados que dependen del pedido se guardan en `Notebook`, `RAM` y `Lectura`, y un segundo comprador los pisa. Además, la regla REC-R3 **contamina entre compradores** (Notebook_E se descartaría también para quien no pide virtualización). Afecta al código de PI4 de SM2.
+1. **Hay un defecto de diseño que la profesora ya detectó y que es más amplio de lo que ella dijo** (§10): los resultados que dependen del pedido se guardan en `Notebook`, `RAM` y `Lectura`, y un segundo comprador los pisa. Además, la regla REC-R3 **contamina entre compradores** (Notebook_E se descartaría también para quien no pide virtualización). Afecta al código de PI4 de SM2. **Resuelto en el grafo canónico** (§8.4); falta portar el código de SM2.
 2. **El modelo difuso no está validado por ningún técnico** (47 etiquetas, 59 parámetros) y B y K dan casi el mismo riesgo por motivos opuestos (§11).
 3. **Faltan pruebas que crucen compradores distintos sobre la misma notebook** (§14, caso E2E-6).
 4. **Partes del informe PG1 están obsoletas** y no deben copiarse a PG3 (§3.3): la asunción de OFI, el "supuesto conservador", reglas reemplazadas.
@@ -176,7 +177,7 @@ P3 y P4 se repiten **por notebook**, y P3 va primero porque avisa a P4 del ancho
 
 ## 5. PG2 — Qué se entregó
 
-**Archivos:** informe `Grupo_2_PG2_U1.docx` + script `Grupo_2_PG2_U1.cypher` (14 bloques, **sin APOC**, datos de carga embebidos). **Neo4j 5.x.**
+**Archivos:** informe `Grupo_2_PG2_U1.docx` + script `Grupo_2_PG2_U1.cypher` (14 bloques, **sin APOC**, datos de carga embebidos). **Neo4j 5.x.** *Canónico desde D-01: `Grupo_2_PG2_U1_corregido.cypher` (§8).*
 
 **Decisiones de PG2** [PG2], además de responder a las devoluciones (§3.1):
 - **Dos capas en el grafo:** *dominio* (la red de PG1) y *soporte* (frames, variables, etiquetas, reglas, parámetros).
@@ -195,7 +196,7 @@ P3 y P4 se repiten **por notebook**, y P3 va primero porque avisa a P4 del ancho
 
 ## 6. Reglas: estado real en el grafo [CÓD]
 
-El grafo tiene **61 nodos `:Regla`**: **23 `:ReglaDifusa`** y **38 `:ReglaCrisp`** (32 vigentes + 6 reemplazadas). *El informe PG2 dice "24 reglas difusas" (matriz b.3), pero el script carga 23 (FZ-R6 y FZ-R7 están como crisp); ver §15.*
+**Grafo canónico:** **57 nodos `:Regla`**: **23 `:ReglaDifusa`**, **27 `:ReglaCrisp` vigentes** y **7 retiradas** (REN-R6, REN-R9, REC-R1, REC-R2, REC-R6, REC-R12 y GM-R10). *El linaje A tenía 61: 23 difusas y 38 crisp (32 vigentes + 6 reemplazadas).* *El informe PG2 dice "24 reglas difusas" (matriz b.3), pero el script carga 23 (FZ-R6 y FZ-R7 están como crisp); ver §15.*
 
 ### 6.1 Reglas difusas (23) — Mamdani, todas `sin validar`
 
@@ -214,14 +215,14 @@ El grafo tiene **61 nodos `:Regla`**: **23 `:ReglaDifusa`** y **38 `:ReglaCrisp`
 
 **Reglas de SM4:** REC-RD1 alta+dentro → recomendar · RD2 media+dentro → considerar · RD3 alta+levemente excedido → considerar · RD4 media+levemente excedido → descartar · RD5 baja **o** muy excedido → descartar.
 
-### 6.2 Reglas crisp (38)
+### 6.2 Reglas crisp (canónico)
 
-| SM | Vigentes | Reemplazadas en PG2 (→ por) |
-| --- | --- | --- |
-| SM1 (8) | INT-R2, R3, R4, R5, R6, R12, R13, R14 | — |
-| SM2 (10) | REN-R1, R2, R7, R10, R13, R16, FZ-R6, FZ-R7 | **REN-R6** (→ FZ-R1..R5), **REN-R9** (→ FZ-R2, FZ-R4) |
-| SM3 (8) | GM-R4, R8, R10, R11, R12, R14, R16, R17 | — |
-| SM4 (12) | REC-R3, R4, R5, R8, R10, R11, R15, R16 | **REC-R1** (→ RD3, RD5), **REC-R2** (→ RD3), **REC-R6** (→ RD1..RD5), **REC-R12** (→ RD3) |
+| SM | Vigentes en el canónico | Retiradas (→ por) | Solo en el linaje A |
+| --- | --- | --- | --- |
+| SM1 (5) | INT-R5, R11, R12, R13, R14 | — | INT-R2, R3, R4, R6 |
+| SM2 (6) | REN-R1, R7, R10, R16, FZ-R6, FZ-R7 | **REN-R6** (→ FZ-R3 y FZ-R7), **REN-R9** (→ FZ-R4) | REN-R2, REN-R13 |
+| SM3 (6) | GM-R3, R4, R8, R11, R12, R17 | **GM-R10** (→ GM-RD1..RD3) | GM-R14, GM-R16 (y GM-R10 vigente) |
+| SM4 (10) | REC-R3, R4, R5, R7, R8, R9, R10, R11, R13, R15 | **REC-R1**, **REC-R2**, **REC-R6**, **REC-R12** (→ REC-RD1..RD5) | REC-R16 |
 
 **Reglas de PG1 que NO están cargadas en el grafo** [CÓD vs PG1] (están en el informe PG1 pero no como nodo): INT-R1, R7, R8, R9, R10, R11; REN-R3, R4, R5, R8, R11, R12, R14, R15; GM-R1..R3, R5..R7, R9, R13, R15; REC-R7, R9, R13, R17. Algunas pueden aplicarse fuera del grafo (PG2 dice que INT-R7 se aplica al cargar el pedido) y de otras no se sabe si están implementadas en el código de cada integrante [?]. **REN-R11, REN-R14 y GM-R15 (el aviso de canal simple a SM3) no existen en el script**: el dato `canal` ni siquiera existe en `:RAM` [CÓD]. *Decidir en PG3 cuáles se cargan, cuáles se implementan y cuáles se declaran fuera de alcance.*
 
@@ -239,7 +240,7 @@ El grafo tiene **61 nodos `:Regla`**: **23 `:ReglaDifusa`** y **38 `:ReglaCrisp`
 
 ## 7. Lógica difusa (PG2) [CÓD]
 
-**15 variables, 47 etiquetas, todas con `estado_validacion = 'sin validar'`.** Cada etiqueta es un nodo `(:EtiquetaDifusa {variable, nombre, centro, sigma, tipo, fuente})` ligado por `[:SE_PARAMETRIZA_CON]` a un `(:Parametro {nombre:'mf_<var>_<etiqueta>'})`. Ninguna consulta tiene valores embebidos.
+**15 variables, 47 etiquetas, todas con `estado_validacion = 'sin validar'`.** Cada etiqueta es un nodo `(:EtiquetaDifusa {variable, nombre, centro, sigma, tipo, fuente})` ligado por `[:SE_PARAMETRIZA_CON]` a un `(:Parametro {nombre:'centros_y_sigmas_<variable>'})` por variable (en el linaje A era un `mf_<var>_<etiqueta>` por etiqueta). Ninguna consulta tiene valores embebidos.
 
 | Variable (SM) | Universo | Etiquetas: centro · sigma (tipo) |
 | --- | --- | --- |
@@ -256,113 +257,143 @@ El grafo tiene **61 nodos `:Regla`**: **23 `:ReglaDifusa`** y **38 `:ReglaCrisp`
 | `adecuacion_movilidad` (3, salida) | 0–1 | baja 0,05 · media 0,50 · alta 0,95 (σ 0,12) |
 | `grado_gpu` (3, salida) | 0–1 | insuficiente 0,20·0,12 · parcial 0,55·0,12 · pleno 0,95·0,10 |
 | `adecuacion_global` (4) | 0–1 | baja 0,40·0,14 (hi) · media 0,70·0,07 · alta 0,90·0,07 (hd) |
-| `excedente_presupuesto` (4) | 0–30 % | dentro 0·3 · levemente_excedido 10·4 · muy_excedido 25·6 (hd) |
+| `excedente_presupuesto` (4) | 0–30 % | dentro 0·3 · levemente 10·4 · muy 25·6 (hd) |
 | `grado_recomendacion` (4, salida) | 0–1 | descartar 0·0,15 · considerar 0,5·0,15 · recomendar 1,0·0,15 |
 
 **Quedan crisp (hechos verificables de la ficha):** gama de CPU y GPU (ordinal), suficiencia de almacenamiento, virtualización, tipo de disco, cobertura sRGB, condición de excluyente.
 
-**Parámetros base (12) [CÓD]** (además de los 47 `mf_*`; total **59** `:Parametro`): `umbral_exigencia` 0,40 · `dedicacion_min_h` 0 · `dedicacion_max_h` 40 · `peso_gpu` 0,60 · `peso_pantalla` 0,40 · `factor_autonomia` 0,70 · `dif_alerta_tgp` 0,20 · `alfa_alerta_autonomia` 0,50 · `potencia_min_desconocida` 0,30 (= 35 W / 115 W) · `incremento_prioridad` 0,20 · `factor_movilidad_monitor` 0,50 · `margen_empate` 0,05.
+**Parámetros crisp del canónico (15) [CÓD]** (más 15 `centros_y_sigmas_*`; total **30** `:Parametro`, con `estado_validacion = 'provisional'`): `umbral_exigencia` 0,40 · `banda_frontera` 0,05 · `entropia_max` 0,60 · `P_COSTO_MODULO_RAM_USD` 30 · `P_PESO_RANURAS_AMPLIABILIDAD` 0,50 · `P_RANURAS_REFERENCIA` 2 · `P_DIF_ALERTA_TGP` 0,20 · `P_GRADO_GPU_UN_NIVEL_ABAJO` 0,50 · `P_PESO_GPU_GRAFICA` 0,60 · `P_PESO_PANTALLA_GRAFICA` 0,40 · `P_ALFA_ALERTA_AUTONOMIA` 0,50 · `P_FACTOR_AUTONOMIA` 0,70 · `P_INCREMENTO_PRIORIDAD` 0,20 · `P_MARGEN_EMPATE` 0,05 · `P_MAX_RECOMENDADAS` 3. *El linaje A tenía 12 base (incluidos `dedicacion_min_h`, `dedicacion_max_h`, `potencia_min_desconocida` y `factor_movilidad_monitor`, que el canónico no tiene) + 47 `mf_*` = 59.*
 
 **Cómo se calcula el riesgo de RAM (SM2) [CÓD]:** ρ = `ram_gb` ÷ `req_ram_min` (tope 3) · índice a = 0,25 × ranuras libres (máx. 2) + 0,5 × min(1, (max_gb − ram_gb) ÷ `req_ram_rec`) · FZ-R1..R5 con MIN/MAX · centroide.
 
 ---
 
-## 8. Modelo del grafo implementado [CÓD][PG2]
+## 8. Modelo del grafo canónico [CÓD]
 
-> **Este modelo reemplaza a la sección 8 de `CONTEXTO_PROYECTO_SM2_PARA_PG3.md`**, que era una deducción hecha sin el `.cypher`. Si hay diferencia, vale esta sección.
+> **Grafo canónico del proyecto (decisión D-01, 09/11/2026): [`docs/cypher/Grupo_2_PG2_U1_corregido.cypher`](../cypher/Grupo_2_PG2_U1_corregido.cypher)** (1739 líneas). Es la «versión corregida» tras la devolución de PG2 que usan SM3 y SM4. Esta sección lo describe y **reemplaza** al modelo de `Grupo_2_PG2_U1.cypher` (linaje A), que es el que usaron SM1 y SM2 en PI4. Las diferencias entre los dos y lo que falta portar están en §8.8. También reemplaza a la sección 8 de `Contexto_SM2_Miranda_para_PG3.md`.
 
-### 8.1 Script por bloques (se ejecutan en orden; `MATCH (n) DETACH DELETE n` al inicio: **borra todo**)
+### 8.1 Script por bloques (se ejecutan en orden; `MATCH (n) DETACH DELETE n` al inicio **borra todo**)
 
 | Bloque | Contenido |
 | --- | --- |
-| 0–1 | Limpieza y **10 restricciones de unicidad** (Comprador.id, Requerimiento.id, Notebook.id, Perfil.codigo, Evaluacion.id, VariableDifusa.nombre, Regla.id, Parametro.nombre, Alerta.id, **Lectura.id**) |
-| 2–3 | **20 frames** con herencia; 7 perfiles con requisitos; 12 parámetros base |
-| 4–5 | 15 variables / 47 etiquetas; 23 reglas difusas con `ANTECEDENTE`/`CONSECUENTE`; 38 reglas crisp |
-| 6 | Léxico de frecuencias (9 expresiones), 5 gamas de GPU, software y juegos |
-| 7 | 2 compradores, 2 requerimientos, 3 actividades de `req_01` |
-| 8 | Catálogo de 9 notebooks |
-| 9 | Fuzificación de entradas (dedicación, exigencia del juego, peso, autonomía, potencia de GPU) |
-| 10 | **Inferencia SM1 → SM2 → SM3 → SM4** (10.a a 10.e) |
+| 0–1 | Limpieza; **8 restricciones de unicidad** (`Frame.nombre`, `Perfil.codigo`, `Notebook.modelo`, `Comprador.id`, `Requerimiento.id`, `VariableDifusa.nombre`, `Regla.id`, `Parametro.nombre`) y un índice sobre `EtiquetaDifusa(variable, nombre)` |
+| 2–3 | Frames (`INSTANCIA_DE`, `POSEE_SLOT`); 7 perfiles con pesos y requisitos; un `Requisito` por perfil y criterio (`ram_gb`, `ssd_gb`, `gama_cpu`, `virtualizacion`, `gama_gpu`) |
+| 4 | 15 variables y 47 etiquetas difusas, todas `sin validar` |
+| 5 | 5.a 23 reglas difusas · 5.b 27 crisp · 5.c 7 retiradas · 5.d 15 parámetros crisp · 5.e 15 parámetros `centros_y_sigmas_<variable>` · 5.f agenda de validación (`ConsultaExperto`) |
+| 6 | Léxico de 14 expresiones de frecuencia, 5 gamas de GPU y 3 juegos (Stardew Valley, Fortnite, Cyberpunk 2077) |
+| 7 | 3 compradores, 3 requerimientos y 4 actividades |
+| 8 | Catálogo de 9 notebooks; salidas crisp de PI2 por par notebook-perfil (`SALIDA_PI2`); consulta puntual (`CONSULTA_POR`); GM-R12, REN-R16 y potencia relativa |
+| 9 | Fuzificación de dedicación, exigencia del juego, peso, autonomía y potencia de GPU |
+| 10 | Inferencia **10.a–10.b SM1 · 10.c SM2 · 10.d–10.e SM3 · 10.f SM4** |
 | 11 | Consultas C1–C3 |
-| 12 | Casos de prueba CP1–CP10 |
-| 13 | Consultas para el LLM L1–L4 |
+| 12 | Casos de prueba CP1–CP11 y agenda V1 |
+| 13 | Consultas para el LLM L1–L4 (parametrizadas con `$requerimiento_id` y `$modelo`) |
 
-**Importante:** el bloque 10 se ejecuta *una sola vez sobre todos los requerimientos a la vez* (`MATCH (c:Requerimiento)-[:EVALUA]->...`). No hay forma de "evaluar un pedido nuevo" sin re-correr todo (y ahí aparece el problema de §10).
+**Sigue vigente [CÓD]:** el bloque 10 corre una sola vez sobre todos los requerimientos. No hay forma de evaluar un pedido nuevo sin volver a ejecutar el script (D-08).
 
 ### 8.2 Nodos (labels)
 
-**Dominio:** `Comprador`, `Requerimiento`, `Actividad`, `ElementoMencionado` (+ `Software`, `Juego`), `ExpresionFrecuencia`, `GamaGPU`, `Perfil`, `Requisito`, `Notebook`, `CPU`, `RAM`, `Almacenamiento`, `GPU`, `Pantalla`, `Bateria`, `Evaluacion`, `Lectura`, `Alerta`, `Pregunta`, `Recomendacion`.
-**Soporte:** `Frame`, `VariableDifusa`, `EtiquetaDifusa`, `Regla` (+ `ReglaDifusa`/`ReglaCrisp`), `Parametro`.
-**Nota [CÓD]:** el frame `Carrera` existe pero **no hay nodos `:Carrera` cargados**; INT-R8 ("solo carrera → perfil por defecto") no tiene datos.
+**Dominio:** `Comprador`, `Requerimiento`, `Actividad`, `Juego`, `ExpresionFrecuencia`, `GamaGPU`, `Perfil`, `Requisito`, `Notebook`, `CPU`, `RAM`, `Almacenamiento`, `GPU`, `Pantalla`, `Bateria`, `Evaluacion`, `Lectura`, `Alerta`, `Pregunta`, `Recomendacion`, `SinAlternativaAdecuada`.
+**Soporte:** `Frame`, `VariableDifusa`, `EtiquetaDifusa`, `Regla` (+ `ReglaDifusa`/`ReglaCrisp`), `Parametro`, `ConsultaExperto`.
+**No existen en el canónico:** `ElementoMencionado`/`Software` (Docker, VirtualBox) ni `Carrera`.
 
 ### 8.3 Relaciones
 
 | Relación | Origen → destino | Propiedades |
 | --- | --- | --- |
-| `FORMULA` | Comprador → Requerimiento | |
+| `FORMULA` | Comprador → Requerimiento | `fecha` |
 | `INCLUYE` | Requerimiento → Actividad | |
-| `EXPRESADA_COMO` / `USA` | Actividad → ExpresionFrecuencia / Software o Juego | |
-| `ASOCIADO_A` / `RECOMIENDA_GAMA` | Software, Juego → Perfil / Juego → GamaGPU | |
-| `LLEVA_A` | Actividad → Perfil | `regla_origen` |
-| `PERTENECE` | Requerimiento → Perfil | `grado(_min/_max)`, `impone_requisitos`, `estado`, `regla_origen` |
+| `APUNTA_A` | Actividad → Perfil | (perfil de la actividad; en A era `LLEVA_A`) |
+| `EXPRESADA_COMO` / `USA` | Actividad → ExpresionFrecuencia / Juego | |
+| `RECOMIENDA_GAMA` | Juego → GamaGPU | `fuente` |
+| `PERTENECE` | Requerimiento → Perfil | `grado`, `origen`, `impone_requisitos`, `en_frontera` |
 | `TIENE_PERFIL_DOMINANTE` | Requerimiento → Perfil | |
-| `TIENE_PREGUNTA` / `GENERA` | Requerimiento → Pregunta / Alerta | |
+| `REQUIERE_ACLARACION` | Requerimiento → Pregunta | (en A era `TIENE_PREGUNTA`) |
+| `CONSULTA_POR` | Requerimiento → Notebook | consulta puntual: solo se evalúa esa notebook y no hay ranking |
 | `EXIGE` | Perfil → Requisito | |
 | `POSEE` | Notebook → CPU, RAM, Almacenamiento, GPU, Pantalla, Bateria | |
-| **`EVALUA`** / **`SOBRE`** | Requerimiento → **Evaluacion** → Notebook | cruce pedido × notebook |
-| `TIENE_LECTURA` | Actividad, GPU, RAM, Notebook, Evaluacion → Lectura | |
-| `PERTENECE_A` | Lectura, Juego, Notebook, Bateria → EtiquetaDifusa | `grado`, `valor_crisp`, `ts` |
-| `INCUMPLE` / `NO_VERIFICADO` | **Notebook → Requisito** | `excluyente`, `regla` |
-| `GENERA` | **Notebook** o Requerimiento → Alerta | |
-| `ACTIVA` | Actividad, Requerimiento, **RAM**, **Notebook**, Evaluacion → Regla | `fuerza`, `escenario` |
-| `RECIBE` / `PROPONE` / `PROPONE_FUERA_DE_PRESUPUESTO` | Requerimiento → Recomendacion → Notebook | `orden` |
-| `INSTANCIA_DE` / `ES_UN` | instancia → Frame / Frame → Frame | |
-| `ANTECEDENTE` / `CONSECUENTE` / `TIENE_ETIQUETA` / `SE_PARAMETRIZA_CON` | Regla → Etiqueta / Variable → Etiqueta / Etiqueta → Parametro | |
+| `ES_DE_GAMA` | GPU → GamaGPU | |
+| `SALIDA_PI2` | Notebook → Perfil | `adecuacion_rendimiento`, `grado_pantalla`, `origen` |
+| `EVALUA` / `SOBRE` | Requerimiento → Evaluacion → Notebook | cruce pedido × notebook |
+| `TIENE_LECTURA` | Evaluacion → Lectura | `escenario` `peor`/`mejor` para dato faltante: ampliabilidad desconocida (FZ-R6) o movilidad sin autonomía (REC-R15) |
+| `PERTENECE_A` | Actividad, Juego, Notebook, Bateria, GPU, Evaluacion, Lectura → EtiquetaDifusa | `grado`, `valor_crisp`, `ts` |
+| `ACTIVA` | Actividad, Requerimiento, Notebook, Evaluacion, Lectura, Recomendacion → Regla | `fuerza` (el escenario está en la `Lectura`: `peor`/`mejor`) |
+| `GENERA` | Requerimiento, Notebook o **Evaluacion** → Alerta | |
+| `PRODUCIDA_POR` | Alerta → Regla | |
+| `RECIBE` | Requerimiento → Recomendacion / SinAlternativaAdecuada | |
+| `PROPONE` / `PROPONE_FUERA_DE_PRESUPUESTO` | Recomendacion → Notebook | `orden` |
+| `INSTANCIA_DE` / `POSEE_SLOT` | instancia → Frame / Frame → Frame | |
+| `TIENE_ETIQUETA` / `SE_PARAMETRIZA_CON` / `VALIDA` | Variable → Etiqueta / Etiqueta → Parametro / ConsultaExperto → Parametro o Regla | |
+| `INCUMPLE` / `NO_VERIFICADO` | Notebook → Requisito | **solo las escribe la consulta de demostración C1**; el estado no las lee (§10.3 resuelto) |
 
-*Las relaciones en **negrita** son las que causan los problemas de §10.*
+### 8.4 Dónde queda cada resultado (corrección C-A aplicada)
 
-### 8.4 Catálogo de prueba (9 notebooks; precios al 01/10/2026) [PG2][CÓD]
+| Nodo | Propiedades |
+| --- | --- |
+| `Evaluacion` (una por requerimiento × notebook; clave `requerimiento` + `notebook`) | `perfil`, `adecuacion_rendimiento`, `grado_pantalla`, `excluyente_virtualizacion` (`no aplica`/`cumple`/`no cumple`/`falta informacion`), `suficiencia_rho`, `indice_ampliabilidad`, `riesgo_valor` o `riesgo_min`/`riesgo_max`, `riesgo_etiqueta`, `grado_gpu`, `margen_gama` (`superior`/`justa`/`inferior`), `adecuacion_grafica`, pesos, `adecuacion_global` o `_min`/`_max`, `excedente_presupuesto`, `dato_faltante`, `grado_recomendacion` o `_min`/`_max`, `etiqueta_recomendacion`/`etiqueta_peor`/`etiqueta_mejor`, `estado`, `indice_costo_beneficio` |
+| `Notebook` | `modelo`, `precio_usd`, `peso_kg`, `adecuacion_movilidad`, `movilidad_etiqueta` (la movilidad no depende de quién pregunta) |
+| `RAM` | `ram_gb`, `tipo`, `ranuras_libres`, `max_gb`, `canal`, `ampliabilidad`, `nivel_ampliabilidad` (REN-R16) |
+| `Bateria` | `autonomia_medida_h`, `autonomia_declarada_h`, `autonomia_usada_h` (GM-R12), `tipo_dato`, `fuente`, `verificada` |
+| `GPU` | `gama`, `dedicada`, `vram_gb`, `tgp_w`, `tgp_max_w`, `potencia_relativa` |
+| `Requerimiento` | `presupuesto_usd`, `prioridad`, `usa_monitor_externo`, `texto_pedido`, `notebook_consultada`, `perfil_dominante`, `grado_perfil_dominante`, `intensidad_grafica`, `intensidad_valor` |
 
-| Modelo (`id`) | USD | Virt. | RAM | GPU | Peso | Autonomía | `rend` (crisp) | `pantalla` (crisp) | Rol |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| A (`NB_A`) | 950 | soportada | 16 GB, 1 ranura libre, máx 64 | integrada | 1,4 | 8,0 h medida | 0,90 | 1,00 | caso positivo |
-| B | 700 | soportada | 16 GB **soldada** | integrada | 1,3 | 10,0 h medida | 0,80 | 1,00 | |
-| H | 1000 | soportada | 16 GB, 1 ranura, máx 32, M.2 libre | integrada | 2,0 | 6,0 h medida | 0,88 | 0,90 | |
-| K | 900 | soportada | **8 GB**, 1 ranura, máx 32 | integrada | 1,6 | 7,5 h medida | 0,50 | 0,90 | |
-| X | 1050 | soportada | 16 GB, 1 ranura, máx 64 | RTX 4060 **a 60 W de 115 W** | 1,8 | 7,0 h medida | 0,92 | 1,00 | caso difuso (5 % sobre presupuesto) |
-| E | 980 | **no soportada** | 16 GB, 1 ranura, máx 32 | integrada | 1,5 | 7,0 h medida | 0,85 | 0,95 | caso negativo |
-| C | 1200 | soportada | 16 GB, 2 ranuras, máx 64, M.2 libre | RTX 4060 a 115 W | 2,3 | 5,0 h medida | 0,95 | 1,00 | |
-| G | 650 | **no informada** | 8 GB, **ampliabilidad desconocida** | integrada | 1,9 | 5,7 h declarada | 0,55 | 0,80 | caso indeterminado |
-| M | 880 | soportada | 16 GB, 1 ranura, máx 64 | integrada | 1,5 | **no informada** | 0,88 | 0,95 | caso condicionado |
+Alertas que dependen del pedido cuelgan de `Evaluacion`: riesgo de obsolescencia (FZ-R7), condicionado a ampliación (REN-R7), potencia gráfica reducida (GM-R8), autonomía insuficiente (GM-R11), infradimensionamiento (REC-R13) y sobredimensionamiento (REC-R7). Las de la ficha cuelgan de `Notebook`: ampliabilidad no verificada (REN-R10) e información incompleta (REC-R15).
 
-**`rend` (adecuación de rendimiento) y `pantalla` se cargan como valores crisp**, no se calculan [CÓD]. Esto significa que **hoy SM2 no calcula la adecuación de rendimiento: la recibe como dato** [DED sobre el script; PG2 lo reconoce como limitación 4]. Eso es independiente del perfil, lo cual también es una simplificación (§15).
+### 8.5 Catálogo de prueba (9 notebooks; precios al 01/10/2026) [CÓD]
 
-### 8.5 Perfiles (valores provisionales, sin validar) [CÓD]
+| Modelo | USD | CPU (gama, núcleos, virt.) | RAM (GB, tipo, ranuras, máx., canal) | SSD / M.2 | GPU | Pantalla | Autonomía | `SALIDA_PI2` VIRT (rend / pant) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| A | 950 | alta, 8, soportada | 16 mixta, 1, 64, doble | 1024 / sí | integrada moderna | FHD 60 Hz 65 % | 8,0 h medida | 0,90 / 1,00 |
+| B | 700 | media, 8, soportada | 16 **soldada**, 0, 16, doble | 512 / no | integrada moderna | FHD 60 Hz 62 % | 10,0 h medida | 0,80 / 1,00 |
+| H | 1000 | alta, 10, soportada | 16 mixta, 1, 32, doble | 1024 / sí | integrada moderna | FHD 60 Hz 58 % | 6,0 h medida | 0,88 / 0,90 |
+| K | 900 | media, 8, soportada | **8** mixta, 1, 32, **simple** | 512 / sí | integrada moderna | FHD 60 Hz 60 % | 7,5 h medida | 0,50 / 0,90 |
+| X | 1050 | alta, 10, soportada | 16 mixta, 1, 64, doble | 1024 / sí | dedicada media, **60 de 115 W** | FHD 144 Hz 95 % | 7,0 h medida | 0,92 / 1,00 |
+| E | 980 | media, 6, **no soportada** | 16 mixta, 1, 32, doble | 1024 / sí | integrada moderna | FHD 60 Hz 70 % | 7,0 h medida | 0,85 / 0,95 |
+| C | 1200 | alta, 14, soportada | 16 ampliable, 2, 64, doble | 1024 / sí | dedicada media, 115 de 115 W | QHD 144 Hz 98 % | 5,0 h medida | 0,95 / 1,00 |
+| G | 650 | entrada, 4, **no informada** | 8 **desconocida**, —, —, desconocido | 512 / no | integrada moderna | FHD 60 Hz 55 % | 5,7 h declarada (3,99 usada) | 0,55 / 0,80 |
+| M | 880 | alta, 8, soportada | 16 mixta, 1, 64, doble | 1024 / sí | integrada moderna | FHD 60 Hz 66 % | **no informada** | 0,88 / 0,95 |
 
-| Perfil | Orden | RAM mín / rec (GB) | SSD mín / rec (GB) | Gama CPU / GPU mín | Otros | Pesos rend / gráf / mov |
-| --- | --- | --- | --- | --- | --- | --- |
-| VID3D | 1 | 16 / 32 | 1024 / 2048 | 3 / 4 | | 0,40 / 0,50 / 0,10 |
-| GAM | 2 | 16 / 32 | 512 / 1024 | 2 / 3 | ≥ 120 Hz | 0,30 / 0,60 / 0,10 |
-| DATOS | 3 | 16 / 32 | 1024 / 2048 | 3 / 4 | | 0,50 / 0,40 / 0,10 |
-| VIRT | 4 | 16 / 32 | 512 / 1024 | 2 / 1 | **virtualización excluyente** | 0,70 / 0,10 / 0,20 |
-| DIS | 5 | 16 / 32 | 512 / 1024 | 2 / 2 | sRGB ≥ 95 % | 0,35 / 0,45 / 0,20 |
-| DEV | 6 | 16 / 32 | 512 / 1024 | 2 / 1 | | 0,50 / 0,10 / 0,40 |
-| OFI | 7 | 8 / 16 | 256 / 512 | 1 / 1 | | 0,30 / 0,10 / 0,60 |
+El rendimiento y la pantalla **no se calculan**: se cargan por par notebook-perfil en `SALIDA_PI2` («salidas crisp que SM2 y SM3 ya producían en PI2»). Solo hay pares para VIRT, más **K–OFI (0,80 / 0,90), que es un supuesto del grupo para CP11, pendiente de que SM2 lo recalcule**. Sin un par, la notebook no se evalúa para ese perfil (D-03).
 
-Gamas CPU: 1 entrada, 2 media, 3 alta. Gamas GPU: 1 integrada básica, 2 integrada moderna, 3 dedicada de entrada, 4 dedicada media, 5 dedicada alta. El requisito `gama_gpu` está marcado excluyente en todos los perfiles, pero **solo actúa con dos o más gamas por debajo** (GM-R4 + GM-R14). **VIRT no tiene relevado el valor "sobra" de RAM** (queda nulo, no cero) [PG2].
+### 8.6 Perfiles (valores provisionales, sin validar) [CÓD]
 
-### 8.6 Pedidos cargados [CÓD]
+| Perfil | RAM mín / rec / sobra (GB) | SSD mín (GB) | Gama CPU / GPU mín | Virtualización excluyente | Pesos rend / gráf / mov |
+| --- | --- | --- | --- | --- | --- |
+| OFI | 8 / 16 / 32 | 512 | entrada / 1 | no | 0,40 / 0,10 / 0,50 |
+| DEV | 16 / 32 / — | 1024 | media / 1 | no | 0,60 / 0,10 / 0,30 |
+| VIRT | 16 / 32 / — | 512 | media / 1 | **sí** | 0,70 / 0,10 / 0,20 |
+| DIS | 16 / 32 / 32 | 1024 | media / 3 | no | 0,40 / 0,50 / 0,10 |
+| VID3D | 16 / 32 / — | 1024 | alta / 4 | no | 0,50 / 0,40 / 0,10 |
+| GAM | 16 / 32 / 32 | 512 | media / 3 | no | 0,30 / 0,60 / 0,10 |
+| DATOS | 16 / 32 / — | 1024 | alta / 4 | no | 0,70 / 0,10 / 0,20 |
 
-- **`req_01`** (`comprador_01`, 1000 USD, prioridad rendimiento): *"Necesito una notebook para programar, usar máquinas virtuales y Docker, y a veces jugar al Stardew Valley. Tengo 1000 USD."* Actividades: `ACT_PROG` (programar; perfil por descripción VIRT; expresión "la necesito para" → 28 h), `ACT_VIRT` (Docker; "la necesito para" → 28 h), `ACT_JUGAR` (Stardew Valley; "a veces" → 4 h).
-- **`req_02`** (`comprador_02`, 600 USD, prioridad ninguna, `aclaracion:'sin respuesta'`): *"Quiero una notebook para la facu, tengo 600 USD."* Sin actividades ⇒ perfil `indeterminado`, **0 evaluaciones**, pregunta pendiente (CP10).
-- **Resultado de SM1 para `req_01` [PG2]:** VIRT 0,899 (impone requisitos) · GAM 0,313 (solo preferencia) · intensidad gráfica baja (0,176) · perfil dominante VIRT · pesos con prioridad rendimiento: 0,750 / 0,083 / 0,167.
-- Con Cyberpunk 2077 la intensidad se informa como rango [0,48 ; 0,76] [PG2].
+Los pesos son los del Anexo D de SM4 (P7). No hay `ssd_rec` ni `orden_exigencia`. Solo el `Requisito` de virtualización de VIRT es excluyente; el de `gama_gpu` no lo es (actúa vía GM-R4 con dos o más gamas abajo). La gama mínima de GPU sale **solo del perfil dominante**: la intensidad gráfica de SM1 se calcula, pero no la modifica.
+
+### 8.7 Pedidos cargados [CÓD]
+
+- **`req_01`** (`comprador_01`, Ingeniería en Sistemas; 1000 USD; prioridad rendimiento): *«Necesito una notebook para programar, usar máquinas virtuales y Docker, y a veces jugar al Stardew Valley. Tengo 1000 USD.»* Actividades `act_virtualizar` y `act_programar` (las dos con «la necesito para» → 28 h → VIRT) y `act_jugar` (Stardew Valley, «a veces» → 4 h → GAM).
+- **`req_02`** (`comprador_02`; 600 USD; prioridad `ninguna`; `aclaracion: 'sin respuesta'`): *«Quiero una notebook para la facu, tengo 600 USD.»* Sin actividades: perfil `indeterminado`, alerta y pregunta (INT-R13), 0 evaluaciones (CP10).
+- **`req_03`** (`comprador_03`, Contador Público; 1000 USD; prioridad portabilidad; **consulta puntual por Notebook_K**): *«Estoy mirando la Notebook_K. ¿Me sirve para la facu? La uso todos los días para Word, Excel y el navegador y la llevo a todos lados. Tengo 1000 USD.»* `act_ofimatica` («todos los días» → 14 h → OFI). Solo se evalúa K (CP11).
+
+### 8.8 Diferencias con el linaje A (`Grupo_2_PG2_U1.cypher`) y qué falta portar
+
+| Tema | Linaje A (SM1 y SM2 en PI4) | Canónico | Acción |
+| --- | --- | --- | --- |
+| Resultados por pedido | En `RAM` y `Notebook` (defecto C-A) | En `Evaluacion` | Portar las consultas de PI4 de SM2 a `ev.*` |
+| Identificador de notebook | `id: 'NB_A'` + `modelo` | solo `modelo` | — |
+| Software | `ElementoMencionado`/`Software` (Docker, VirtualBox) con `ASOCIADO_A` y `exige_virtualizacion` | No existe | **Portar** (SM1 lo usa) |
+| Virtualización del pedido | `necesita_virtualizacion` (INT-R3) | Sale de `Perfil.requiere_virtualizacion` del dominante | Portar |
+| Empate de perfiles (INT-R12) | `orden_exigencia` | `ram_min` | Portar |
+| Dedicación desconocida (INT-R14) | Dos lecturas de 0 h y 40 h; `PERTENECE {grado_min, grado_max, estado}` | No hay lecturas; `PERTENECE {impone_requisitos, en_frontera}` | Portar |
+| Reglas | 61 nodos | 57 (sin INT-R2, R3, R4, R6, REN-R2, REN-R13, GM-R14, GM-R16 ni REC-R16; suma INT-R11, GM-R3, REC-R7, REC-R9, REC-R13 y GM-R10 como retirada) | Portar o declarar fuera de alcance (D-04) |
+| Parámetros | 12 base + 47 `mf_*` = 59 | 15 crisp + 15 `centros_y_sigmas_*` = 30 | — |
+| Nombres | `LLEVA_A`, `TIENE_PREGUNTA`, `ACTIVA {escenario}` | `APUNTA_A`, `REQUIERE_ACLARACION`, escenario en `Lectura` | Unificar (D-06) |
 
 ---
 
 ## 9. Resultados de referencia (valores esperados para las pruebas) [PG2]
 
-Todos sobre `req_01` (perfil VIRT). Reproducibles ejecutando el script completo.
+Todos sobre `req_01` (perfil VIRT). Reproducibles ejecutando el script completo. Para `req_01` el canónico da los mismos valores que el linaje A (los pesos y requisitos de VIRT no cambiaron), como muestra la corrida de SM4 en Neo4j.
 
 ### 9.1 C1 — Excluyente de virtualización (REN-R1 + REC-R3)
 **Notebook_E: Descartada** (no soporta virtualización; adecuación 0,810, casi igual que B 0,813 y H 0,811). **Notebook_G: Indeterminada** (virtualización no informada). Las otras 7 siguen en evaluación.
@@ -396,32 +427,35 @@ Todos sobre `req_01` (perfil VIRT). Reproducibles ejecutando el script completo.
 
 **Recomendación final:** 1.º **A** (0,785) · 2.º **H** (0,626; empata con B dentro de 0,05 y gana por ampliabilidad) · 3.º **B** (0,632; mejor costo-beneficio 1,161, RAM soldada) · aparte, fuera de presupuesto: **X** (0,534). "Recomendada (Media)" = etiqueta *considerar*. Ejemplo de cálculo [PG2]: A = 0,750×0,90 + 0,083×1,000 + 0,167×0,625 = 0,862.
 
-### 9.4 Casos de prueba CP1–CP10 [PG2] (los diez dieron el resultado esperado)
+### 9.4 Casos de prueba CP1–CP11 [PG2] (CP11 solo existe en el canónico)
 
 | # | Situación | Esperado | Obtenido |
 | --- | --- | --- | --- |
 | CP1 | A cumple todo | Recomendada con el mayor grado | 0,785, Alta, puesto 1 |
 | CP2 | E con 0,810 sin virtualización | Descartada | `INCUMPLE`, Descartada (excluyente) |
 | CP3 | X con 0,841 pero 5 % sobre presupuesto | Alternativa, no primera | 0,534, fuera de presupuesto |
-| CP4 | G sin virtualización ni ampliabilidad | No descartar; rango y pedir el dato | Indeterminada, [49,58 ; 81,46], **3 alertas** (REN-R13, REN-R10, FZ-R7) |
+| CP4 | G sin virtualización ni ampliabilidad | No descartar; rango y pedir el dato | Indeterminada, [49,58 ; 81,46], **3 alertas** (REN-R13, REN-R10, FZ-R7). *En el canónico no existe REN-R13: quedan 2 (REN-R10 y FZ-R7)* |
 | CP5 | K con 8 GB y ranura libre | Riesgo medio, no alto | 49,55, medio; alerta "Condicionado a ampliación" |
 | CP6 | C con 2,3 kg y 5 h | Movilidad baja | 0,231, baja |
 | CP7 | H y B a 0,006 de diferencia | Desempate por ampliabilidad | H (puesto 2) antes que B (puesto 3) |
 | CP8 | Parámetros sin validar | 47 etiquetas sin validar | 47 en 15 variables |
 | CP9 | M sin autonomía | Rango y condicionada | [0,504 ; 0,826] |
 | CP10 | `req_02` sin respuesta | No asumir OFI | Perfil indeterminado, 0 evaluadas, pregunta pendiente |
+| CP11 | `req_03` (OFI, portabilidad) sobre Notebook_K, que `req_01` descarta | Cada evaluación conserva su evidencia | K: Recomendada (Media), grado 0,469, pesos 0,333/0,083/0,583 (corrida de SM4); para `req_01`, Descartada |
 
 ### 9.5 Limitaciones que reconoce PG2 [PG2]
 1. FZ-R2 y FZ-R3 no distinguen B de K → calibrar consecuentes.
 2. El centroide **comprime** las salidas: el grado va de 0,19 a 0,79, por eso se leen por etiqueta.
 3. Entre 4 y 5 h de autonomía ninguna etiqueta pasa de 0,6.
-4. Rendimiento y pantalla se cargan como crisp.
-5. **Riesgo, grado de GPU y adecuación gráfica dependen del perfil pero se guardan en la notebook** (⇒ C-A).
+4. Rendimiento y pantalla se cargan como crisp (en el canónico, por perfil en `SALIDA_PI2`).
+5. **Riesgo, grado de GPU y adecuación gráfica dependen del perfil pero se guardan en la notebook** (⇒ C-A). **Resuelto en el canónico.**
 6. Ningún parámetro está validado: "más gradual, no más correcto".
 
 ---
 
 ## 10. C-A: resultados que se pisan entre compradores
+
+> **Estado (D-01):** el grafo canónico ya aplica el esquema de §10.5 (ver §8.4), y REC-R3 decide por `ev.excluyente_virtualizacion` de cada evaluación, sin la contaminación de §10.3. Esta sección queda como **historia del defecto** y como **guía para portar el código de PI4 de SM2** (§10.4). El `req_03` del canónico no es el de §10.6: es una consulta puntual sobre K (§8.7), así que la prueba de que E y G no queden contaminadas sigue pendiente (D-11).
 
 ### 10.1 Qué dijo la profesora y qué encontré [DED]
 La profesora señala tres propiedades (riesgo, adecuación gráfica, grado de GPU). **Leyendo el script, el problema es más amplio** y tiene dos efectos: *sobrescritura silenciosa* y *contaminación cruzada de estados*.
@@ -529,7 +563,7 @@ La profesora no dice cuál es el valor correcto: dice que **lo diga el técnico*
 
 **Qué necesita el LLM para explicar [PG2]:** (1) estado y **etiqueta** lingüística; (2) los **tres bloques de REC-R11** (cumple / no cumple / falta verificar); (3) alertas con su regla de origen; (4) la regla de mayor fuerza por escenario; (5) la advertencia de parámetros sin validar. **Si el resultado es un rango o un perfil indeterminado, el LLM lo dice así y no completa el dato.** Si la explicación menciona algo ausente de la traza: regenerar hasta 2 veces y luego **plantilla fija** (REC-R11).
 
-**Nota para PG3 [DED]:** L1–L4 de PG2 están escritas con literales (`req_01`, `Notebook_A`); en PI4 SM2 las reemplaza por `$req` y `$modelo` y las amplía (C2 completa, L2 por notebook). **No tengo los PI4 de SM1, SM3 y SM4** [?]: hay que ver qué entregó cada integrante (flujo, prompts, consultas, formato de salida) antes de diseñar el router y el contrato común.
+**Nota para PG3 [DED]:** L1–L4 de PG2 están escritas con literales (`req_01`, `Notebook_A`); en PI4 SM2 las reemplaza por `$req` y `$modelo` y las amplía (C2 completa, L2 por notebook). Los PI4 de SM1–SM4 están en `docs/fuentes/`; hay que revisar el flujo, los prompts, las consultas y el formato de salida de cada uno antes de diseñar el router y el contrato común (D-07).
 
 ---
 
@@ -579,7 +613,7 @@ Cada caso cruza submódulos y usa valores de §9 (verificables contra el grafo).
 | 4 | **Demo de PG1 vs PG2** | PG1: A 0,85, B 900 USD 0,62 · PG2: A 0,862, B 700 USD 0,813. La demo de PG1 se recalculó; no citar la de PG1 |
 | 5 | **Catálogo** | PG1 prevé 30 notebooks; hay 9 cargadas. PI4 de SM2 acepta nombres de una letra (`Notebook_A`..`Z`) |
 | 6 | **IDs de notebook** | `NB_A` (id) vs `Notebook_A` (modelo) vs "Notebook K" o "la K" en lenguaje natural |
-| 7 | **`rend` y `pantalla` crisp** | SM2 no calcula la adecuación de rendimiento; la recibe. Si el informe de PG3 dice que SM2 "evalúa CPU, RAM y almacenamiento", aclarar que hoy solo calcula virtualización y riesgo de RAM [DED] |
+| 7 | **`rend` y `pantalla` crisp** | SM2 no calcula la adecuación de rendimiento; la recibe. Si el informe de PG3 dice que SM2 "evalúa CPU, RAM y almacenamiento", aclarar que hoy solo calcula virtualización y riesgo de RAM [DED]. En el canónico llegan por perfil en `SALIDA_PI2` (D-03) |
 | 8 | **Reglas sin nodo ni implementación** | §6.2: p. ej. REN-R11/R14 y GM-R15 (aviso de canal simple a SM3) no existen en el script. El informe PG1 las describe como vigentes |
 | 9 | **`Carrera` sin datos** | INT-R8 y el frame `Carrera` no tienen nodos |
 | 10 | **Pedido sin ningún perfil que imponga requisitos** | Si todos los perfiles de un pedido quedan "solo preferencia" (grado < 0,4) pero hay perfil dominante, REN-R2 no consolida requisitos y `req_ram_min`/`req_ram_rec` quedan `null`; luego 10.c divide `ram_gb / null` [DED por lectura; no ejecutado: confirmar con un pedido de prueba] |
@@ -592,9 +626,10 @@ Cada caso cruza submódulos y usa valores de §9 (verificables contra el grafo).
 ## 16. Pendientes priorizados para PG3
 
 **Críticos (corrigen lo que pidió la profesora)**
-- [ ] **C-A:** refactor del grafo a resultados por `Evaluacion` (§10.5); re-keyear lecturas y alertas; REC-R3 por `ev`; reescribir C2, C3, CP4, CP5, CP7, L2, L3 y las consultas de PI4.
-- [ ] **Regresión:** CP1–CP10 deben dar lo mismo para `req_01` después del refactor.
-- [ ] **C-C:** agregar `req_03` (OFI) y la prueba de dos compradores (E2E-6, §10.6).
+- [x] **C-A en el grafo:** resuelto en el canónico (§8.4).
+- [ ] **C-A en el código:** portar a `ev.*` las consultas de PI4 de SM2 (§10.4).
+- [ ] **Regresión:** CP1–CP10 deben dar lo mismo para `req_01` sobre el canónico (la corrida de SM4 ya coincide en el ranking; falta confirmar todos los casos).
+- [ ] **C-C (parcial):** el canónico tiene CP11 (`req_03` puntual sobre K); falta un pedido OFI que evalúe el catálogo completo (E2E-6, §10.6; D-11).
 - [ ] **C-B:** sesión con el técnico (o análisis de sensibilidad como mínimo) y calibrar FZ-R2/FZ-R3; validar centros y σ prioritarios; documentar el estado de validación.
 
 **Integración (lo que pide PG3)**

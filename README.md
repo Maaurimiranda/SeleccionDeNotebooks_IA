@@ -45,8 +45,12 @@ Está formado por cuatro submódulos que comparten una única base de conocimien
 SeleccionDeNotebooks_IA/
 ├── README.md
 └── docs/
+    ├── RESTRICCIONES.md            # qué técnicas y tecnologías se pueden usar
+    ├── INCONSISTENCIAS_CONTEXTOS.md # inconsistencias entre contextos y decisiones pendientes (D-01 a D-13)
     ├── consigna/                   # ConsignaPG3.md: consigna de la cátedra y ejemplo de referencia
-    └── contexto/                   # contexto de cada submódulo para PG3 (SM2, SM4)
+    ├── contexto/                   # contexto para PG3: PG1/PG2 grupal y SM1–SM4 (Contexto_SMX_{Apellido}_para_PG3.md)
+    ├── cypher/                     # scripts de PG2; canónico: Grupo_2_PG2_U1_corregido.cypher (D-01)
+    └── fuentes/                    # PI4 de cada submódulo (SM1–SM4): código y prompts
 ```
 
 ## 5. Requisitos

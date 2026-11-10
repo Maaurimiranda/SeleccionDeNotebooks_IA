@@ -2,6 +2,7 @@
 
 > Asistente Experto para la Selección Personalizada de Notebooks · Grupo 2 · Comisión 5K09 · UTN FRM · Cátedra de Inteligencia Artificial · Ciclo 2026
 > Archivo generado el 09/11/2026 a partir de: PI1, PI2, PI3 y PI4 de SM1 (informes), PG1 y PG2 del grupo, correcciones de la profesora (PI1–PI3, PG0–PG2), consigna de PG3, `Grupo_2_PG2_U1_v2.cypher` (versión que corrió en Aura), `Olea_Facundo_PI4_U4.py` y la ejecución real de PI4 en Colab (07/11/2026).
+> **Grafo canónico (D-01, 09/11/2026):** `docs/cypher/Grupo_2_PG2_U1_corregido.cypher`. Este archivo describe el esquema del linaje A (`Grupo_2_PG2_U1.cypher`, 61 reglas, `NB_A`, `ASOCIADO_A`), con el que corrió PI4 y que el notebook carga por ese nombre. Las diferencias y lo que hay que portar al canónico están en `Contexto_PG1_PG2_Grupo_para_PG3.md` §8.8.
 
 ---
 
@@ -266,6 +267,8 @@ Parámetros elegidos por el grupo sin técnico; el centroide comprime la salida 
 
 ## 7. Modelo de grafo de SM1 (Neo4j)
 
+> **Linaje A.** En el grafo canónico no hay `ElementoMencionado`/`Software` (Docker, VirtualBox), `LLEVA_A` se llama `APUNTA_A`, `TIENE_PREGUNTA` se llama `REQUIERE_ACLARACION`, no hay lecturas de dedicación (INT-R14) ni `necesita_virtualizacion` ni `orden_exigencia`, y `PERTENECE` guarda `impone_requisitos` y `en_frontera` en lugar de `estado`. Por eso `REGLAS_SM1` no corre tal cual contra el canónico (PG1/PG2 §8.8).
+
 ### 7.1 Nodos `[CÓD]`
 
 | Etiqueta | Propiedades relevantes |
@@ -514,7 +517,7 @@ Endpoints que SM1 necesita (en la API común, no propia): `POST /consultar {text
 
 | Ref. | Tema | Detalle | Acción |
 | --- | --- | --- | --- |
-| **A** | Versión del Cypher | Existen dos archivos de PG2: el original (inconsistente con el informe) y `Grupo_2_PG2_U1_v2.cypher` (reescrito, sin `$`, el que corrió en Aura). **Usar v2** | Incluir v2 en el ZIP y borrar el viejo |
+| **A** | Versión del Cypher | Existen dos archivos de PG2: el original (inconsistente con el informe) y `Grupo_2_PG2_U1_v2.cypher` (reescrito, sin `$`, el que corrió en Aura). **Usar v2** | **Resuelto (D-01):** el canónico es `docs/cypher/Grupo_2_PG2_U1_corregido.cypher`; el esquema de SM1 se porta desde el linaje A (`docs/cypher/Grupo_2_PG2_U1.cypher`) |
 | **B** | `requisitos_explicitos` | SM2 los espera de SM1; SM1 no los extrae ni los guarda en el grafo | Decidir si se agregan al prompt y al Requerimiento, o documentar que no están |
 | **C** | Reglas no implementadas | INT-R8 (carrera), INT-R9 (contradicción), banda de frontera y entropía de INT-R5 (PI3) | Implementar o declararlas fuera del prototipo en el informe |
 | **D** | Perfil por descripción | En PG2 `programar → VIRT` estaba fijo; en PI4 depende de `necesita_virtualizacion` (si no, DEV) | Unificar (PI4 es la versión vigente) |
