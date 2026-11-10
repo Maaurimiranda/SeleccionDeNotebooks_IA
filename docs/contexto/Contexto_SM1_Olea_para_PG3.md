@@ -524,7 +524,7 @@ Endpoints que SM1 necesita (en la API común, no propia): `POST /consultar {text
 | **E** | Dominante con rango | Ordena por `grado_min` (CP1 salió GAM) | Ver 12.4-2 |
 | **F** | Fallo CP1 | El `req_01` de PG2 da VIRT 0,899 porque las actividades están escritas a mano; vía LLM salió indeterminado | Corregir la extracción antes de usar CP1 como E2E |
 | **G** | Aclaración | Hoy se reprocesa todo el texto y se crea **otro** Requerimiento; no se actualiza el original ni se marca la pregunta como respondida | Para la API: actualizar el mismo pedido y cerrar la `Pregunta` |
-| **H** | Proveedor de LLM | PI4 corrió con Groq (plan gratuito, límite por minuto); Ollama Cloud pidió créditos (402) y Gemini dio 503 | Acordar un único proveedor para el grupo (SM2 usa Ollama local) |
+| **H** | Proveedor de LLM | PI4 corrió con Groq (plan gratuito, límite por minuto); Ollama Cloud pidió créditos (402) y Gemini dio 503 | Acordar un único proveedor para el grupo (SM2 usa Ollama local) **Resuelto:** **D-05 (09/11/2026):** Ollama local con `qwen2.5:7b` (alternativa `qwen2.5:3b` por `OLLAMA_MODEL`), temperatura 0 en las dos llamadas y HTTP directo a `/api/chat` con `requests`, sin LangChain. SM1 deja Groq y `langchain-openai`; su notebook ya traía Ollama como opción por defecto. |
 | **I** | Escritura en el grafo | SM1 es el único submódulo que **crea** nodos por cada consulta; los otros solo leen en PI4 | La API necesita sesión de escritura para SM1 y lectura para el resto |
 | **J** | Validación | Ningún parámetro de SM1 validado; no hubo entrevista a un asesor | Declararlo en evaluación y trazabilidad |
 | **K** | Devolución de PI4 | Aún sin corrección de la profesora | Revisar cuando llegue |

@@ -485,7 +485,7 @@ Archivos en `/mnt/project-files/PI4/` (en el repo: `docs/fuentes/SM4/` y `docs/c
 4. **Generación de consultas (Python):** según la intención elige plantillas Cypher parametrizadas. **El LLM nunca escribe Cypher.**
 5. **Recuperación (Neo4j):** sesiones de solo lectura (`routing_="r"`). Devuelve lo que el grafo ya infirió.
 6. **Paquete de evidencia:** un único JSON, lo único que ve el segundo prompt. Siempre trae la `advertencia` de parámetros sin validar.
-7. **Explicación (LLM):** respuesta empática y justificada solo con esa evidencia, a temperatura 0,2.
+7. **Explicación (LLM):** respuesta empática y justificada solo con esa evidencia, a temperatura 0,2. *D-05 (09/11/2026): Ollama local con `qwen2.5:7b` (alternativa `qwen2.5:3b` por `OLLAMA_MODEL`), temperatura 0 en las dos llamadas y HTTP directo a `/api/chat` con `requests`, sin LangChain. La explicación pasa de 0,2 a 0, y `urllib` se reemplaza por `requests`.*
 8. **Verificación REC-R11 (Python):** si la respuesta menciona modelos, reglas o números ausentes de la evidencia, se regenera indicando el problema (hasta 2 veces). Si sigue fallando, responde una **plantilla fija** determinista.
 
 ### 6.2 Consultas Cypher del SM4 (diccionario `CONSULTAS`)
@@ -555,7 +555,7 @@ Esquema de salida:
 | Componente | Elección | Por qué |
 |---|---|---|
 | Orquestación | Python 3 con funciones propias (`orquestar()`) | El flujo es fijo, no un agente: así cada control queda explícito y se puede probar |
-| LLM | Ollama local, **qwen2.5:3b** en las corridas de PI4 (el `.py` trae `qwen2.5:7b` por defecto; se configura con `OLLAMA_MODEL`) | Gratis, local y con salida estructurada. Se usó 3B porque el 7B colgaba la PC de prueba por RAM y disco |
+| LLM | Ollama local, **qwen2.5:3b** en las corridas de PI4 (el `.py` trae `qwen2.5:7b` por defecto; se configura con `OLLAMA_MODEL`) | Gratis, local y con salida estructurada. Se usó 3B porque el 7B colgaba la PC de prueba por RAM y disco **PG3 (D-05):** `qwen2.5:7b`, alternativa `3b`, temperatura 0 | |
 | Base de conocimiento | Neo4j 5.x (probado en 5.26) con el driver `neo4j` (6.4.1), solo lectura | El grafo de PG2 es la base: el prototipo no escribe ni recalcula |
 | Consultas | Plantillas parametrizadas | Evitan Text2Cypher, con el que el LLM podría consultar otra cosa, inventar filtros o modificar el grafo |
 | Verificador | `verificar_explicacion()` + `plantilla_fija()` | REC-R11 automático: el control no depende de que el modelo obedezca |

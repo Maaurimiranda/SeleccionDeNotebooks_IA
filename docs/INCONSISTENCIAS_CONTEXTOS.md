@@ -176,7 +176,21 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 | INT-R8, INT-R9, banda de frontera y entropía (SM1), REC-R16/R17 | Diseñadas, no implementadas | Declararlas fuera del prototipo en el informe *(recomendada)* |
 | REC-R9 con prioridad «precio» | SM4 propone un `ORDER BY` nuevo y un `req_04` para probarlo | Aceptar o no el cambio |
 
-### D-05 · LLM y técnicas permitidas
+### D-05 · LLM y técnicas permitidas — **RESUELTA (09/11/2026)**
+
+> **Decisión del grupo:**
+> - **Ollama local** con **`qwen2.5:7b`** por defecto (A11, verde) y **`qwen2.5:3b`** como alternativa por `OLLAMA_MODEL`.
+> - **Temperatura 0** en extracción y en explicación.
+> - **HTTP directo a `/api/chat` con `requests`** (amarillo) y salida estructurada (`format`). **Sin LangChain.**
+> - **Se quitan** `rich`, `python-dotenv`, `langchain-*` y `ollama`. `pydantic` queda solo para la API y `httpx` solo para los tests.
+>
+> **Qué tiene que cambiar cada uno:**
+> - **SM1:** deja Groq y `langchain-openai`.
+> - **SM2:** cambia el modelo por defecto (`llama3.1:8b` → `qwen2.5:7b`).
+> - **SM3:** deja LangChain y los extras, y la explicación pasa de 0,3 a 0.
+> - **SM4:** la explicación pasa de 0,2 a 0, y `urllib` se reemplaza por `requests`.
+>
+> Contextos actualizados: SM1 13-H, SM2 §10.3, SM3 §7.3, SM4 §6.1 y §6.5, y README §5. Lo de abajo describe la situación previa.
 
 **Inconsistencia.**
 - **SM1** usa **Groq** (`openai/gpt-oss-120b`) con `langchain-openai`. Groq está en rojo en `RESTRICCIONES.md` y `langchain-openai` no está en la lista.
