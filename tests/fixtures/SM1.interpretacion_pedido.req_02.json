@@ -1,0 +1,43 @@
+{
+ "intencion": "SM1.interpretacion_pedido",
+ "parametros": {
+  "requerimiento_id": "req_02"
+ },
+ "consultas": [
+  {
+   "nombre": "SM1.L1",
+   "cypher": "MATCH (c:Requerimiento {id:$requerimiento_id})\nOPTIONAL MATCH (c)-[r:PERTENECE]->(p:Perfil)\nOPTIONAL MATCH (c)-[:REQUIERE_ACLARACION]->(q:Pregunta)\nRETURN c.id AS requerimiento, c.presupuesto_usd AS presupuesto, c.prioridad AS prioridad,\n       c.perfil_dominante AS perfil_dominante,\n       [x IN collect(DISTINCT {perfil:p.codigo, grado:r.grado, grado_min:r.grado_min, grado_max:r.grado_max,\n                impone_requisitos:r.impone_requisitos, en_frontera:r.en_frontera}) WHERE x.perfil IS NOT NULL] AS perfiles,\n       c.intensidad_grafica AS intensidad, c.intensidad_valor AS intensidad_valor,\n       collect(DISTINCT q.texto) AS preguntas_pendientes",
+   "parametros": {
+    "requerimiento_id": "req_02"
+   },
+   "filas": [
+    {
+     "requerimiento": "req_02",
+     "presupuesto": 600.0,
+     "prioridad": "ninguna",
+     "perfil_dominante": "indeterminado",
+     "perfiles": [],
+     "intensidad": null,
+     "intensidad_valor": null,
+     "preguntas_pendientes": [
+      "Que programas o actividades va a usar con la notebook (por ejemplo: Office, programacion, diseno, juegos)?"
+     ]
+    }
+   ]
+  }
+ ],
+ "evidencia": {
+  "requerimiento": "req_02",
+  "presupuesto": 600.0,
+  "prioridad": "ninguna",
+  "perfiles": [],
+  "perfil_dominante": "indeterminado",
+  "perfil_dominante_provisional": false,
+  "intensidad": null,
+  "intensidad_valor": null,
+  "preguntas_pendientes": [
+   "Que programas o actividades va a usar con la notebook (por ejemplo: Office, programacion, diseno, juegos)?"
+  ],
+  "estado_pedido": "indeterminado"
+ }
+}

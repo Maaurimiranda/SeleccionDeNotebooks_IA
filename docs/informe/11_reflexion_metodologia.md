@@ -1,0 +1,15 @@
+# 11. Reflexión sobre la metodología
+
+**Formulación del problema.** Definir desde PG0 que el usuario es el asesor y el beneficiario el comprador fijó el tono y el destinatario de toda explicación. También fijó el alcance: hasta tres notebooks, con alertas y una explicación trazable. Esa decisión llegó hasta PG3: el explicador redacta para el asesor, en voseo y con un máximo de 180 palabras (D-07).
+
+**Análisis de tareas expertas.** Descomponer la tarea del técnico en interpretar el pedido, consolidar requisitos, evaluar rendimiento, gráfica y movilidad, filtrar, ordenar y explicar dio los cuatro submódulos y su orden. La regla de PG1 «primero se filtran los excluyentes, después se trata la información incompleta» es la que hoy descarta a Notebook_E pese a su adecuación de 0,81 (CP2, E2E-5).
+
+**Adquisición de conocimiento.** Las fichas oficiales, los requisitos de software, Notebookcheck y la entrevista al técnico dieron los mínimos por perfil y el tratamiento de datos faltantes. La lección más fuerte fue separar «falta información» de «no cumple»: Notebook_G no informa virtualización ni ampliabilidad, y por eso queda `Indeterminada: completar informacion`, no descartada (CP4).
+
+**Modelado conceptual.** La red semántica y los frames de PG1 se tradujeron casi uno a uno a labels y relaciones de Neo4j. La corrección de PG2, que guarda todo lo que depende del pedido en una `(:Evaluacion)`, permite que dos compradores evalúen la misma Notebook_K sin pisarse: para `req_01` queda `Descartada` y para `req_03`, `Recomendada (Media)` con grado 0,469 (CP11).
+
+**Lógica difusa.** Las 23 reglas Mamdani manejan la vaguedad del dominio: frecuencias («a veces»), «liviana», «RAM justa». El riesgo de RAM de FZ-R1..R5 distingue a Notebook_K (49,55, ranura libre) de Notebook_G, que sin dato de ampliabilidad se informa como rango [49,58 ; 81,46] en lugar de un número falso. Su límite también es metodológico: los 77 parámetros siguen `'sin validar'` por el técnico, y el sistema lo advierte en cada respuesta.
+
+**Implementación en grafos.** Tener cada regla como nodo y cada activación como `[:ACTIVA {fuerza}]` vuelve recorrible la inferencia. La traza de Notebook_A en `req_01` (consulta L3) muestra 20 reglas de los cuatro submódulos con su fuerza. Dividir el grafo en un archivo por dueño, verificado con la misma cantidad de nodos y relaciones por tipo (57 de 57) y la regresión CP1–CP11 en 11 de 11, permitió que cuatro personas trabajaran en paralelo sin pisarse.
+
+**Integración con el LLM.** Siguiendo el ejemplo de PG3 de la cátedra, el LLM es solo la interfaz: un router con prompt maestro arma un plan JSON (LangChain + Ollama, `qwen2.5:3b` a temperatura 0, salida estructurada) y Python lo valida antes de tocar el grafo. Las consultas Cypher son fijas y las elige el código. La validación en Python fue necesaria: sobre 25 consultas de prueba el modelo acertó las intenciones en 24 (96 %), y la que erró («¿Cuál es la capital de Francia?», planificada como consulta de parámetros) la corrigió la validación, que la devolvió como fuera de alcance sin tocar el grafo. El resultado final fue correcto en las 25 (sección 6).

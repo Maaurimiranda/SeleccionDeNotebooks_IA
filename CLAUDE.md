@@ -13,10 +13,10 @@ Leer, en este orden:
 ## Reglas
 
 - **Neo4j maneja la verdad.** El LLM no calcula ni decide: interpreta (router) y explica (explicador). Las consultas Cypher son plantillas fijas y el LLM no las escribe.
-- **Contrato:** cada submódulo expone solo `ejecutar(intencion, parametros, grafo) -> {"consultas", "evidencia"}` y no importa a otros submódulos. `asistente/contrato.py` se cambia solo con un PR aprobado por Miranda.
+- **Contrato:** cada submódulo expone solo `ejecutar(intencion, parametros, grafo) -> {"consultas", "evidencia"}` y no importa a otros submódulos. Cada submódulo es un paquete con `entrada.py` → `servicio.py` → `repositorio.py`, más `esquemas.py` (ARQUITECTURA §2.1): el Cypher va solo en `repositorio.py`, y no hay endpoints por submódulo. `asistente/contrato.py` se cambia solo con un PR aprobado por Miranda.
 - **Literales de D-06**, sin tildes en el código y en el grafo: `Recomendada (Alta)`, `Recomendada (Media)`, `Recomendada condicionada por falta de informacion`, `Indeterminada: completar informacion`, `Descartada (excluyente incumplido)`, `Descartada`, `'sin validar'`.
 - **La incertidumbre se conserva:** rangos `{min, max}`, `desconocida` e `indeterminado` no se completan ni se promedian.
-- **LLM:** Ollama `qwen2.5:3b`, temperatura 0, `requests` a `/api/chat` y `format` con esquema JSON (D-05).
+- **LLM:** Ollama `qwen2.5:3b`, temperatura 0, vía LangChain (`ChatOllama` + `ChatPromptTemplate`) con `with_structured_output`, en `asistente/llm.py`; el orquestador despacha a los submódulos con `RunnableLambda` (D-05). LangChain no escribe Cypher ni se usan agentes.
 - **Pruebas:** `unittest` (no `pytest`). Las que necesitan Neo4j u Ollama se saltean si no están.
 - **El repo es público:** ninguna credencial, URI de Aura ni contraseña en archivos versionados. Todo va en `.env`.
 - **Dueño por archivo** (ARQUITECTURA §2 y §5): para tocar un archivo de otro, avisarle; él revisa el PR.

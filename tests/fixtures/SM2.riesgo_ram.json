@@ -1,0 +1,158 @@
+{
+ "intencion": "SM2.riesgo_ram",
+ "parametros": {
+  "requerimiento_id": "req_01",
+  "modelos": [
+   "Notebook_G"
+  ]
+ },
+ "consultas": [
+  {
+   "nombre": "SM2.C2",
+   "cypher": "MATCH (c:Requerimiento {id:$requerimiento_id})-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(r:RAM)\nWHERE ($modelos IS NULL OR n.modelo IN $modelos)\n  AND ($tipo_ram IS NULL OR r.tipo = $tipo_ram)\n  AND ($etiqueta IS NULL OR ev.riesgo_etiqueta = $etiqueta)\nCALL {\n  WITH ev\n  OPTIONAL MATCH (ev)-[:TIENE_LECTURA*0..1]->(x)-[act:ACTIVA]->(q:Regla)\n  WHERE q.id STARTS WITH 'FZ-R' AND act.fuerza IS NOT NULL\n  RETURN collect(DISTINCT CASE WHEN q IS NULL THEN null ELSE\n         {id:q.id, fuerza:act.fuerza, escenario:x.escenario, validacion:q.estado_validacion} END) AS reglas\n}\nCALL {\n  WITH ev, n\n  OPTIONAL MATCH (al:Alerta {submodulo_origen:'SM2'})\n  WHERE EXISTS { MATCH (ev)-[:GENERA]->(al) } OR EXISTS { MATCH (n)-[:GENERA]->(al) }\n  RETURN collect(DISTINCT CASE WHEN al IS NULL THEN null ELSE\n         {codigo:al.regla_origen, tipo:al.tipo, texto:al.mensaje} END) AS alertas\n}\nRETURN n.modelo AS notebook, ev.perfil AS perfil, r.ram_gb AS ram_gb, r.tipo AS tipo_ram,\n       r.ampliabilidad AS ampliabilidad, ev.suficiencia_rho AS suficiencia_rho,\n       ev.indice_ampliabilidad AS indice_ampliabilidad,\n       ev.riesgo_valor AS riesgo_valor, ev.riesgo_min AS riesgo_min, ev.riesgo_max AS riesgo_max,\n       ev.riesgo_etiqueta AS riesgo_etiqueta, reglas, alertas\nORDER BY coalesce(ev.riesgo_max, ev.riesgo_valor) DESC, notebook",
+   "parametros": {
+    "requerimiento_id": "req_01",
+    "modelos": [
+     "Notebook_G"
+    ],
+    "etiqueta": null,
+    "tipo_ram": null
+   },
+   "filas": [
+    {
+     "notebook": "Notebook_G",
+     "perfil": "VIRT",
+     "ram_gb": 8,
+     "tipo_ram": "desconocida",
+     "ampliabilidad": "desconocida",
+     "suficiencia_rho": 0.5,
+     "indice_ampliabilidad": null,
+     "riesgo_valor": null,
+     "riesgo_min": 49.58,
+     "riesgo_max": 81.46,
+     "riesgo_etiqueta": "alto",
+     "reglas": [
+      {
+       "id": "FZ-R1",
+       "fuerza": 1.0,
+       "escenario": "peor",
+       "validacion": "sin validar"
+      },
+      {
+       "id": "FZ-R2",
+       "fuerza": 0.021,
+       "escenario": "peor",
+       "validacion": "sin validar"
+      },
+      {
+       "id": "FZ-R2",
+       "fuerza": 1.0,
+       "escenario": "mejor",
+       "validacion": "sin validar"
+      },
+      {
+       "id": "FZ-R3",
+       "fuerza": 0.044,
+       "escenario": "peor",
+       "validacion": "sin validar"
+      },
+      {
+       "id": "FZ-R4",
+       "fuerza": 0.021,
+       "escenario": "peor",
+       "validacion": "sin validar"
+      },
+      {
+       "id": "FZ-R4",
+       "fuerza": 0.044,
+       "escenario": "mejor",
+       "validacion": "sin validar"
+      }
+     ],
+     "alertas": [
+      {
+       "codigo": "FZ-R7",
+       "texto": "Riesgo alto de que la RAM quede corta para el perfil: [49.58 ; 81.46] sobre 100",
+       "tipo": "Riesgo de obsolescencia"
+      },
+      {
+       "codigo": "REN-R10",
+       "texto": "La ficha no informa si la RAM es ampliable: el riesgo se informa como rango",
+       "tipo": "Ampliabilidad no verificada"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "evidencia": {
+  "requerimiento_id": "req_01",
+  "perfil": "VIRT",
+  "escala_riesgo": "0 a 100",
+  "notebooks": [
+   {
+    "notebook": "Notebook_G",
+    "ram_gb": 8,
+    "tipo_ram": "desconocida",
+    "ampliabilidad": "desconocida",
+    "suficiencia_rho": 0.5,
+    "indice_ampliabilidad": "desconocida",
+    "riesgo": {
+     "min": 49.58,
+     "max": 81.46
+    },
+    "etiqueta": "alto",
+    "reglas": [
+     {
+      "id": "FZ-R1",
+      "fuerza": 1.0,
+      "escenario": "peor",
+      "validacion": "sin validar"
+     },
+     {
+      "id": "FZ-R2",
+      "fuerza": 1.0,
+      "escenario": "mejor",
+      "validacion": "sin validar"
+     },
+     {
+      "id": "FZ-R2",
+      "fuerza": 0.021,
+      "escenario": "peor",
+      "validacion": "sin validar"
+     },
+     {
+      "id": "FZ-R3",
+      "fuerza": 0.044,
+      "escenario": "peor",
+      "validacion": "sin validar"
+     },
+     {
+      "id": "FZ-R4",
+      "fuerza": 0.044,
+      "escenario": "mejor",
+      "validacion": "sin validar"
+     },
+     {
+      "id": "FZ-R4",
+      "fuerza": 0.021,
+      "escenario": "peor",
+      "validacion": "sin validar"
+     }
+    ],
+    "alertas": [
+     {
+      "codigo": "FZ-R7",
+      "texto": "Riesgo alto de que la RAM quede corta para el perfil: [49.58 ; 81.46] sobre 100",
+      "notebook": "Notebook_G"
+     },
+     {
+      "codigo": "REN-R10",
+      "texto": "La ficha no informa si la RAM es ampliable: el riesgo se informa como rango",
+      "notebook": "Notebook_G"
+     }
+    ]
+   }
+  ]
+ }
+}

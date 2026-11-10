@@ -63,7 +63,7 @@ SeleccionDeNotebooks_IA/
 | --- | --- | --- |
 | Python | `[confirmar]` | La consigna pide el código en Python con `requirements.txt` |
 | Neo4j | 5.x `[confirmar]` | Base de conocimiento de PG2. Las consultas de SM2 usan subconsultas `EXISTS { … }` y el driver 5 |
-| LLM | Ollama local, `qwen2.5:3b` (`qwen2.5:7b` opcional por `OLLAMA_MODEL`) | Temperatura 0 en las dos llamadas; HTTP directo a `/api/chat` con `requests`, sin LangChain (D-05) |
+| LLM | Ollama local, `qwen2.5:3b` (`qwen2.5:7b` opcional por `OLLAMA_MODEL`) | Temperatura 0 en las dos llamadas; LangChain (`ChatOllama`) como cliente, sin agentes ni Cypher generado (D-05) |
 | Memoria | ~4 GB libres para `qwen2.5:3b` (~8 GB con `7b`) | Más lo que use Neo4j |
 
 ## 6. Puesta en marcha

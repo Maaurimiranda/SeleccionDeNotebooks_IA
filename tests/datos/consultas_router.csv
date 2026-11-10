@@ -1,0 +1,26 @@
+id,consulta,pedido_sesion,intenciones_esperadas,requerimiento_esperado,resultado_esperado,cubre
+R01,¿Qué me recomendás para req_01?,,SM4.recomendar,req_01,plan,SM4.recomendar
+R02,¿Qué pidió el comprador de req_02?,,SM1.interpretacion_pedido,req_02,plan,SM1.interpretacion_pedido
+R03,¿Qué riesgo tiene la Notebook_K de quedarse corta de RAM en req_01?,,SM2.riesgo_ram,req_01,plan,SM2.riesgo_ram
+R04,¿Cuáles se descartan por no soportar virtualización en req_01?,,SM2.virtualizacion,req_01,plan,SM2.virtualizacion
+R05,Buscá las más livianas con al menos 8 horas de batería para req_01,,SM3.buscar,req_01,plan,SM3.buscar
+R06,Mostrame la ficha de la Notebook_M para req_01,,SM3.ficha,req_01,plan,SM3.ficha
+R07,¿Por qué la Notebook_E quedó descartada en req_01?,,SM4.explicar_notebook,req_01,plan,SM4.explicar_notebook
+R08,Compará la Notebook_A y la Notebook_H para req_01,,SM4.comparar,req_01,plan,SM4.comparar
+R09,¿Cuál rinde más por su precio en req_01?,,SM4.costo_beneficio,req_01,plan,SM4.costo_beneficio
+R10,¿Qué reglas se activaron para la Notebook_A en req_01?,,GRUPO.traza_reglas,req_01,plan,GRUPO.traza_reglas
+R11,¿Qué parámetros del sistema están sin validar?,,GRUPO.parametros,,plan,GRUPO.parametros
+R12,Quiero cargar un pedido nuevo: soy diseñadora y tengo 1200 USD,,SM1.registrar_pedido,,aclaracion,SM1.registrar_pedido
+R13,Respondo la pregunta pendiente de req_02: la uso para programar,,SM1.aclarar_pedido,req_02,aclaracion,SM1.aclarar_pedido
+R14,¿Por qué la G quedó indeterminada y qué riesgo de RAM tiene en req_01?,,SM4.explicar_notebook|SM2.riesgo_ram,req_01,plan,multisubmodulo
+R15,Recomendame algo para req_01 y buscá cuáles tienen mejor gráfica,,SM4.recomendar|SM3.buscar,req_01,plan,multisubmodulo
+R16,¿Qué riesgo de RAM tiene la Notebook_M y qué reglas se activaron para ella en req_01?,,SM2.riesgo_ram|GRUPO.traza_reglas,req_01,plan,multisubmodulo
+R17,Compará la A y la H en req_01 y decime cuál sale mejor por su precio,,SM4.comparar|SM4.costo_beneficio,req_01,plan,multisubmodulo
+R18,¿Cuál es la capital de Francia?,,,,fuera_de_alcance,fuera_de_alcance
+R19,Contame un chiste,,,,fuera_de_alcance,fuera_de_alcance
+R20,¿Quién ganó el último mundial de fútbol?,,,,fuera_de_alcance,fuera_de_alcance
+R21,¿Qué me recomendás?,,SM4.recomendar,,aclaracion,sin_pedido
+R22,¿Qué riesgo de RAM tiene la Notebook_G?,,SM2.riesgo_ram,,aclaracion,sin_pedido
+R23,¿Qué riesgo de RAM tiene la Notebook_G?,req_01,SM2.riesgo_ram,req_01,plan,pedido_de_sesion
+R24,Mostrame la ficha de la Notebook_Z en req_01,,SM3.ficha,req_01,aclaracion,modelo_inexistente
+R25,¿Por qué la Notebook_Q quedó descartada en req_01?,,SM4.explicar_notebook,req_01,aclaracion,modelo_inexistente

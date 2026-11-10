@@ -1,0 +1,209 @@
+{
+ "intencion": "SM3.buscar",
+ "parametros": {
+  "requerimiento_id": "req_01",
+  "orden": "grafica",
+  "filtros": {
+   "dedicada": true
+  }
+ },
+ "consultas": [
+  {
+   "nombre": "SM3.unificada_grafica",
+   "cypher": "MATCH (c:Requerimiento {id:$requerimiento_id})-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)\nMATCH (n)-[:POSEE]->(g:GPU)-[:ES_DE_GAMA]->(gg:GamaGPU)\nMATCH (n)-[:POSEE]->(p:Pantalla)\nMATCH (n)-[:POSEE]->(b:Bateria)\n\nWHERE ($dedicada    IS NULL OR g.dedicada = $dedicada)\n  AND ($gama_min    IS NULL OR gg.indice >= $gama_min)\n  AND ($peso_max    IS NULL OR n.peso_kg <= $peso_max)\n  AND ($bateria_min IS NULL OR b.autonomia_usada_h >= $bateria_min)\n  AND ($srgb_min    IS NULL OR p.srgb >= $srgb_min)\n\nOPTIONAL MATCH (x)-[act:ACTIVA]->(q:Regla {submodulo:'SM3'})\nWHERE x = n OR x = ev\nWITH c, ev, n, g, gg, p, b,\n     collect(DISTINCT CASE WHEN q IS NULL THEN null ELSE\n       {id:q.id, fuerza:act.fuerza, validacion:q.estado_validacion} END) AS reglas\nOPTIONAL MATCH (al:Alerta {submodulo_origen:'SM3'})\nWHERE EXISTS { MATCH (ev)-[:GENERA]->(al) } OR EXISTS { MATCH (n)-[:GENERA]->(al) }\nWITH c, ev, n, g, gg, p, b, reglas,\n     collect(DISTINCT CASE WHEN al IS NULL THEN null ELSE\n       {codigo:al.regla_origen, texto:al.mensaje} END) AS alertas\n\nRETURN n.modelo AS notebook, ev.perfil AS perfil, n.precio_usd AS precio_usd,\n       gg.nombre AS gama_gpu, gg.indice AS gama_gpu_indice, g.dedicada AS gpu_dedicada,\n       ev.grado_gpu AS grado_gpu, ev.margen_gama AS margen_gama, ev.adecuacion_grafica AS adecuacion_grafica,\n       n.adecuacion_movilidad AS adecuacion_movilidad, n.movilidad_etiqueta AS movilidad_etiqueta,\n       n.peso_kg AS peso_kg, b.autonomia_usada_h AS autonomia_h, b.tipo_dato AS autonomia_tipo_dato,\n       p.srgb AS srgb, reglas, alertas\nORDER BY coalesce(adecuacion_grafica, -1) DESC, gama_gpu_indice DESC, precio_usd ASC\nLIMIT $limite",
+   "parametros": {
+    "requerimiento_id": "req_01",
+    "dedicada": true,
+    "gama_min": null,
+    "peso_max": null,
+    "bateria_min": null,
+    "srgb_min": null,
+    "limite": 5
+   },
+   "filas": [
+    {
+     "notebook": "Notebook_C",
+     "perfil": "VIRT",
+     "precio_usd": 1200.0,
+     "gama_gpu": "dedicada media",
+     "gama_gpu_indice": 4,
+     "gpu_dedicada": true,
+     "grado_gpu": 0.902,
+     "margen_gama": "superior",
+     "adecuacion_grafica": 0.941,
+     "adecuacion_movilidad": 0.231,
+     "movilidad_etiqueta": "baja",
+     "peso_kg": 2.3,
+     "autonomia_h": 5.0,
+     "autonomia_tipo_dato": "medida",
+     "srgb": 98,
+     "reglas": [
+      {
+       "id": "GM-RD2",
+       "fuerza": 0.135,
+       "validacion": "sin validar"
+      },
+      {
+       "id": "GM-RD3",
+       "fuerza": 0.801,
+       "validacion": "sin validar"
+      },
+      {
+       "id": "GM-RD4",
+       "fuerza": 1.0,
+       "validacion": "sin validar"
+      }
+     ],
+     "alertas": []
+    },
+    {
+     "notebook": "Notebook_X",
+     "perfil": "VIRT",
+     "precio_usd": 1050.0,
+     "gama_gpu": "dedicada media",
+     "gama_gpu_indice": 4,
+     "gpu_dedicada": true,
+     "grado_gpu": 0.74,
+     "margen_gama": "superior",
+     "adecuacion_grafica": 0.844,
+     "adecuacion_movilidad": 0.486,
+     "movilidad_etiqueta": "media",
+     "peso_kg": 1.8,
+     "autonomia_h": 7.0,
+     "autonomia_tipo_dato": "medida",
+     "srgb": 95,
+     "reglas": [
+      {
+       "id": "GM-RD1",
+       "fuerza": 0.011,
+       "validacion": "sin validar"
+      },
+      {
+       "id": "GM-RD2",
+       "fuerza": 0.917,
+       "validacion": "sin validar"
+      },
+      {
+       "id": "GM-RD3",
+       "fuerza": 0.066,
+       "validacion": "sin validar"
+      },
+      {
+       "id": "GM-RD4",
+       "fuerza": 0.736,
+       "validacion": "sin validar"
+      },
+      {
+       "id": "GM-RD5",
+       "fuerza": 0.229,
+       "validacion": "sin validar"
+      }
+     ],
+     "alertas": [
+      {
+       "codigo": "GM-R8",
+       "texto": "El TGP configurado (60 W de 115 W) reduce el rendimiento de la GPU respecto de su gama"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "evidencia": {
+  "requerimiento_id": "req_01",
+  "perfil": "VIRT",
+  "orden": "grafica",
+  "filtros": {
+   "dedicada": true
+  },
+  "limite": 5,
+  "notebooks": [
+   {
+    "notebook": "Notebook_C",
+    "precio_usd": 1200.0,
+    "gama_gpu": "dedicada media",
+    "gama_gpu_indice": 4,
+    "gpu_dedicada": true,
+    "grado_gpu": 0.902,
+    "margen_gama": "superior",
+    "adecuacion_grafica": 0.941,
+    "adecuacion_movilidad": 0.231,
+    "movilidad_etiqueta": "baja",
+    "peso_kg": 2.3,
+    "autonomia_h": 5.0,
+    "autonomia_tipo_dato": "medida",
+    "srgb": 98,
+    "reglas": [
+     {
+      "id": "GM-RD4",
+      "fuerza": 1.0,
+      "validacion": "sin validar"
+     },
+     {
+      "id": "GM-RD3",
+      "fuerza": 0.801,
+      "validacion": "sin validar"
+     },
+     {
+      "id": "GM-RD2",
+      "fuerza": 0.135,
+      "validacion": "sin validar"
+     }
+    ],
+    "alertas": [],
+    "datos_faltantes": []
+   },
+   {
+    "notebook": "Notebook_X",
+    "precio_usd": 1050.0,
+    "gama_gpu": "dedicada media",
+    "gama_gpu_indice": 4,
+    "gpu_dedicada": true,
+    "grado_gpu": 0.74,
+    "margen_gama": "superior",
+    "adecuacion_grafica": 0.844,
+    "adecuacion_movilidad": 0.486,
+    "movilidad_etiqueta": "media",
+    "peso_kg": 1.8,
+    "autonomia_h": 7.0,
+    "autonomia_tipo_dato": "medida",
+    "srgb": 95,
+    "reglas": [
+     {
+      "id": "GM-RD2",
+      "fuerza": 0.917,
+      "validacion": "sin validar"
+     },
+     {
+      "id": "GM-RD4",
+      "fuerza": 0.736,
+      "validacion": "sin validar"
+     },
+     {
+      "id": "GM-RD5",
+      "fuerza": 0.229,
+      "validacion": "sin validar"
+     },
+     {
+      "id": "GM-RD3",
+      "fuerza": 0.066,
+      "validacion": "sin validar"
+     },
+     {
+      "id": "GM-RD1",
+      "fuerza": 0.011,
+      "validacion": "sin validar"
+     }
+    ],
+    "alertas": [
+     {
+      "codigo": "GM-R8",
+      "texto": "El TGP configurado (60 W de 115 W) reduce el rendimiento de la GPU respecto de su gama",
+      "notebook": "Notebook_X"
+     }
+    ],
+    "datos_faltantes": []
+   }
+  ]
+ }
+}

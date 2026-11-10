@@ -3,13 +3,15 @@
 > **Entrega:** viernes **13/11/2026** (`Grupo_2_PG3_ProyectoFinal.zip`).
 > **Capacidad:** 4 personas × 3 h por día. Del martes 10 (noche) al viernes 13 hay unas **36 a 48 horas** en total.
 > **Arquitectura:** [`docs/ARQUITECTURA.md`](../ARQUITECTURA.md). **Decisiones:** [`docs/INCONSISTENCIAS_CONTEXTOS.md`](../INCONSISTENCIAS_CONTEXTOS.md) (D-01 a D-13).
+> **Stack del LLM (D-05, 10/11/2026):** LangChain (`ChatOllama` + `ChatPromptTemplate`) sobre Ollama, como en el ejemplo de PG3 de la cátedra. Lo implementa PG3-01 en `asistente/llm.py` (cliente) y `asistente/orquestador.py` (despacho con `RunnableLambda`); los submódulos no importan LangChain.
+> **Capas del backend:** controlador → servicio → repositorio, más esquemas, en el sistema y dentro de cada submódulo (ARQUITECTURA §2.1). PG3-01 deja los cinco paquetes armados.
 > **Tareas:** una por archivo en [`issues/`](issues/), con el formato de un issue de GitHub, listas para crearse con `gh issue create --body-file`.
 
 ---
 
 ## 1. Cómo leer este plan
 
-- **Nivel 1:** lo imprescindible para aprobar. Cubre cada criterio de evaluación de la consigna (§7) y cada ítem a–l del ZIP. Suma unas **37,5 h** y es lo único que se planifica con fecha.
+- **Nivel 1:** lo imprescindible para aprobar. Cubre cada criterio de evaluación de la consigna (§7) y cada ítem a–l del ZIP. Suma unas **42 h** y es lo único que se planifica con fecha.
 - **Nivel 2:** si sobra tiempo. Son las mejoras de D-03, D-04, D-08, D-09, D-10 y D-11. Cada una está escrita como issue, así que se puede tomar cuando haya un hueco. Lo que no se haga se declara como **trabajo futuro** en el informe.
 - **Asignación:**
   - Lo de cada submódulo va a su dueño: SM1 Olea, SM2 Miranda, SM3 de Coninck y SM4 Luconi.
@@ -35,13 +37,13 @@
 
 | Persona | Submódulo | Tareas | Horas |
 | --- | --- | --- | --- |
-| **Miranda, Mauricio** | SM2 | PG3-01 Esqueleto y contrato (3) · PG3-02 Grafo modular y regresión (2) · PG3-03 SM2 (2) · PG3-16 Manual de uso (1) · PG3-17 Exportación y ZIP (1,5) | **9,5** |
+| **Miranda, Mauricio** | SM2 | PG3-01 Esqueleto y contrato (3,5) · PG3-02 Grafo modular y regresión (2) · PG3-03 SM2 (2) · PG3-16 Manual de uso (1) · PG3-17 Exportación y ZIP (1,5) | **10** |
 | **Olea, Facundo** | SM1 | PG3-06 Prompt maestro y router (3) · PG3-07 SM1 (2) · PG3-08 Secciones del informe: problema, LLM y metodología (1,5) · PG3-18 Infografía (1,5) · PG3-19 Video (1,5) | **9,5** |
 | **de Coninck, Ramiro** | SM3 | PG3-09 SM3 (2,5) · PG3-04 GRUPO: traza y parámetros (1) · PG3-10 Diagramas (2) · PG3-11 E2E, casos de uso y pruebas (3) · PG3-15 Registro de correcciones (1) | **9,5** |
 | **Luconi, Martina** | SM4 | PG3-12 SM4 (3) · PG3-13 Explicador común (3) · PG3-14 Informe ejecutivo PDF (3) | **9** |
 | **Todos** | — | PG3-00 Entorno (0,5 c/u) · PG3-20 Lectura cruzada (0,5 c/u) | 4 |
 
-**Total del nivel 1: ~41,5 h.** Es más de lo que da 3 h × 3 días (36 h) y entra si se usa la noche del martes. Si el miércoles a la noche (H2) alguien viene atrasado, se recorta primero la infografía (la consigna pide «video **o** infografía»), después el manual separado (se lo puede reemplazar por el README) y por último el diagrama de secuencia.
+**Total del nivel 1: ~42 h.** Es más de lo que da 3 h × 3 días (36 h) y entra si se usa la noche del martes. Si el miércoles a la noche (H2) alguien viene atrasado, se recorta primero la infografía (la consigna pide «video **o** infografía»), después el manual separado (se lo puede reemplazar por el README) y por último el diagrama de secuencia.
 
 ## 4. Cronograma
 
@@ -132,7 +134,7 @@ Línea continua gruesa = dura. Punteada = blanda.
 | ID | Título | Responsable | Horas | Depende de |
 | --- | --- | --- | --- | --- |
 | [PG3-00](issues/PG3-00.md) | Entorno local igual para todos | Todos | 0,5 c/u | — |
-| [PG3-01](issues/PG3-01.md) | Esqueleto ejecutable, contrato y API | Miranda | 3 | PG3-00 |
+| [PG3-01](issues/PG3-01.md) | Esqueleto ejecutable, contrato y API | Miranda | 3,5 | PG3-00 |
 | [PG3-02](issues/PG3-02.md) | Grafo modular por dueño y regresión CP1–CP11 | Miranda | 2 | PG3-00 |
 | [PG3-03](issues/PG3-03.md) | SM2 en el contrato: riesgo de RAM y virtualización | Miranda | 2 | 01·, 02· |
 | [PG3-04](issues/PG3-04.md) | GRUPO: traza de reglas (L3) y parámetros (L4) | de Coninck | 1 | 01·, 02· |

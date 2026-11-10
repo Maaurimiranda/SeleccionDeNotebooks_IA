@@ -1,0 +1,1379 @@
+{
+ "intencion": "GRUPO.parametros",
+ "parametros": {},
+ "consultas": [
+  {
+   "nombre": "GRUPO.L4",
+   "cypher": "MATCH (e:EtiquetaDifusa)<-[:TIENE_ETIQUETA]-(v:VariableDifusa)\nRETURN v.submodulo AS submodulo, v.nombre + '.' + e.nombre AS nombre,\n       {centro:e.centro, sigma:e.sigma} AS valor, e.estado_validacion AS estado_validacion,\n       'etiqueta_difusa' AS tipo\nUNION ALL\nMATCH (p:Parametro)\nRETURN p.submodulo AS submodulo, p.nombre AS nombre, p.valor AS valor,\n       p.estado_validacion AS estado_validacion, 'parametro' AS tipo",
+   "parametros": {},
+   "filas": [
+    {
+     "submodulo": "SM1",
+     "nombre": "dedicacion_h.frecuente",
+     "valor": {
+      "sigma": 4.5,
+      "centro": 12.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "dedicacion_h.principal",
+     "valor": {
+      "sigma": 8.0,
+      "centro": 28.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "dedicacion_h.ocasional",
+     "valor": {
+      "sigma": 2.0,
+      "centro": 4.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "dedicacion_h.rara_vez",
+     "valor": {
+      "sigma": 1.5,
+      "centro": 0.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "exigencia_grafica.media",
+     "valor": {
+      "sigma": 12.0,
+      "centro": 45.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "exigencia_grafica.baja",
+     "valor": {
+      "sigma": 12.0,
+      "centro": 10.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "exigencia_grafica.alta",
+     "valor": {
+      "sigma": 14.0,
+      "centro": 80.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "peso_perfil.marginal",
+     "valor": {
+      "sigma": 0.12,
+      "centro": 0.2
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "peso_perfil.determinante",
+     "valor": {
+      "sigma": 0.1,
+      "centro": 0.95
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "peso_perfil.relevante",
+     "valor": {
+      "sigma": 0.12,
+      "centro": 0.6
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "intensidad_grafica.alta",
+     "valor": {
+      "sigma": 0.12,
+      "centro": 0.85
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "intensidad_grafica.baja",
+     "valor": {
+      "sigma": 0.12,
+      "centro": 0.15
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "intensidad_grafica.media",
+     "valor": {
+      "sigma": 0.12,
+      "centro": 0.5
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "suficiencia_ram.justa",
+     "valor": {
+      "sigma": 0.2,
+      "centro": 1.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "suficiencia_ram.insuficiente",
+     "valor": {
+      "sigma": 0.2,
+      "centro": 0.5
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "suficiencia_ram.suficiente",
+     "valor": {
+      "sigma": 0.2,
+      "centro": 1.5
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "suficiencia_ram.holgada",
+     "valor": {
+      "sigma": 0.25,
+      "centro": 2.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "indice_ampliabilidad.mucha",
+     "valor": {
+      "sigma": 0.2,
+      "centro": 1.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "indice_ampliabilidad.poca",
+     "valor": {
+      "sigma": 0.2,
+      "centro": 0.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "indice_ampliabilidad.media",
+     "valor": {
+      "sigma": 0.18,
+      "centro": 0.5
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "riesgo_obsolescencia.medio",
+     "valor": {
+      "sigma": 15.0,
+      "centro": 50.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "riesgo_obsolescencia.alto",
+     "valor": {
+      "sigma": 18.0,
+      "centro": 100.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "riesgo_obsolescencia.bajo",
+     "valor": {
+      "sigma": 18.0,
+      "centro": 0.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "peso_kg.intermedia",
+     "valor": {
+      "sigma": 0.25,
+      "centro": 1.8
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "peso_kg.pesada",
+     "valor": {
+      "sigma": 0.3,
+      "centro": 2.5
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "peso_kg.liviana",
+     "valor": {
+      "sigma": 0.2,
+      "centro": 1.2
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "autonomia_h.media",
+     "valor": {
+      "sigma": 1.2,
+      "centro": 6.5
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "autonomia_h.alta",
+     "valor": {
+      "sigma": 1.5,
+      "centro": 10.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "autonomia_h.baja",
+     "valor": {
+      "sigma": 1.0,
+      "centro": 3.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "potencia_relativa.moderada",
+     "valor": {
+      "sigma": 0.1,
+      "centro": 0.6
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "potencia_relativa.restringida",
+     "valor": {
+      "sigma": 0.1,
+      "centro": 0.35
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "potencia_relativa.plena",
+     "valor": {
+      "sigma": 0.1,
+      "centro": 0.8
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "adecuacion_movilidad.baja",
+     "valor": {
+      "sigma": 0.12,
+      "centro": 0.05
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "adecuacion_movilidad.media",
+     "valor": {
+      "sigma": 0.12,
+      "centro": 0.5
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "adecuacion_movilidad.alta",
+     "valor": {
+      "sigma": 0.12,
+      "centro": 0.95
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "grado_gpu.pleno",
+     "valor": {
+      "sigma": 0.1,
+      "centro": 0.95
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "grado_gpu.parcial",
+     "valor": {
+      "sigma": 0.12,
+      "centro": 0.55
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "grado_gpu.insuficiente",
+     "valor": {
+      "sigma": 0.12,
+      "centro": 0.2
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "adecuacion_global.alta",
+     "valor": {
+      "sigma": 0.07,
+      "centro": 0.9
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "adecuacion_global.media",
+     "valor": {
+      "sigma": 0.07,
+      "centro": 0.7
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "adecuacion_global.baja",
+     "valor": {
+      "sigma": 0.14,
+      "centro": 0.4
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "excedente_presupuesto.dentro",
+     "valor": {
+      "sigma": 3.0,
+      "centro": 0.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "excedente_presupuesto.levemente",
+     "valor": {
+      "sigma": 4.0,
+      "centro": 10.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "excedente_presupuesto.muy",
+     "valor": {
+      "sigma": 6.0,
+      "centro": 25.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "grado_recomendacion.recomendar",
+     "valor": {
+      "sigma": 0.15,
+      "centro": 1.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "grado_recomendacion.considerar",
+     "valor": {
+      "sigma": 0.15,
+      "centro": 0.5
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "grado_recomendacion.descartar",
+     "valor": {
+      "sigma": 0.15,
+      "centro": 0.0
+     },
+     "estado_validacion": "sin validar",
+     "tipo": "etiqueta_difusa"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "umbral_exigencia",
+     "valor": 0.4,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "banda_frontera",
+     "valor": 0.05,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "entropia_max",
+     "valor": 0.6,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "P_COSTO_MODULO_RAM_USD",
+     "valor": 30.0,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "P_PESO_RANURAS_AMPLIABILIDAD",
+     "valor": 0.5,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "P_RANURAS_REFERENCIA",
+     "valor": 2.0,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "P_DIF_ALERTA_TGP",
+     "valor": 0.2,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "P_GRADO_GPU_UN_NIVEL_ABAJO",
+     "valor": 0.5,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "P_PESO_GPU_GRAFICA",
+     "valor": 0.6,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "P_PESO_PANTALLA_GRAFICA",
+     "valor": 0.4,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "P_ALFA_ALERTA_AUTONOMIA",
+     "valor": 0.5,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "P_FACTOR_AUTONOMIA",
+     "valor": 0.7,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "P_INCREMENTO_PRIORIDAD",
+     "valor": 0.2,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "P_MARGEN_EMPATE",
+     "valor": 0.05,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "P_MAX_RECOMENDADAS",
+     "valor": 3.0,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "centros_y_sigmas_dedicacion_h",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "centros_y_sigmas_exigencia_grafica",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "centros_y_sigmas_peso_perfil",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM1",
+     "nombre": "centros_y_sigmas_intensidad_grafica",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "centros_y_sigmas_suficiencia_ram",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "centros_y_sigmas_indice_ampliabilidad",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM2",
+     "nombre": "centros_y_sigmas_riesgo_obsolescencia",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "centros_y_sigmas_peso_kg",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "centros_y_sigmas_autonomia_h",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "centros_y_sigmas_potencia_relativa",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "centros_y_sigmas_adecuacion_movilidad",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM3",
+     "nombre": "centros_y_sigmas_grado_gpu",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "centros_y_sigmas_adecuacion_global",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "centros_y_sigmas_excedente_presupuesto",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    },
+    {
+     "submodulo": "SM4",
+     "nombre": "centros_y_sigmas_grado_recomendacion",
+     "valor": null,
+     "estado_validacion": "sin validar",
+     "tipo": "parametro"
+    }
+   ]
+  }
+ ],
+ "evidencia": {
+  "parametros": [
+   {
+    "submodulo": "SM1",
+    "nombre": "dedicacion_h.frecuente",
+    "valor": {
+     "sigma": 4.5,
+     "centro": 12.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "dedicacion_h.ocasional",
+    "valor": {
+     "sigma": 2.0,
+     "centro": 4.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "dedicacion_h.principal",
+    "valor": {
+     "sigma": 8.0,
+     "centro": 28.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "dedicacion_h.rara_vez",
+    "valor": {
+     "sigma": 1.5,
+     "centro": 0.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "exigencia_grafica.alta",
+    "valor": {
+     "sigma": 14.0,
+     "centro": 80.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "exigencia_grafica.baja",
+    "valor": {
+     "sigma": 12.0,
+     "centro": 10.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "exigencia_grafica.media",
+    "valor": {
+     "sigma": 12.0,
+     "centro": 45.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "intensidad_grafica.alta",
+    "valor": {
+     "sigma": 0.12,
+     "centro": 0.85
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "intensidad_grafica.baja",
+    "valor": {
+     "sigma": 0.12,
+     "centro": 0.15
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "intensidad_grafica.media",
+    "valor": {
+     "sigma": 0.12,
+     "centro": 0.5
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "peso_perfil.determinante",
+    "valor": {
+     "sigma": 0.1,
+     "centro": 0.95
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "peso_perfil.marginal",
+    "valor": {
+     "sigma": 0.12,
+     "centro": 0.2
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "peso_perfil.relevante",
+    "valor": {
+     "sigma": 0.12,
+     "centro": 0.6
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "banda_frontera",
+    "valor": 0.05,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "centros_y_sigmas_dedicacion_h",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "centros_y_sigmas_exigencia_grafica",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "centros_y_sigmas_intensidad_grafica",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "centros_y_sigmas_peso_perfil",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "entropia_max",
+    "valor": 0.6,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM1",
+    "nombre": "umbral_exigencia",
+    "valor": 0.4,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "indice_ampliabilidad.media",
+    "valor": {
+     "sigma": 0.18,
+     "centro": 0.5
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "indice_ampliabilidad.mucha",
+    "valor": {
+     "sigma": 0.2,
+     "centro": 1.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "indice_ampliabilidad.poca",
+    "valor": {
+     "sigma": 0.2,
+     "centro": 0.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "riesgo_obsolescencia.alto",
+    "valor": {
+     "sigma": 18.0,
+     "centro": 100.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "riesgo_obsolescencia.bajo",
+    "valor": {
+     "sigma": 18.0,
+     "centro": 0.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "riesgo_obsolescencia.medio",
+    "valor": {
+     "sigma": 15.0,
+     "centro": 50.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "suficiencia_ram.holgada",
+    "valor": {
+     "sigma": 0.25,
+     "centro": 2.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "suficiencia_ram.insuficiente",
+    "valor": {
+     "sigma": 0.2,
+     "centro": 0.5
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "suficiencia_ram.justa",
+    "valor": {
+     "sigma": 0.2,
+     "centro": 1.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "suficiencia_ram.suficiente",
+    "valor": {
+     "sigma": 0.2,
+     "centro": 1.5
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "P_COSTO_MODULO_RAM_USD",
+    "valor": 30.0,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "P_PESO_RANURAS_AMPLIABILIDAD",
+    "valor": 0.5,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "P_RANURAS_REFERENCIA",
+    "valor": 2.0,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "centros_y_sigmas_indice_ampliabilidad",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "centros_y_sigmas_riesgo_obsolescencia",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM2",
+    "nombre": "centros_y_sigmas_suficiencia_ram",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "adecuacion_movilidad.alta",
+    "valor": {
+     "sigma": 0.12,
+     "centro": 0.95
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "adecuacion_movilidad.baja",
+    "valor": {
+     "sigma": 0.12,
+     "centro": 0.05
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "adecuacion_movilidad.media",
+    "valor": {
+     "sigma": 0.12,
+     "centro": 0.5
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "autonomia_h.alta",
+    "valor": {
+     "sigma": 1.5,
+     "centro": 10.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "autonomia_h.baja",
+    "valor": {
+     "sigma": 1.0,
+     "centro": 3.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "autonomia_h.media",
+    "valor": {
+     "sigma": 1.2,
+     "centro": 6.5
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "grado_gpu.insuficiente",
+    "valor": {
+     "sigma": 0.12,
+     "centro": 0.2
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "grado_gpu.parcial",
+    "valor": {
+     "sigma": 0.12,
+     "centro": 0.55
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "grado_gpu.pleno",
+    "valor": {
+     "sigma": 0.1,
+     "centro": 0.95
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "peso_kg.intermedia",
+    "valor": {
+     "sigma": 0.25,
+     "centro": 1.8
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "peso_kg.liviana",
+    "valor": {
+     "sigma": 0.2,
+     "centro": 1.2
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "peso_kg.pesada",
+    "valor": {
+     "sigma": 0.3,
+     "centro": 2.5
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "potencia_relativa.moderada",
+    "valor": {
+     "sigma": 0.1,
+     "centro": 0.6
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "potencia_relativa.plena",
+    "valor": {
+     "sigma": 0.1,
+     "centro": 0.8
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "potencia_relativa.restringida",
+    "valor": {
+     "sigma": 0.1,
+     "centro": 0.35
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "P_ALFA_ALERTA_AUTONOMIA",
+    "valor": 0.5,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "P_DIF_ALERTA_TGP",
+    "valor": 0.2,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "P_FACTOR_AUTONOMIA",
+    "valor": 0.7,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "P_GRADO_GPU_UN_NIVEL_ABAJO",
+    "valor": 0.5,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "P_PESO_GPU_GRAFICA",
+    "valor": 0.6,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "P_PESO_PANTALLA_GRAFICA",
+    "valor": 0.4,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "centros_y_sigmas_adecuacion_movilidad",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "centros_y_sigmas_autonomia_h",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "centros_y_sigmas_grado_gpu",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "centros_y_sigmas_peso_kg",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM3",
+    "nombre": "centros_y_sigmas_potencia_relativa",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "adecuacion_global.alta",
+    "valor": {
+     "sigma": 0.07,
+     "centro": 0.9
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "adecuacion_global.baja",
+    "valor": {
+     "sigma": 0.14,
+     "centro": 0.4
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "adecuacion_global.media",
+    "valor": {
+     "sigma": 0.07,
+     "centro": 0.7
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "excedente_presupuesto.dentro",
+    "valor": {
+     "sigma": 3.0,
+     "centro": 0.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "excedente_presupuesto.levemente",
+    "valor": {
+     "sigma": 4.0,
+     "centro": 10.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "excedente_presupuesto.muy",
+    "valor": {
+     "sigma": 6.0,
+     "centro": 25.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "grado_recomendacion.considerar",
+    "valor": {
+     "sigma": 0.15,
+     "centro": 0.5
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "grado_recomendacion.descartar",
+    "valor": {
+     "sigma": 0.15,
+     "centro": 0.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "grado_recomendacion.recomendar",
+    "valor": {
+     "sigma": 0.15,
+     "centro": 1.0
+    },
+    "estado_validacion": "sin validar",
+    "tipo": "etiqueta_difusa"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "P_INCREMENTO_PRIORIDAD",
+    "valor": 0.2,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "P_MARGEN_EMPATE",
+    "valor": 0.05,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "P_MAX_RECOMENDADAS",
+    "valor": 3.0,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "centros_y_sigmas_adecuacion_global",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "centros_y_sigmas_excedente_presupuesto",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   },
+   {
+    "submodulo": "SM4",
+    "nombre": "centros_y_sigmas_grado_recomendacion",
+    "valor": null,
+    "estado_validacion": "sin validar",
+    "tipo": "parametro"
+   }
+  ],
+  "total": 77,
+  "sin_validar": 77
+ }
+}

@@ -182,15 +182,16 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 > - **Ollama local** con **`qwen2.5:3b`** por defecto (amarillo) y **`qwen2.5:7b`** (A11, verde) como opción por `OLLAMA_MODEL`.
 >   **Cambio del 10/11/2026:** se invierte el orden original (7b por defecto). Con la entrega el 13/11, el 3b corre en todas las notebooks del grupo (~2 GB, ~4 GB de RAM) y es 2 a 3 veces más rápido. Sus debilidades (JSON del plan y redacción) se compensan con la salida estructurada (`format` + `enum` de intenciones), la validación en Python y el verificador con plantilla fija.
 > - **Temperatura 0** en extracción y en explicación.
-> - **HTTP directo a `/api/chat` con `requests`** (amarillo) y salida estructurada (`format`). **Sin LangChain.**
-> - **Se quitan** `rich`, `python-dotenv`, `langchain-*` y `ollama`. `pydantic` queda solo para la API y `httpx` solo para los tests.
+> - **LangChain como cliente del LLM:** `ChatOllama` (`langchain-ollama`) y `ChatPromptTemplate` (`langchain-core`), con salida estructurada (`format` con esquema JSON). El cliente vive en `asistente/llm.py` y el despacho a submódulos (`RunnableLambda`) en `asistente/orquestador.py`; nadie más importa LangChain.
+>   **Cambio del 10/11/2026:** antes era HTTP directo con `requests` y sin LangChain. Se cambia porque el ejemplo de PG3 que subió la cátedra al campus usa LangChain para la extracción. LangChain **no** escribe Cypher (nada de `GraphCypherQAChain` en el flujo principal) ni se usan agentes: las consultas siguen siendo plantillas fijas con el driver `neo4j`. `requests` queda solo para `GET /api/tags`.
+> - **Se quitan** `rich`, `python-dotenv`, `langchain-openai` y `ollama` (el paquete suelto). `pydantic` queda solo para la API y `httpx` solo para los tests.
 >
 > **Qué tiene que cambiar cada uno:**
-> - **SM1:** deja Groq y `langchain-openai`.
+> - **SM1:** deja Groq y `langchain-openai` (pasa a `ChatOllama` vía el `LLM` común).
 > - **SM2:** cambia el modelo por defecto (`llama3.1:8b` → `qwen2.5:3b`).
 > - **SM4:** cambia el modelo por defecto (`qwen2.5:7b` → `qwen2.5:3b`), que es con el que corrió PI4.
-> - **SM3:** deja LangChain y los extras, y la explicación pasa de 0,3 a 0.
-> - **SM4:** la explicación pasa de 0,2 a 0, y `urllib` se reemplaza por `requests`.
+> - **SM3:** su `ChatOllama` pasa al `LLM` común, deja `rich`, `python-dotenv` y `pydantic` en la extracción, y la explicación pasa de 0,3 a 0.
+> - **SM4:** la explicación pasa de 0,2 a 0, y `urllib` se reemplaza por el `LLM` común (LangChain).
 >
 > Contextos actualizados: SM1 13-H, SM2 §10.3, SM3 §7.3, SM4 §6.1 y §6.5, y README §5. Lo de abajo describe la situación previa.
 
@@ -483,10 +484,10 @@ Esto le corresponde a cada autor (SM3: de Coninck; SM4: Luconi).
 - SM3 y SM4: etiquetas de procedencia y correcciones de la profesora (D-13).
 
 **Código de los PI4 → orquestador común:**
-- SM1: dejar Groq por Ollama/`requests` y extraer `requisitos_explicitos` (D-05, D-10).
+- SM1: dejar Groq por Ollama vía el `LLM` común (LangChain) y extraer `requisitos_explicitos` (D-05, D-10).
 - SM2: consultas a `ev.*`, modelo `qwen2.5:3b`, sin `req_01` por defecto (D-01, D-05, D-07).
-- SM3: sin LangChain, `rich` ni `python-dotenv`, temperatura 0 (D-05).
-- SM4: voseo, temperatura 0 y `requests` (D-05, D-07).
+- SM3: LLM solo vía el `LLM` común, sin `rich` ni `python-dotenv`, temperatura 0 (D-05).
+- SM4: voseo, temperatura 0 y el `LLM` común (D-05, D-07).
 - Todos se integran al contrato de D-07: intenciones, plan, evidencia, verificador y traza.
 
 ## 3. Verificaciones (cerradas el 09/11/2026)

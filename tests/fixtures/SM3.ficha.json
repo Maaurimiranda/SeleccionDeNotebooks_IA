@@ -1,0 +1,91 @@
+{
+ "intencion": "SM3.ficha",
+ "parametros": {
+  "requerimiento_id": "req_01",
+  "modelo": "Notebook_M"
+ },
+ "consultas": [
+  {
+   "nombre": "SM3.modelo",
+   "cypher": "MATCH (c:Requerimiento {id:$requerimiento_id})-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)\nMATCH (n)-[:POSEE]->(g:GPU)-[:ES_DE_GAMA]->(gg:GamaGPU)\nMATCH (n)-[:POSEE]->(p:Pantalla)\nMATCH (n)-[:POSEE]->(b:Bateria)\nWHERE n.modelo = $modelo\n\nOPTIONAL MATCH (x)-[act:ACTIVA]->(q:Regla {submodulo:'SM3'})\nWHERE x = n OR x = ev\nWITH c, ev, n, g, gg, p, b,\n     collect(DISTINCT CASE WHEN q IS NULL THEN null ELSE\n       {id:q.id, fuerza:act.fuerza, validacion:q.estado_validacion} END) AS reglas\nOPTIONAL MATCH (al:Alerta {submodulo_origen:'SM3'})\nWHERE EXISTS { MATCH (ev)-[:GENERA]->(al) } OR EXISTS { MATCH (n)-[:GENERA]->(al) }\nWITH c, ev, n, g, gg, p, b, reglas,\n     collect(DISTINCT CASE WHEN al IS NULL THEN null ELSE\n       {codigo:al.regla_origen, texto:al.mensaje} END) AS alertas\n\nRETURN n.modelo AS notebook, ev.perfil AS perfil, n.precio_usd AS precio_usd,\n       gg.nombre AS gama_gpu, gg.indice AS gama_gpu_indice, g.dedicada AS gpu_dedicada,\n       ev.grado_gpu AS grado_gpu, ev.margen_gama AS margen_gama, ev.adecuacion_grafica AS adecuacion_grafica,\n       n.adecuacion_movilidad AS adecuacion_movilidad, n.movilidad_etiqueta AS movilidad_etiqueta,\n       n.peso_kg AS peso_kg, b.autonomia_usada_h AS autonomia_h, b.tipo_dato AS autonomia_tipo_dato,\n       p.srgb AS srgb, reglas, alertas,\n       b.autonomia_medida_h AS autonomia_medida_h, b.autonomia_declarada_h AS autonomia_declarada_h,\n       b.fuente AS fuente_bateria, p.resolucion AS resolucion, p.refresco_hz AS refresco_hz,\n       g.vram_gb AS vram_gb, n.fuente_precio AS fuente_precio",
+   "parametros": {
+    "requerimiento_id": "req_01",
+    "modelo": "Notebook_M"
+   },
+   "filas": [
+    {
+     "notebook": "Notebook_M",
+     "perfil": "VIRT",
+     "precio_usd": 880.0,
+     "gama_gpu": "integrada moderna",
+     "gama_gpu_indice": 2,
+     "gpu_dedicada": false,
+     "grado_gpu": 1.0,
+     "margen_gama": "superior",
+     "adecuacion_grafica": 0.98,
+     "adecuacion_movilidad": null,
+     "movilidad_etiqueta": null,
+     "peso_kg": 1.5,
+     "autonomia_h": null,
+     "autonomia_tipo_dato": "desconocida",
+     "srgb": 66,
+     "reglas": [
+      {
+       "id": "GM-R3",
+       "fuerza": null,
+       "validacion": "sin validar"
+      }
+     ],
+     "alertas": [],
+     "autonomia_medida_h": null,
+     "autonomia_declarada_h": null,
+     "fuente_bateria": "ficha del fabricante",
+     "resolucion": "FHD",
+     "refresco_hz": 60,
+     "vram_gb": 0,
+     "fuente_precio": "Mercado Libre Argentina y tiendas oficiales, 01/10/2026"
+    }
+   ]
+  }
+ ],
+ "evidencia": {
+  "requerimiento_id": "req_01",
+  "perfil": "VIRT",
+  "notebooks": [
+   {
+    "notebook": "Notebook_M",
+    "precio_usd": 880.0,
+    "gama_gpu": "integrada moderna",
+    "gama_gpu_indice": 2,
+    "gpu_dedicada": false,
+    "grado_gpu": 1.0,
+    "margen_gama": "superior",
+    "adecuacion_grafica": 0.98,
+    "adecuacion_movilidad": null,
+    "movilidad_etiqueta": null,
+    "peso_kg": 1.5,
+    "autonomia_h": null,
+    "autonomia_tipo_dato": "desconocida",
+    "srgb": 66,
+    "autonomia_medida_h": null,
+    "autonomia_declarada_h": null,
+    "fuente_bateria": "ficha del fabricante",
+    "resolucion": "FHD",
+    "refresco_hz": 60,
+    "vram_gb": 0,
+    "fuente_precio": "Mercado Libre Argentina y tiendas oficiales, 01/10/2026",
+    "reglas": [
+     {
+      "id": "GM-R3",
+      "fuerza": null,
+      "validacion": "sin validar"
+     }
+    ],
+    "alertas": [],
+    "datos_faltantes": [
+     "autonomia (la adecuacion de movilidad no se puede evaluar)"
+    ]
+   }
+  ]
+ }
+}
