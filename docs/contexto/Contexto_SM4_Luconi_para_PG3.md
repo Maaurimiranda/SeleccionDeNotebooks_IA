@@ -555,7 +555,7 @@ Esquema de salida:
 | Componente | Elección | Por qué |
 |---|---|---|
 | Orquestación | Python 3 con funciones propias (`orquestar()`) | El flujo es fijo, no un agente: así cada control queda explícito y se puede probar |
-| LLM | Ollama local, **qwen2.5:3b** en las corridas de PI4 (el `.py` trae `qwen2.5:7b` por defecto; se configura con `OLLAMA_MODEL`) | Gratis, local y con salida estructurada. Se usó 3B porque el 7B colgaba la PC de prueba por RAM y disco **PG3 (D-05):** `qwen2.5:7b`, alternativa `3b`, temperatura 0 | |
+| LLM | Ollama local, **qwen2.5:3b** en las corridas de PI4 (el `.py` trae `qwen2.5:7b` por defecto; se configura con `OLLAMA_MODEL`) | Gratis, local y con salida estructurada. Se usó 3B porque el 7B colgaba la PC de prueba por RAM y disco. **PG3 (D-05):** `qwen2.5:7b`, alternativa `3b`, temperatura 0 | |
 | Base de conocimiento | Neo4j 5.x (probado en 5.26) con el driver `neo4j` (6.4.1), solo lectura | El grafo de PG2 es la base: el prototipo no escribe ni recalcula |
 | Consultas | Plantillas parametrizadas | Evitan Text2Cypher, con el que el LLM podría consultar otra cosa, inventar filtros o modificar el grafo |
 | Verificador | `verificar_explicacion()` + `plantilla_fija()` | REC-R11 automático: el control no depende de que el modelo obedezca |
