@@ -46,6 +46,8 @@ WITH *, CASE
        {regla:'REC-R3', motivo:'La CPU no soporta virtualizacion por hardware: requisito excluyente del perfil'}
   WHEN ev.excluyente_virtualizacion = 'falta informacion' THEN
        {regla:'REC-R3', motivo:'La ficha no informa si la CPU soporta virtualizacion: no se puede comparar'}
+  WHEN ev.estado = 'Descartada' AND ev.dato_faltante IS NOT NULL THEN
+       {regla:'REC-R15', motivo:'El grado queda en descartar aun con el dato que falta: ' + ev.dato_faltante}
   WHEN ev.estado = 'Descartada' THEN
        {regla:regla_descarte, motivo:'El grado de recomendacion queda en descartar'}
   WHEN NOT ev.estado STARTS WITH 'Recomendada' THEN
@@ -54,7 +56,7 @@ WITH *, CASE
   WHEN cp IS NOT NULL THEN
        {regla:null, motivo:'Es una consulta puntual por esta notebook: se responde con su evaluacion, sin ranking'}
   WHEN ev.excedente_presupuesto > 0 THEN
-       {regla:null, motivo:'Supera el presupuesto: solo se ofrece una alternativa fuera de presupuesto'}
+       {regla:null, motivo:'Supera el presupuesto del pedido'}
   ELSE {regla:'REC-R8', motivo:'Quedo fuera de los primeros ' + toString(toInteger(mx.valor)) + ' puestos del ranking'}
 END AS m
 """

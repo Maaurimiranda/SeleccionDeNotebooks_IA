@@ -35,24 +35,30 @@ def _notebook(f: dict) -> dict:
     return nb
 
 
-def _con_motivo(nb: dict, f: dict) -> dict:
-    """Por qué no figura en el ranking y qué regla lo decidió (solo si el grafo lo informa)."""
+def _no_figura(f: dict) -> dict:
+    """La notebook, con por qué no figura en el ranking y qué regla lo decidió (solo si el grafo lo informa)."""
+    nb = _notebook(f)
     for clave in ("motivo", "regla", "dato_faltante"):
         if f.get(clave) is not None:
             nb[clave] = f[clave]
     return nb
 
 
-def _con_empates(items: list[dict], filas: list[dict]) -> list[dict]:
-    """`empata_con`: las de su misma franja de REC-R8, que calculó el grafo. Solo para las que tienen puesto."""
+def _con_empates(items: list[dict], filas: list[dict], contra: list[dict] | None = None) -> list[dict]:
+    """`empata_con`: las de su misma franja de REC-R8, que calculó el grafo, entre todas las del ranking (`contra`).
+    Solo para las que tienen puesto. Si su grado es un rango, la franja se calculó con el peor caso."""
+    contra = filas if contra is None else contra
     for nb, f in zip(items, filas):
         if f["franja_empate"] is not None:
-            nb["empata_con"] = [o["notebook"] for o in filas if o is not f and o["franja_empate"] == f["franja_empate"]]
+            nb["empata_con"] = [o["notebook"] for o in contra
+                                if o["notebook"] != f["notebook"] and o["franja_empate"] == f["franja_empate"]]
+            if isinstance(nb["grado"], dict):
+                nb["franja_con_peor_caso"] = True
     return items
 
 
 def _desempate(c: dict):
-    return {k: redondear(v) for k, v in c["filas"][0].items()} if c["filas"] else None
+    return redondear(c["filas"][0]) if c["filas"] else None
 
 
 def recomendar(grafo, p: dict) -> tuple[list, EvidenciaRecomendar]:
@@ -67,7 +73,7 @@ def recomendar(grafo, p: dict) -> tuple[list, EvidenciaRecomendar]:
         "requerimiento_id": req,
         "ranking": _con_empates([{"puesto": f["puesto"], **_notebook(f)} for f in dentro], dentro),
         "fuera_de_presupuesto": _notebook(fuera[0]) if fuera else None,
-        "no_propuestas": [_con_motivo(_notebook(f), f) for f in c2["filas"]],
+        "no_propuestas": [_no_figura(f) for f in c2["filas"]],
         "sin_alternativa": c3["filas"][0]["motivo"] if c3["filas"] else None,
         "criterio_desempate": _desempate(c6b),
     }
@@ -79,7 +85,7 @@ def explicar_notebook(grafo, p: dict) -> tuple[list, EvidenciaExplicar]:
     if not c["filas"]:
         raise Aclaracion(f"La {p['modelo']} no está evaluada en el pedido {p['requerimiento_id']}.")
     f = c["filas"][0]
-    nb = _con_motivo(_notebook(f), f)
+    nb = _no_figura(f)
     nb.update({"en_la_recomendacion": f["en_la_recomendacion"], "pesos": redondear(f["pesos"]),
                "cumple": f["cumple"], "no_cumple": f["no_cumple"], "falta_verificar": f["falta_verificar"]})
     evidencia: EvidenciaExplicar = {"requerimiento_id": p["requerimiento_id"], "perfil": f["perfil"],
@@ -92,21 +98,28 @@ def comparar(grafo, p: dict) -> tuple[list, EvidenciaComparar]:
     faltan = [m for m in p["modelos"] if m not in {f["notebook"] for f in c["filas"]}]
     if faltan:
         raise Aclaracion(f"No están evaluadas en el pedido {p['requerimiento_id']}: {', '.join(faltan)}.")
-    c6b = repositorio.criterio_desempate(grafo)
-    notebooks = [_con_motivo({**_notebook(f), "en_la_recomendacion": f["en_la_recomendacion"]}, f) for f in c["filas"]]
+    c6b, c1 = repositorio.criterio_desempate(grafo), repositorio.ranking(grafo, p["requerimiento_id"])
+    notebooks = [{**_no_figura(f), "en_la_recomendacion": f["en_la_recomendacion"]} for f in c["filas"]]
+    dentro = [f for f in c1["filas"] if not f["fuera_de_presupuesto"]]   # empata con cualquiera del ranking, no solo con las comparadas
     evidencia: EvidenciaComparar = {"requerimiento_id": p["requerimiento_id"],
-                                    "notebooks": _con_empates(notebooks, c["filas"]),
+                                    "notebooks": _con_empates(notebooks, c["filas"], dentro),
                                     "criterio_desempate": _desempate(c6b)}
-    return [c, c6b], evidencia
+    return [c, c6b, c1], evidencia
 
 
 def costo_beneficio(grafo, p: dict) -> tuple[list, EvidenciaCostoBeneficio]:
-    c = repositorio.costo_beneficio(grafo, p["requerimiento_id"])
+    req = p["requerimiento_id"]
+    c = repositorio.costo_beneficio(grafo, req)
     if not c["filas"]:
-        raise _sin_evaluaciones(p["requerimiento_id"])
+        # Q7 solo trae las recomendadas: sin ninguna, el pedido puede estar evaluado igual (REC-R10)
+        c2, c3 = repositorio.no_propuestas(grafo, req), repositorio.sin_alternativa(grafo, req)
+        if not c2["filas"]:
+            raise _sin_evaluaciones(req)
+        motivo = c3["filas"][0]["motivo"] if c3["filas"] else "Ninguna notebook evaluada quedó recomendada"
+        return [c, c2, c3], {"requerimiento_id": req, "regla": None, "notebooks": [], "sin_alternativa": motivo}
     r = c["filas"][0]
     evidencia: EvidenciaCostoBeneficio = {
-        "requerimiento_id": p["requerimiento_id"],
+        "requerimiento_id": req,
         "regla": {"id": r["regla"], "enunciado": r["enunciado"], "validacion": r["validacion"]},
         "notebooks": [{"posicion": i, **_notebook(f)} for i, f in enumerate(c["filas"], 1)],
     }

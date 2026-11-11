@@ -28,6 +28,7 @@ class NotebookSM4(TypedDict, total=False):
     # solo si corresponde
     puesto: int
     empata_con: list[str]              # notebooks en la misma franja de REC-R8
+    franja_con_peor_caso: bool         # True si el grado es un rango: la franja usa su mínimo
     en_la_recomendacion: str
     motivo: str                        # por qué no figura en el ranking
     regla: str
@@ -77,5 +78,6 @@ class ReglaCostoBeneficio(TypedDict, total=False):
 
 class EvidenciaCostoBeneficio(TypedDict, total=False):
     requerimiento_id: str
-    regla: ReglaCostoBeneficio
+    regla: ReglaCostoBeneficio | None           # None si ninguna notebook quedó recomendada
     notebooks: list[NotebookSM4]                # de mayor a menor índice
+    sin_alternativa: str                        # solo si no hay recomendadas: el motivo de REC-R10

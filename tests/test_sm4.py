@@ -126,7 +126,7 @@ class TestSM4Offline(unittest.TestCase):
     def test_comparar_e_b_h_el_excluyente_gana_al_puntaje(self):
         r = ejecutar_fixture("SM4.comparar")
         self.assertEqual([c["nombre"] for c in r["consultas"]],
-                         ["SM4.Q6_COMPARAR", "SM4.Q6B_CRITERIO_DESEMPATE"])
+                         ["SM4.Q6_COMPARAR", "SM4.Q6B_CRITERIO_DESEMPATE", "SM4.Q1_RECOMENDACION"])
         e = r["evidencia"]
         nbs = e["notebooks"]
         self.assertEqual([n["notebook"] for n in nbs], ["Notebook_H", "Notebook_B", "Notebook_E"])
@@ -201,6 +201,38 @@ class TestSM4Offline(unittest.TestCase):
                 sm4.ejecutar(intencion, {"modelo": "Notebook_A", "modelos": ["Notebook_A", "Notebook_H"]}, g)
             self.assertEqual(g.llamadas, [])
 
+    def test_comparar_empata_con_cualquiera_del_ranking_no_solo_con_las_comparadas(self):
+        """H empata con B aunque B no esté entre las comparadas: la franja se mira contra todo el ranking."""
+        f = fixture("SM4.comparar")
+        q6 = next(c for c in f["consultas"] if c["nombre"] == "SM4.Q6_COMPARAR")
+        q6["filas"] = [fila for fila in q6["filas"] if fila["notebook"] != "Notebook_B"]
+        e = sm4.ejecutar("SM4.comparar", {"requerimiento_id": "req_01", "modelos": ["Notebook_H", "Notebook_E"]},
+                         GrafoFalso(f))["evidencia"]
+        h = next(n for n in e["notebooks"] if n["notebook"] == "Notebook_H")
+        self.assertEqual(h["empata_con"], ["Notebook_B"])
+
+    def test_costo_beneficio_sin_recomendadas_no_dice_que_no_hay_evaluaciones(self):
+        """Q7 solo trae las recomendadas: con notebooks evaluadas pero ninguna recomendada (REC-R10) no es una Aclaracion."""
+        vacio = {"consultas": [{"cypher": CONSULTAS["Q7_COSTO_BENEFICIO"], "filas": []}]}
+        sin_alt = {"consultas": [{"cypher": CONSULTAS["Q3_SIN_ALTERNATIVA"],
+                                  "filas": [{"motivo": "Ninguna cumple el presupuesto"}]}]}
+        e = sm4.ejecutar("SM4.costo_beneficio", {"requerimiento_id": "req_01"},
+                         GrafoFalso(fixture("SM4.recomendar"), vacio, sin_alt))["evidencia"]
+        self.assertEqual((e["notebooks"], e["regla"]), ([], None))
+        self.assertEqual(e["sin_alternativa"], "Ninguna cumple el presupuesto")
+
+    def test_costo_beneficio_sin_nada_evaluado_pide_aclaracion(self):
+        with self.assertRaises(Aclaracion):
+            sm4.ejecutar("SM4.costo_beneficio", {"requerimiento_id": "req_01"}, GrafoFalso())
+
+    def test_un_grado_en_rango_marca_que_la_franja_usa_el_peor_caso(self):
+        f = fixture("SM4.recomendar")
+        q1 = next(c for c in f["consultas"] if c["nombre"] == "SM4.Q1_RECOMENDACION")
+        q1["filas"][0].update(grado_recomendacion=None, grado_recomendacion_min=0.5, grado_recomendacion_max=0.8)
+        a = sm4.ejecutar("SM4.recomendar", f["parametros"], GrafoFalso(f))["evidencia"]["ranking"][0]
+        self.assertEqual(a["grado"], {"min": 0.5, "max": 0.8})
+        self.assertTrue(a["franja_con_peor_caso"])
+
     def test_explicar_sin_modelo(self):
         with self.assertRaises(Aclaracion):
             sm4.ejecutar("SM4.explicar_notebook", {"requerimiento_id": "req_01"}, GrafoFalso())
@@ -214,12 +246,23 @@ class TestSM4Offline(unittest.TestCase):
         for nombre, c in CONSULTAS.items():
             if nombre != "Q6B_CRITERIO_DESEMPATE":
                 self.assertIn("{id:$requerimiento_id}", c, nombre)
-        f = fixture("SM4.recomendar")
-        g = GrafoFalso(f)
-        sm4.ejecutar("SM4.recomendar", {"requerimiento_id": "req_01"}, g)
-        for cypher, parametros in g.llamadas:
-            if "$requerimiento_id" in cypher:
-                self.assertEqual(parametros["requerimiento_id"], "req_01")
+
+    def test_cada_consulta_recibe_sus_parametros(self):
+        """Con el grafo falso: el pedido, el modelo (Q4) y los modelos (Q6) llegan a cada consulta que los usa."""
+        casos = {"SM4.recomendar": "SM4.recomendar", "SM4.explicar_notebook": "SM4.explicar_notebook",
+                 "SM4.comparar": "SM4.comparar", "SM4.costo_beneficio": "SM4.costo_beneficio"}
+        for intencion, archivo in casos.items():
+            f = fixture(archivo)
+            g = GrafoFalso(f)
+            sm4.ejecutar(intencion, f["parametros"], g)
+            self.assertTrue(g.llamadas, intencion)
+            for cypher, parametros in g.llamadas:
+                for var, valor in f["parametros"].items():
+                    clave = "modelos" if var == "modelos" else var
+                    if f"${clave}" in cypher:
+                        self.assertEqual(parametros[clave], valor, f"{intencion}: {clave}")
+                if "$requerimiento_id" in cypher:
+                    self.assertEqual(parametros["requerimiento_id"], "req_01")
 
     def test_solo_lectura(self):
         escritura = re.compile(r"\b(MERGE|CREATE|SET|DELETE|REMOVE|DROP|LOAD)\b")
