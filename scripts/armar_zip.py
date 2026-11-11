@@ -111,9 +111,11 @@ def main(argv: list[str]) -> int:
              "Proyecto final de PG3 (UTN FRM). Este ZIP tiene una carpeta por ítem de la consigna §4. "
              "Para reproducirlo: `e_codigo_fuente/` y `d_manual_de_uso/` (cómo instalarlo y correrlo), `f_scripts_cypher/` (cargar el grafo) y `g_configuracion/` (variables de entorno).", "",
              "| Ítem | Carpeta | Contenido | Estado |", "| --- | --- | --- | --- |"]
+    pendiente = {"k": "**pendiente**: el enlace al video va en `docs/video/ENLACE.md` (volver a correr `python -m scripts.armar_zip`)"}
     for letra, carpeta, desc, _ in ITEMS:
         n = len(contenido[letra])
-        leeme.append(f"| {letra}) | `{carpeta}/` | {desc} | {f'{n} archivos' if n else '**pendiente** (ver el enlace o el aviso del grupo)'} |")
+        leeme.append(f"| {letra}) | `{carpeta}/` | {desc} | "
+                     f"{f'{n} archivos' if n else pendiente.get(letra, '**pendiente** (ver el aviso del grupo)')} |")
     SALIDA.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(SALIDA, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("LEEME.md", "\n".join(leeme) + "\n")

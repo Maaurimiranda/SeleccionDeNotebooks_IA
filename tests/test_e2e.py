@@ -19,14 +19,15 @@ class TestE2E(unittest.TestCase):
         from asistente.llm import LLM
         from asistente.orquestador import Orquestador
         grafo, llm = grafo_real(), LLM()
-        if grafo is None or not llm.salud().get("ok"):
+        if grafo is None or not grafo.salud().get("notebooks") or not llm.salud().get("ok"):
             raise unittest.SkipTest("hace falta Neo4j (con el grafo cargado) y Ollama con el modelo")
-        cls.orq = Orquestador(grafo, llm, dir_trazas=tempfile.mkdtemp())
+        orq = Orquestador(grafo, llm, dir_trazas=tempfile.mkdtemp())
+        cls.corridas = {c["id"]: _correr(c, orq) for c in CASOS}   # una sola corrida por caso (el LLM es lento)
 
     def test_cada_e2e(self):
         for caso in CASOS:
             with self.subTest(caso["id"]):
-                c = _correr(caso, self.orq)
+                c = self.corridas[caso["id"]]
                 fallos = [f"{x['esperado']} -> {x['obtenido']}" for x in c["resultados"] if not x["ok"]]
                 self.assertEqual(fallos, [])
 
@@ -35,11 +36,11 @@ class TestE2E(unittest.TestCase):
         self.assertGreaterEqual(len(integrales), 5)
         for caso in integrales:
             with self.subTest(caso["id"]):
-                self.assertGreaterEqual(len(_submodulos_pedidos(_correr(caso, self.orq)["traza"])), 2)
+                self.assertGreaterEqual(len(_submodulos_pedidos(self.corridas[caso["id"]]["traza"])), 2)
 
     def test_el_control_fuera_de_alcance_no_consulta_el_grafo(self):
         caso = next(c for c in CASOS if c["id"] == "E2E-8")
-        c = _correr(caso, self.orq)
+        c = self.corridas[caso["id"]]
         self.assertEqual(c["traza"]["consultas"], [])
         self.assertEqual(c["respuesta"]["origen_respuesta"], "fuera_de_alcance")
 

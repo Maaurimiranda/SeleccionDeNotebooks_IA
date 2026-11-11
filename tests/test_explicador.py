@@ -85,6 +85,10 @@ class TestVerificador(unittest.TestCase):
         r = con("El perfil VIRT tiene grado 0,899 (casi 0.9) y presupuesto de 1000 USD.")
         self.assertEqual(verificar(r, self.ram), [])
 
+    def test_punto_de_miles_no_es_decimal(self):
+        self.assertEqual(verificar(con("El presupuesto es de 1.000 USD."), self.ram), [])
+        self.assertTrue(any(p.startswith("(a)") for p in verificar(con("El presupuesto es de 2.000 USD."), self.ram)))
+
     def test_buena_con_estados_con_tilde(self):
         r = con("Notebook_M queda Recomendada condicionada por falta de información, entre 0.504 y 0.826. "
                 "Notebook_A queda Recomendada (Alta) con 0.785 y Notebook_E, Descartada (excluyente incumplido).")

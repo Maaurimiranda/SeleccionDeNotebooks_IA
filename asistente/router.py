@@ -175,6 +175,11 @@ def validar(plan: dict, texto: str, sesion: dict, catalogo: list[str], pedidos: 
             "observaciones": obs}
 
 
+_PALABRAS_NUMERO = {n: w for n, w in enumerate(
+    "cero uno dos tres cuatro cinco seis siete ocho nueve diez once doce trece catorce quince dieciseis "
+    "diecisiete dieciocho diecinueve veinte".split())}
+
+
 def _filtro_en_texto(valor, texto: str) -> bool:
     """Un filtro de SM3 vale solo si el usuario lo dijo: su número aparece en el texto (con punto o coma)
     o, si es un sí/no, la palabra «dedicada». Un modelo chico copia los filtros del ejemplo del prompt."""
@@ -183,8 +188,12 @@ def _filtro_en_texto(valor, texto: str) -> bool:
     if not isinstance(valor, (int, float)):   # un valor que no es número no se puede respaldar
         return False
     escritos = {str(valor), f"{valor:g}"}
+    if valor >= 1000 and float(valor).is_integer():
+        escritos.add(f"{int(valor):,}".replace(",", "."))     # «2.500 gramos» para 2500
     escritos |= {e.replace(".", ",") for e in escritos}
-    return any(re.search(r"(?<![\d.,])" + re.escape(e) + r"(?!\d)", texto) for e in escritos)
+    if any(re.search(r"(?<![\d.,])" + re.escape(e) + r"(?!\d)", texto) for e in escritos):
+        return True
+    return float(valor).is_integer() and _PALABRAS_NUMERO.get(int(valor)) in re.findall(r"[a-z]+", _sin_tildes(texto))
 
 
 def _validar_parametros(intencion: str, crudos: dict, catalogo: list[str], modelos_texto: list[str],

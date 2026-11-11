@@ -45,6 +45,14 @@ class TestValidar(unittest.TestCase):
         r = v(p, "Para req_01, las de más de 8 horas de batería, con gráfica dedicada y menos de 2,5 kg")
         self.assertEqual(r["consultas"][0]["parametros"]["filtros"], {"peso_max": 2.5, "bateria_min": 8, "dedicada": True})
 
+    def test_filtro_escrito_en_palabras_o_con_punto_de_miles(self):
+        from asistente.router import _filtro_en_texto
+        self.assertTrue(_filtro_en_texto(8, "las de ocho horas de batería"))
+        self.assertTrue(_filtro_en_texto(2500, "menos de 2.500 gramos"))
+        self.assertTrue(_filtro_en_texto(2.5, "menos de 2,5 kg"))
+        self.assertFalse(_filtro_en_texto(8, "las de nueve horas"))
+        self.assertFalse(_filtro_en_texto(8, "las de 18 horas"))   # el 8 de 18 no cuenta
+
     def test_intencion_invalida_se_descarta(self):
         r = v(plan([{"intencion": "SM9.volar", "parametros": {}},
                     {"intencion": "SM4.recomendar", "parametros": {}}], "req_01"), "recomendame algo para req_01")

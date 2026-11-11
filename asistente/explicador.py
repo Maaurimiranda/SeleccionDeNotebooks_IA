@@ -81,10 +81,12 @@ def _numeros_de_la_evidencia(evidencia) -> set[Decimal]:
 
 def _respaldado(n: Decimal, nums: set[Decimal]) -> bool:
     """n está en la evidencia, o es ese número redondeado a los decimales con que se escribió,
-    o es un grado (0 a 1) escrito como porcentaje."""
+    o es un grado (0 a 1) escrito como porcentaje, o es «1.200» con punto de miles para 1200."""
     d = max(0, -n.as_tuple().exponent)
+    miles = d == 3 and n >= 1   # tres decimales exactos: puede ser un punto de miles
     try:
-        return any(_redondear(e, d) == n or (0 <= e <= 1 and _redondear(e * 100, d) == n) for e in nums)
+        return any(_redondear(e, d) == n or (0 <= e <= 1 and _redondear(e * 100, d) == n) or (miles and e == n * 1000)
+                   for e in nums)
     except InvalidOperation:   # una cifra que no se puede redondear no está respaldada
         return False
 
