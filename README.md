@@ -35,76 +35,164 @@ Está formado por cuatro submódulos que comparten una única base de conocimien
 
 ## 3. Arquitectura
 
-Definida en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md): router con prompt maestro, cuatro submódulos con un contrato común, explicador con verificador y traza. El plan de trabajo hasta la entrega (13/11/2026) está en [`docs/plan/PLAN_PG3.md`](docs/plan/PLAN_PG3.md).
+Definida en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md): componentes (§2), flujo de una consulta (§3), contrato de los submódulos (§4), grafo dividido por dueño (§5) y traza (§8). Las decisiones del grupo están en [`docs/INCONSISTENCIAS_CONTEXTOS.md`](docs/INCONSISTENCIAS_CONTEXTOS.md) (D-01 a D-13) y el plan de trabajo hasta la entrega (13/11/2026) en [`docs/plan/PLAN_PG3.md`](docs/plan/PLAN_PG3.md).
+
+El camino de una consulta:
+
+1. **Interfaz** (`asistente/api.py`, `asistente/cli.py`): la entrada única. Valida el texto y lo pasa al orquestador.
+2. **Router** (`asistente/router.py`, `prompts/maestro.txt`): el LLM traduce el texto a un plan JSON de intenciones cerradas y Python lo valida. Nunca se asume un pedido ni se acepta un modelo que no está en el catálogo.
+3. **Submódulos** (`asistente/submodulos/`): SM1 a SM4 y GRUPO. Cada uno expone solo `ejecutar(intencion, parametros, grafo)` y corre Cypher fijo, de solo lectura, sobre Neo4j.
+4. **Explicador** (`asistente/explicador.py`, `prompts/explicacion.txt`): el LLM redacta usando únicamente la evidencia que devolvió el grafo. Un verificador controla cifras, notebooks, reglas, alertas y estados y, si la redacción no pasa tras los reintentos, se responde con una plantilla fija.
+5. **Traza** (`asistente/traza.py`): un registro por consulta.
+
+El orquestador (`asistente/orquestador.py`) coordina los pasos 2 a 5. Los diagramas finales de componentes, secuencia y grafo se arman en PG3-10 (`docs/diagramas/`); hasta entonces están en Mermaid en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §2 y §3.
 
 ## 4. Estructura del repositorio
 
-> La estructura final está en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §6. Por ahora:
+La estructura completa y quién es dueño de cada archivo están en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §6. Hoy:
 
 ```
 SeleccionDeNotebooks_IA/
 ├── README.md
 ├── CLAUDE.md                       # reglas para agentes y personas; nota de sesión obligatoria
+├── requirements.txt  .env.example  # dependencias y plantilla de configuración (ítems e y g)
+├── asistente/                      # código fuente (ítem e)
+│   ├── api.py  cli.py              # interfaz única: POST /consultar, GET /salud y consola
+│   ├── orquestador.py  router.py  explicador.py  traza.py
+│   ├── contrato.py  config.py  grafo.py  llm.py
+│   └── submodulos/                 # sm1, sm2, sm3, sm4 y grupo: entrada → servicio → repositorio (+ esquemas)
+├── prompts/                        # maestro.txt (router) y explicacion.txt (explicador)
+├── cypher/                         # el grafo en scripts por dueño, 00_ a 90_ (ítem f)
+├── scripts/                        # cargar_grafo, verificar_grafo, contar_grafo, generar_fixtures
+├── tests/                          # unittest; fixtures/ con filas reales del grafo
 └── docs/
+    ├── MANUAL_DE_USO.md            # manual de uso (ítem d)
     ├── ARQUITECTURA.md             # arquitectura y contrato de PG3
-    ├── plan/                       # PLAN_PG3.md + issues/ (una tarea por archivo)
-    ├── sesiones/                   # explicación de cada sesión de trabajo, para el grupo
     ├── RESTRICCIONES.md            # qué técnicas y tecnologías se pueden usar
-    ├── INCONSISTENCIAS_CONTEXTOS.md # inconsistencias entre contextos y decisiones pendientes (D-01 a D-13)
+    ├── INCONSISTENCIAS_CONTEXTOS.md # inconsistencias entre contextos y decisiones (D-01 a D-13)
+    ├── CORRECCIONES.md             # registro de correcciones (consigna §3.1)
+    ├── plan/                       # PLAN_PG3.md + issues/ (una tarea por archivo)
+    ├── informe/                    # secciones del informe, una por archivo (ítem a)
+    ├── pruebas/                    # casos de prueba y resultados (ítem c)
+    ├── sesiones/                   # explicación de cada sesión de trabajo, para el grupo
     ├── consigna/                   # ConsignaPG3.md: consigna de la cátedra y ejemplo de referencia
     ├── contexto/                   # contexto para PG3: PG1/PG2 grupal y SM1–SM4 (Contexto_SMX_{Apellido}_para_PG3.md)
     ├── cypher/                     # scripts de PG2; canónico: Grupo_2_PG2_U1_corregido.cypher (D-01)
     └── fuentes/                    # PI4 de cada submódulo (SM1–SM4): código y prompts
 ```
 
+Se agregan con las tareas que siguen: `docs/diagramas/` (PG3-10), `scripts/correr_e2e.py` y los `docs/pruebas/E2E-n.md` (PG3-11), y `datos/` con `scripts/exportar_grafo.py` y `scripts/armar_zip.py` (PG3-17). La carpeta `trazas/` se crea sola al consultar y no se versiona.
+
 ## 5. Requisitos
 
 | Herramienta | Versión | Nota |
 | --- | --- | --- |
-| Python | `[confirmar]` | La consigna pide el código en Python con `requirements.txt` |
-| Neo4j | 5.x `[confirmar]` | Base de conocimiento de PG2. Las consultas de SM2 usan subconsultas `EXISTS { … }` y el driver 5 |
+| Python | 3.10 o posterior (probado con 3.14) | La consigna pide el código en Python con `requirements.txt` |
+| Neo4j | 5.x (probado con 5.26) | Base de conocimiento de PG2. Las consultas de SM2 usan subconsultas `EXISTS { … }` y el driver 5 |
 | LLM | Ollama local, `qwen2.5:3b` (`qwen2.5:7b` opcional por `OLLAMA_MODEL`) | Temperatura 0 en las dos llamadas; LangChain (`ChatOllama`) como cliente, sin agentes ni Cypher generado (D-05) |
 | Memoria | ~4 GB libres para `qwen2.5:3b` (~8 GB con `7b`) | Más lo que use Neo4j |
 
+Cómo instalar cada uno, paso a paso: [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md) §1 y §2.
+
 ## 6. Puesta en marcha
 
-> **Pendiente.** Los comandos, las variables de entorno y la carga del grafo dependen de la arquitectura y la estructura (secciones 3 y 4).
+Resumen para Windows (PowerShell). El paso a paso, con la instalación de Ollama y de Neo4j, el bloque que se corre en cada terminal y los errores comunes, está en [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md).
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+ollama pull qwen2.5:3b
+Copy-Item .env.example .env        # y completar NEO4J_PASSWORD
+```
+
+El código **no lee el `.env` solo** (sin `python-dotenv`, D-05): las variables se cargan en la terminal antes de lanzar cualquier comando (manual §4.1). Con Neo4j iniciado y las variables cargadas:
+
+```powershell
+python -m scripts.cargar_grafo      # BORRA la base y carga cypher/ (101 sentencias)
+python -m scripts.verificar_grafo   # regresión CP1–CP11: tiene que dar 11/11 OK
+```
+
+La configuración (`NEO4J_*`, `OLLAMA_*`, `MAX_CARACTERES`, `MAX_REGENERACIONES`, `DIR_TRAZAS`) está en `.env.example` y se describe en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §4.6. **El `.env` no se sube nunca: el repositorio es público.**
 
 ## 7. Uso
 
-> **Pendiente.** La interfaz (chat, API o las dos) y su contrato se definen con la arquitectura. La consigna pide una **entrada única** para el usuario.
+La consigna pide una **entrada única**: el sistema tiene dos formas de usarla, y las dos pasan por el mismo orquestador.
 
-### Preguntas de ejemplo *(ideas, a validar contra el grafo)*
+```powershell
+python -m asistente.cli "Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?"
+uvicorn asistente.api:app
+```
 
-| Pregunta | Submódulos que debería usar |
-| --- | --- |
-| «¿Qué riesgo corre cada notebook de quedarse corta de RAM?» | SM2 |
-| «¿Qué notebooks se descartan porque no soportan virtualización?» | SM2 (y SM4 para el estado final) |
-| «Explicame por qué la Notebook G quedó indeterminada» | SM2 + SM4 |
-| «¿Qué reglas se activaron para la Notebook A?» | SM2 + SM3 + SM4 |
-| «¿Qué riesgo de RAM tienen las notebooks para mi pedido?» (con `req_02`) | SM1 + SM2 (perfil indeterminado) |
-| «¿Cuál es la capital de Francia?» | Ninguno: respuesta fija de alcance |
+- **Consola** (`asistente/cli.py`): sin texto abre el modo conversación (`/pedido req_01` fija el pedido y `/salir` termina); `--traza` muestra la traza de cada respuesta.
+- **API** (`asistente/api.py`): `POST /consultar` recibe `texto` y, opcionalmente, `requerimiento_id`, y devuelve `respuesta`, `requerimiento_id`, `submodulos_consultados`, `origen_respuesta`, `intento` y `traza`. `GET /salud` informa si Neo4j y Ollama responden. La documentación interactiva (OpenAPI) está en `http://localhost:8000/docs`. No hay endpoints por submódulo.
+
+Cómo se llama a la API desde PowerShell, cómo leer una respuesta (estados, rangos, advertencia y `origen_respuesta`) y qué hacer ante un error: [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md) §4 a §8.
+
+### Preguntas de ejemplo
+
+Son los casos de las pruebas E2E (PG3-11). Lo que se controla es lo que dice el grafo, no la redacción del modelo.
+
+| Pregunta | Submódulos | Qué tiene que decir el grafo |
+| --- | --- | --- |
+| «Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?» (E2E-1) | SM1, SM2, SM3 y SM4 | `Notebook_A` primera (grado 0,785), después `Notebook_H` y `Notebook_B`; `Notebook_X` aparte, fuera de presupuesto |
+| «En req_01, ¿por qué la M quedó condicionada y la G indeterminada?» (E2E-2) | SM2, SM3 y SM4 | M: grado entre 0,504 y 0,826 por falta de la autonomía. G: riesgo de RAM entre 49,58 y 81,46, alertas REN-R10 y FZ-R7 |
+| «En req_01, la E tiene casi el mismo puntaje que la B y la H, ¿por qué no la recomiendan?» (E2E-5) | SM2 y SM4 | E es `Descartada (excluyente incumplido)`: su CPU no soporta virtualización (REN-R1 y REC-R3) |
+| «En req_01, ¿qué reglas se activaron para la A, de dónde sale cada dato y qué riesgo de RAM tiene?» (E2E-9) | GRUPO, SM2 y SM4 | Las 18 reglas de la A con su fuerza y su origen (14 con origen; el resto, «no registrada») y el riesgo de RAM del grafo |
+| «Para req_01, ¿cuáles son las mejores en movilidad y cómo queda el costo-beneficio?» (E2E-10) | SM3 y SM4 | Orden por movilidad; el dato faltante se informa como faltante; costo-beneficio del grafo |
+| «¿Cuál es la capital de Francia?» (E2E-8, control) | Ninguno | `fuera_de_alcance`, mensaje fijo, sin consultas a los submódulos |
 
 ## 8. Pruebas
 
-> **Pendiente.** Herramientas y organización de las pruebas se definen con la arquitectura. Lo que pide la consigna: pruebas funcionales con esperado vs obtenido (sección 3.5) y al menos tres E2E que crucen submódulos (sección 7), ver [`docs/consigna/ConsignaPG3.md`](docs/consigna/ConsignaPG3.md).
+Con `unittest` (no `pytest`, ver [`docs/RESTRICCIONES.md`](docs/RESTRICCIONES.md) §5):
 
-Casos E2E candidatos *(ideas, a validar contra el grafo)*: explicar una recomendación completa (SM2 + SM3 + SM4), dato faltante que atraviesa módulos (Notebook G), perfil indeterminado (`req_02`), RAM y gráfica integrada (SM2 → SM3), y excluyentes con ranking (SM2 + SM4).
+```powershell
+python -m unittest                  # sin Neo4j ni Ollama se saltean las pruebas que los necesitan
+python -m scripts.verificar_grafo   # regresión CP1–CP11 contra el grafo cargado
+$env:PG3_TEST_LLM = "1"; python -m unittest tests.test_router tests.test_explicador   # con Ollama (lento)
+```
+
+| Nivel | Qué prueba | Necesita |
+| --- | --- | --- |
+| Unitarias offline | `ejecutar()` de cada submódulo con un grafo falso que devuelve filas reales (`tests/fixtures/`), el `validar()` del router, el verificador y la plantilla fija | Nada |
+| Grafo | Los 11 casos de PG1/PG2 §9 contra el grafo cargado | Neo4j |
+| Funcionales (consigna §3.5) | Recuperación, consultas, reglas, difuso y respuesta, con esperado contra obtenido: clases `ConGrafo` de `tests/test_smX.py` | Neo4j |
+| E2E (consigna §7) | E2E-1, 2, 5, 9 y 10 (casos integrales, cruzan submódulos) y E2E-3 y 8 (controles), con la traza en el formato de la cátedra | Neo4j + Ollama |
+
+Los E2E los corre `scripts/correr_e2e.py`, que escribe un `docs/pruebas/E2E-n.md` por caso (PG3-11). Hoy [`docs/pruebas/`](docs/pruebas/) tiene la comparación de conteos del grafo ([`conteos_grafo.md`](docs/pruebas/conteos_grafo.md)). El criterio de aprobado de un E2E es lo que dice el grafo (estados, grados, puestos y alertas), no el texto del modelo ([`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §7). Lo que pide la consigna: pruebas funcionales con esperado vs obtenido (sección 3.5) y al menos tres E2E que crucen submódulos (sección 7), ver [`docs/consigna/ConsignaPG3.md`](docs/consigna/ConsignaPG3.md).
 
 ## 9. Trazabilidad y auditoría
 
-> **Pendiente.** Cómo se registra la traza depende de la arquitectura.
-
 La consigna (sección 3.7) pide poder reconstruir, para una respuesta: **fuente** del conocimiento, **regla** utilizada, **evidencia** considerada, **consulta** ejecutada y **explicación** generada.
 
-Lo que ya existe:
+Cada consulta del usuario deja **un registro JSON** en `trazas/AAAA-MM-DD.jsonl` (carpeta `DIR_TRAZAS`, ignorada por Git). La API lo devuelve en el campo `traza` y la consola lo muestra con `--traza`. Tiene la pregunta, el plan del router y su validación, cada consulta Cypher con sus parámetros y las filas que devolvió Neo4j, la evidencia que recibió el explicador, cada intento de redacción con lo que detectó el verificador, la respuesta, su origen y la duración de cada paso. Con esa traza y el grafo se reconstruyen los cinco puntos:
 
-- **En el grafo (PG2):** las reglas activadas quedan registradas (`[:ACTIVA]`, con su fuerza) y cada regla enlaza con la fuente que la respalda.
-- **En el flujo de SM2 (PI4):** se guarda la pregunta y el JSON extraído, los parámetros validados, la consulta Cypher con sus filas, la evidencia que recibió el LLM y cada intento de explicación con lo que detectó el verificador (modo `--log archivo.jsonl`).
+| La consigna pide | Dónde está |
+| --- | --- |
+| **Regla** | `[:ACTIVA]` en el grafo, con su fuerza, y la intención `GRUPO.traza_reglas` |
+| **Fuente** | El grafo canónico **no** guarda `fuente` en las `:Regla`: el origen está en `Parametro.origen` (los parámetros que respaldan cada regla difusa), `EtiquetaDifusa.fuente`, `Juego.fuente`, `Notebook.fuente_precio` y `Bateria.fuente`. `GRUPO` los expone y lo que falta sale como «no registrada», sin inventar nada. Es el origen de los parámetros, no el del texto de la regla |
+| **Evidencia** | El campo `evidencia` de la traza: lo único que ve el explicador |
+| **Consulta** | `consultas[]`: el Cypher, sus parámetros y las filas |
+| **Explicación** | `intentos[]` y `respuesta` |
+
+Cómo ver la traza, con los comandos: [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md) §7. Detalle del diseño: [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §8.
 
 ## 10. Entregable PG3 (`Grupo_2_PG3_ProyectoFinal.zip`)
 
-El contenido mínimo del ZIP (ítems a–l) está en [`docs/consigna/ConsignaPG3.md`](docs/consigna/ConsignaPG3.md#4-formato-del-entregable). Dónde queda cada ítem en el repo se define junto con la estructura (sección 4, **pendiente**).
+El contenido mínimo del ZIP (ítems a–l) está en [`docs/consigna/ConsignaPG3.md`](docs/consigna/ConsignaPG3.md#4-formato-del-entregable). Dónde queda cada ítem en el repo:
+
+| Ítem | Dónde |
+| --- | --- |
+| a) Informe ejecutivo (PDF) | `docs/informe/` (una sección por archivo; el PDF se arma con PG3-14) |
+| b) Diagramas | `docs/diagramas/` (PG3-10) |
+| c) Casos de prueba | `docs/pruebas/` |
+| d) Manual de uso | [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md) |
+| e) Código fuente | `asistente/`, `prompts/`, `scripts/` y `requirements.txt` |
+| f) Scripts Cypher | `cypher/` |
+| g) Archivos de configuración | `.env.example` |
+| h) Recursos complementarios | `prompts/`, `docs/contexto/` y `docs/fuentes/` |
+| i) Exportación de Neo4j y j) Datos de ejemplo | `datos/` (PG3-17) |
+| k) Video e l) Infografía | Se agregan al ZIP (PG3-19 y PG3-18) |
 
 **Criterios de evaluación de PG3:** prompt maestro que enrute y respete que Neo4j maneja la verdad; API o interfaz única sin errores críticos; al menos tres pruebas E2E que crucen submódulos; informe coherente y profesional; ZIP que permita revisar y reproducir.
 
@@ -118,11 +206,13 @@ El contenido mínimo del ZIP (ítems a–l) está en [`docs/consigna/ConsignaPG3
 - [x] Entender el contexto de SM1, SM3 y SM4 (unificados, D-01 a D-13)
 - [x] Definir la arquitectura y la estructura del repositorio (`docs/ARQUITECTURA.md`)
 - [x] Plan de PG3 con tareas, responsables y dependencias (`docs/plan/`)
-- [ ] Integrar SM1, SM3 y SM4
-- [ ] Prompt maestro con enrutamiento
-- [ ] API única con enrutamiento a varios submódulos
-- [ ] Pruebas E2E (≥ 3) con esperado vs obtenido
-- [ ] Informe, diagramas, manual, video e infografía
+- [x] Integrar SM1, SM3 y SM4 (con GRUPO, bajo el contrato común)
+- [x] Prompt maestro con enrutamiento (router)
+- [x] API única con enrutamiento a varios submódulos, y consola
+- [x] Explicador común con verificador y plantilla fija (falta ajustarlos con los E2E reales)
+- [x] Manual de uso (`docs/MANUAL_DE_USO.md`)
+- [ ] Pruebas E2E (≥ 3) con esperado vs obtenido (PG3-11)
+- [ ] Informe, diagramas, video e infografía
 - [ ] Exportación de Neo4j y ZIP final
 
 ## 12. Limitaciones conocidas
