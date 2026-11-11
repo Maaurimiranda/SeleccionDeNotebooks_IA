@@ -50,9 +50,12 @@ NOTA_CORRECCIONES = (
     "Ya están hechos. Las cifras vigentes (router 28 de 31 y 30 de 31, los 7 E2E) están en las secciones 6 y 8.*\n\n")
 
 # Anexos: (archivo relativo a docs/, nota previa). El que no existe se saltea.
+DIAGRAMAS = [("arquitectura", "Arquitectura"), ("secuencia_consulta", "Secuencia de una consulta (E2E-1)"),
+             ("grafo", "Ontología del grafo")]
 ANEXOS = [
     ("CORRECCIONES.md", NOTA_CORRECCIONES),
     ("MANUAL_DE_USO.md", ""),
+    ("@diagramas", ""),  # las imágenes de docs/diagramas, en hojas apaisadas
     ("pruebas/casos_de_uso.md", ""),
     ("pruebas/funcionales.md", ""),
 ]
@@ -87,19 +90,24 @@ img {{ margin: 3pt 0; }}
 # Nota: no se usa background-color en tablas ni en <pre>. MuPDF repite esos fondos como tiras en las páginas siguientes.
 
 
-def tablas_anchas_a_fichas(md: str, min_cols: int = 8) -> str:
-    """Una tabla de 8 o más columnas no entra en una página vertical y MuPDF recorta las últimas. Cada fila pasa a
-    una ficha: título con las tres primeras columnas y la última, y una viñeta por cada columna del medio."""
+# Columnas que van en el título de la ficha; el resto, en viñetas.
+TITULO_FICHA = {"ID", "Aspecto", "Componente", "Estado", "Tipo", "Prueba", "OK"}
+
+
+def tablas_anchas_a_fichas(md: str) -> str:
+    """Una tabla con una columna «ID» o «Prueba» y 5 o más columnas no entra en una página vertical: MuPDF recorta
+    las últimas o las pisa. Cada fila pasa a una ficha: un título con las columnas cortas y una viñeta por cada
+    columna de texto largo."""
     lineas, salida, i = md.split("\n"), [], 0
     celdas = lambda l: [c.strip() for c in re.split(r"(?<!\\)\|", l.strip())[1:-1]]
     while i < len(lineas):
         if lineas[i].startswith("|") and i + 1 < len(lineas) and re.match(r"^\|(\s*:?-+:?\s*\|)+\s*$", lineas[i + 1]) \
-                and len(celdas(lineas[i])) >= min_cols:
+                and len(celdas(lineas[i])) >= 5 and {"ID", "Prueba"} & set(celdas(lineas[i])):
             cab, i = celdas(lineas[i]), i + 2
             while i < len(lineas) and lineas[i].startswith("|"):
                 c = celdas(lineas[i])
-                salida.append("**" + " · ".join(c[:3] + [c[-1]]) + "**\n")
-                salida += [f"- **{cab[k]}:** {c[k]}" for k in range(3, len(cab) - 1)]
+                salida.append("**" + " · ".join(v for h, v in zip(cab, c) if h in TITULO_FICHA) + "**\n")
+                salida += [f"- **{h}:** {v}" for h, v in zip(cab, c) if h not in TITULO_FICHA]
                 salida.append("")
                 i += 1
         else:
@@ -205,6 +213,20 @@ def seccion_md(archivos: list[str]) -> str:
     return "\n\n".join(partes)
 
 
+def anexo_diagramas(letra):
+    """Una hoja A4 apaisada por diagrama de docs/diagramas (PG3-10). Devuelve None si no están."""
+    pngs = [(DOCS / "diagramas" / f"{n}.png", nombre) for n, nombre in DIAGRAMAS]
+    if not all(p.exists() for p, _ in pngs):
+        return None
+    titulo = f"Anexo {next(letra)} · Diagramas del sistema"
+    doc = fitz.open()
+    for i, (png, nombre) in enumerate(pngs, 1):
+        page = doc.new_page(width=A4.height, height=A4.width)
+        page.insert_text((36, 72), f"{titulo} · {i}. {nombre}", fontsize=12, fontname="hebo", color=AZUL)
+        page.insert_image(fitz.Rect(90, 80, 90 + 660 * 1.0, 80 + 660 * 2067 / 2922), filename=str(png))
+    return doc, [(1, titulo, 0)]
+
+
 def pie(doc: fitz.Document):
     """Cabecera y número de página en todas las páginas menos la portada."""
     for i, page in enumerate(doc):
@@ -238,6 +260,11 @@ def armar_informe():
         bloques.append((doc, tit, False))
     letra = iter("ABCDEFG")
     for rel, nota in ANEXOS:
+        if rel == "@diagramas":
+            hallado = anexo_diagramas(letra)
+            if hallado:
+                bloques.append((*hallado, True))
+            continue
         ruta = DOCS / rel
         if not ruta.exists():
             continue

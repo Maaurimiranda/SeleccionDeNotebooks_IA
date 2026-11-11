@@ -81,7 +81,6 @@ Al 11/11/2026, cuando se redactó este informe:
 | Nivel 2 (PG3-22 a 27) | No se hizo. Es trabajo futuro, con su diseño ya documentado en los contextos |
 | Tiempos de punta a punta en otra máquina | No se midieron (solo el plan, de 10 a 50 s, en la notebook de Ramiro de Coninck) |
 | Video demostrativo (PG3-19) | Pendiente, lo hace una persona |
-| Diagramas en Draw.io (PG3-10) | No estaban al redactar. El informe trae dos figuras propias (sección 4) |
 | Infografía (PG3-18) | Se cubre con el resumen ejecutivo de una página (`docs/presentacion/resumen_ejecutivo.pdf`) |
 | Regeneración del verificador con el modelo real | Probada con un LLM falso (`tests/test_explicador.py`). En las 5 respuestas reales de los E2E el verificador aprobó a la primera, así que ninguna usó la regeneración ni la plantilla |
 | Reproducción desde un ZIP limpio siguiendo el manual | No se hizo |

@@ -16,7 +16,7 @@ Esta lista junta lo que figura en el repositorio y en los informes previos del g
 - Entregas PI4 de cada submódulo, en `docs/fuentes/`: `Olea_Facundo_PI4_U4.ipynb` (SM1), `Miranda_Mauricio_PI4_U4.py` (SM2), `sm3_asistente.py` y sus prompts (SM3) y `Luconi_Martina_PI4_U4.py` (SM4).
 - Contextos para PG3 en `docs/contexto/`: `Contexto_PG1_PG2_Grupo_para_PG3.md` y `Contexto_SM1_Olea_para_PG3.md`, `Contexto_SM2_Miranda_para_PG3.md`, `Contexto_SM3_deConinck_para_PG3.md` y `Contexto_SM4_Luconi_para_PG3.md`.
 - Documentos de PG3 del repositorio: `docs/ARQUITECTURA.md`, `docs/RESTRICCIONES.md`, `docs/INCONSISTENCIAS_CONTEXTOS.md` (decisiones D-01 a D-13), `docs/plan/PLAN_PG3.md`, `docs/CORRECCIONES.md` y las notas de `docs/sesiones/`.
-- Corridas citadas en este informe, en `docs/pruebas/`: `resultados_e2e.md`, `E2E-1.md` a `E2E-10.md`, `casos_de_uso.md`, `funcionales.md` y `conteos_grafo.md`.
+- Corridas citadas en este informe, en `docs/pruebas/`: `resultados_e2e.md`, `E2E-n.md` (E2E-1, 2, 3, 5, 8, 9 y 10), `casos_de_uso.md`, `funcionales.md` y `conteos_grafo.md`.
 
 ## Fuentes de conocimiento del dominio
 

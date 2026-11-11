@@ -30,7 +30,7 @@ ITEMS = [
     ("i", "i_exportacion_neo4j", "Exportación de Neo4j", ["datos/export"]),
     ("j", "j_datos_de_ejemplo", "Datos de ejemplo", ["datos/consultas_ejemplo.csv", "datos/salida_pi2.csv", "datos/traza_ejemplo.jsonl"]),
     ("k", "k_video", "Video demostrativo o presentación", ["docs/video"]),
-    ("l", "l_infografia", "Infografía o resumen ejecutivo", ["docs/infografia", "docs/informe/02_resumen*"]),
+    ("l", "l_infografia", "Infografía o resumen ejecutivo", ["docs/infografia", "docs/presentacion", "docs/informe/02_resumen*"]),
 ]
 
 _PLACEHOLDER = re.compile(r"^(?:|…|\.\.\.|<[^>]*>|tu_[\w-]*|cambiar\w*|changeme|xxx+|\$\{?\w+\}?)$", re.IGNORECASE)

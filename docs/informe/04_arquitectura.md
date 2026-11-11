@@ -33,7 +33,7 @@ La arquitectura completa está en `docs/ARQUITECTURA.md` (con su contrato en có
 | Base de conocimiento | Grafo canónico de PG2, cargado desde `cypher/*.cypher` | `cypher/`, `scripts/cargar_grafo.py` |
 | Traza | Una línea JSON por consulta, con plan, Cypher, filas, evidencia, intentos y tiempos | `asistente/traza.py` |
 
-El diagrama de componentes y el de secuencia, en formato Mermaid, están además en `docs/ARQUITECTURA.md`. Los diagramas de Draw.io de la tarea PG3-10 no estaban hechos al redactar este informe (11/11/2026), por lo que las figuras de esta sección se dibujaron aparte.
+Las figuras de esta sección son versiones simplificadas, pensadas para leerse en una página vertical. Los diagramas completos de la tarea PG3-10, en hoja A4 apaisada y editables en Draw.io (arquitectura con los siete elementos de la consigna §3.3, secuencia de una consulta y ontología del grafo), están en el Anexo C y en `docs/diagramas/`. Los diagramas en formato Mermaid están además en `docs/ARQUITECTURA.md`.
 
 ## 4.3 Capas del backend
 
@@ -86,7 +86,7 @@ La **evidencia** es lo único que ve el explicador. Sus reglas: los números sal
 
 ## 4.6 Base de conocimiento y fuentes de información
 
-El grafo (Neo4j 5.26) tiene 343 nodos y 683 relaciones, con 28 labels y 29 tipos de relación. Se arma al cargar los archivos `cypher/NN_*.cypher`, uno por dueño, que reproducen el canónico de PG2 corregido. El detalle de la ontología está en la sección 5.
+El grafo (Neo4j 5.26) tiene 343 nodos y 683 relaciones, con 28 labels y 29 tipos de relación. Se arma al cargar los archivos `cypher/NN_*.cypher`, uno por dueño, que reproducen el canónico de PG2 corregido. El detalle de la ontología está en la sección 5, y su diagrama, en el Anexo C.
 
 Las **fuentes de información** no se consultan en tiempo de ejecución: se volcaron al grafo al construirlo, como parámetros, etiquetas difusas, datos de fichas y precios. Son las que registró el grupo en PG1: apuntes y guía de la cátedra; requisitos oficiales (Docker, Adobe, DaVinci, PyTorch, Steam); fichas de fabricantes (Intel ARK, AMD, NVIDIA, Lenovo PSREF); Notebookcheck y RTINGS; una entrevista a un técnico; y precios de Mercado Libre y tiendas oficiales al 01/10/2026. El patrón es **Graph RAG sin embeddings**: la evidencia son las filas que devuelve el Cypher fijo, y el explicador cita reglas y nodos de ahí.
 

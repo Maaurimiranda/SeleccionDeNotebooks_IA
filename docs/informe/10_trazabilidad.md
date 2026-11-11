@@ -12,7 +12,7 @@ La consigna (§3.7) pide poder reconstruir, para una conclusión del sistema, ci
 | **Consulta** | El Cypher fijo con sus parámetros, las filas que devolvió y su duración, en la traza |
 | **Explicación** | La respuesta final y cada intento del verificador con los problemas que encontró, en la traza |
 
-La traza es una línea JSON por consulta del usuario. Las de los E2E están en `docs/pruebas/trazas/2026-11-11.jsonl`, y `docs/pruebas/E2E-n.md` las presenta paso a paso.
+La traza es una línea JSON por consulta del usuario, en `trazas/AAAA-MM-DD.jsonl` (esa carpeta no se versiona). `docs/pruebas/E2E-n.md` presenta la de cada E2E paso a paso, y `datos/traza_ejemplo.jsonl` guarda una en formato crudo (la del E2E-1). La del E2E-9, que reconstruimos a continuación, se lee completa en `docs/pruebas/E2E-9.md`.
 
 ## 10.2 Ejemplo reconstruido: E2E-9
 
