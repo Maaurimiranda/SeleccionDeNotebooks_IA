@@ -180,6 +180,8 @@ def _filtro_en_texto(valor, texto: str) -> bool:
     o, si es un sí/no, la palabra «dedicada». Un modelo chico copia los filtros del ejemplo del prompt."""
     if isinstance(valor, bool):
         return "dedicad" in texto.lower()
+    if not isinstance(valor, (int, float)):   # un valor que no es número no se puede respaldar
+        return False
     escritos = {str(valor), f"{valor:g}"}
     escritos |= {e.replace(".", ",") for e in escritos}
     return any(re.search(r"(?<![\d.,])" + re.escape(e) + r"(?!\d)", texto) for e in escritos)

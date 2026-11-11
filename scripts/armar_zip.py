@@ -72,6 +72,22 @@ def credenciales(rutas: list[Path]) -> list[str]:
     return halladas
 
 
+def _clave_del_entorno() -> str:
+    """La contraseña real (del entorno o de .env), para buscarla tal cual en todo lo que va al ZIP."""
+    import os
+    clave = os.getenv("NEO4J_PASSWORD", "")
+    env = RAIZ / ".env"
+    if not clave and env.is_file():
+        m = re.search(r"(?m)^\s*NEO4J_PASSWORD\s*=\s*(\S+)", env.read_text(encoding="utf-8", errors="ignore"))
+        clave = m.group(1).strip("'\"") if m else ""
+    return clave if len(clave) >= 4 else ""
+
+
+def contienen_la_clave(rutas: list[Path]) -> list[str]:
+    clave = _clave_del_entorno().encode()
+    return [str(p.relative_to(RAIZ)) for p in rutas if clave and clave in p.read_bytes()] if clave else []
+
+
 def main(argv: list[str]) -> int:
     contenido: dict[str, list[Path]] = {}
     for letra, carpeta, _, patrones in ITEMS:
@@ -81,7 +97,7 @@ def main(argv: list[str]) -> int:
                 vistos[p] = None
         contenido[letra] = list(vistos)
     todos = [p for ps in contenido.values() for p in ps]
-    malas = credenciales(todos)
+    malas = credenciales(todos) + [f"{r}: contiene la contraseña de NEO4J_PASSWORD" for r in contienen_la_clave(todos)]
     if malas:
         print("Se encontraron posibles credenciales; no se arma el ZIP:\n  " + "\n  ".join(malas))
         return 1

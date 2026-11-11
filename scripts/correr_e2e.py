@@ -13,7 +13,6 @@ from datetime import date
 from pathlib import Path
 
 from asistente import explicador
-from asistente.contrato import submodulo_de
 from asistente.orquestador import INTENCION_PEDIDO, Orquestador
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -54,9 +53,9 @@ def _riesgo_sm2(t, m):
 
 
 def _submodulos_pedidos(t) -> list[str]:
-    """Submódulos distintos que pidió el plan, sin contar L1 (que el orquestador agrega siempre)."""
-    return sorted({submodulo_de(c["intencion"]) for c in (t.get("plan") or {}).get("consultas", [])
-                   if c["intencion"] != INTENCION_PEDIDO})
+    """Submódulos distintos que se EJECUTARON, sin contar L1 (que el orquestador agrega siempre): lo que validó el
+    router y despachó el orquestador, no el plan crudo del LLM."""
+    return sorted({q["sm"] for q in t.get("consultas", []) if q.get("intencion") != INTENCION_PEDIDO and q.get("sm")})
 
 
 # ---------------------------------------------------------------- esperados: (descripción, función(traza) -> (ok, obtenido))
@@ -159,7 +158,7 @@ def _e5():
 
 def _e8():
     return [_chk("Origen fuera_de_alcance", lambda t: (t["origen_respuesta"] == "fuera_de_alcance", t["origen_respuesta"])),
-            _chk("Ninguna consulta al grafo (consultas = [])", lambda t: (t["consultas"] == [], len(t["consultas"])))]
+            _chk("Ninguna consulta Cypher de un submódulo (consultas = [])", lambda t: (t["consultas"] == [], len(t["consultas"])))]
 
 
 def _e9():
@@ -167,14 +166,14 @@ def _e9():
         g = ((_ev(t).get("GRUPO") or {}).get("traza_reglas")) or {}
         ids = {r["id"] for r in g.get("reglas", [])}
         o = g.get("origen") or {}
-        ok = (g.get("submodulos") == ["SM1", "SM2", "SM3", "SM4"] and len(ids) == 18 and len(o.get("reglas", {})) == 14
+        ok = (g.get("notebook") == "Notebook_A" and g.get("submodulos") == ["SM1", "SM2", "SM3", "SM4"] and len(ids) == 18 and len(o.get("reglas", {})) == 14
               and set(o.get("reglas_sin_origen", [])) == {"GM-R3", "INT-R11", "REC-R4", "REC-R9"})
         return ok, {"submodulos": g.get("submodulos"), "reglas": len(ids), "con_origen": len(o.get("reglas", {})),
                     "sin_origen": o.get("reglas_sin_origen")}
 
     def fuentes(t):
         n = (((_ev(t).get("GRUPO") or {}).get("traza_reglas") or {}).get("origen") or {}).get("notebook") or {}
-        ok = bool(n.get("fuente_precio")) and n.get("fuente_precio") != "no registrada" and bool(n.get("fuente_autonomia"))
+        ok = all(n.get(k) and n.get(k) != "no registrada" for k in ("fuente_precio", "fuente_autonomia"))
         return ok, n
 
     def riesgo(t):
@@ -192,7 +191,8 @@ def _e10():
         b = ((_ev(t).get("SM3") or {}).get("buscar")) or {}
         valores = [n.get("adecuacion_movilidad") for n in b.get("notebooks", [])]
         con = [v for v in valores if v is not None]
-        ok = b.get("orden") == "movilidad" and con == sorted(con, reverse=True) and valores[:len(con)] == con
+        ok = (b.get("orden") == "movilidad" and not b.get("filtros") and len(con) >= 2   # sin filtros inventados
+              and con == sorted(con, reverse=True) and valores[:len(con)] == con)
         return ok, {"orden": b.get("orden"), "filtros": b.get("filtros"), "adecuacion_movilidad": valores}
 
     def cb(t):
@@ -225,7 +225,7 @@ CASOS = [
     {"id": "E2E-8", "tipo": "control", "texto": "¿Cuál es la capital de Francia?",
      "esperado": _e8,
      "situacion": "Una pregunta que no tiene que ver con notebooks.",
-     "razonamiento": "El router la marca fuera de alcance y el sistema responde con un mensaje fijo, sin consultar el grafo ni el explicador."},
+     "razonamiento": "El router la marca fuera de alcance y el sistema responde con un mensaje fijo, sin ejecutar ninguna consulta de submódulo ni llamar al explicador."},
     {"id": "E2E-9", "tipo": "integral", "texto": "En req_01, ¿qué reglas se activaron para la A, de dónde sale cada dato y qué riesgo de RAM tiene?",
      "esperado": _e9,
      "situacion": "Un auditor pide reconstruir cómo llegó el sistema al resultado de la A: reglas, fuente de los datos y riesgo de RAM (consigna §3.7).",
@@ -267,7 +267,7 @@ def _md_e2e(c: dict) -> str:
     L += [f"Submódulos consultados: {', '.join(r['submodulos_consultados']) or 'ninguno'} (SM1 lo agrega el orquestador siempre que hay pedido)", "",
           "## 3. Consultas Cypher (plantillas fijas) y sus valores", ""]
     if not t["consultas"]:
-        L += ["Ninguna: el sistema no consultó el grafo.", ""]
+        L += ["Ninguna consulta de submódulo (el orquestador solo leyó el catálogo y los pedidos para validar la entrada).", ""]
     for q in t["consultas"]:
         L += [f"### {q.get('nombre') or q.get('intencion')} · parámetros `{json.dumps(q.get('parametros'), ensure_ascii=False)}` · "
               f"{len(q.get('filas') or [])} filas" + (f" · {q['ms']} ms" if q.get("ms") is not None else ""), "",
@@ -339,12 +339,13 @@ def _md_resultados(corridas: list[dict]) -> str:
 def main(ids: list[str]) -> int:
     from asistente.config import DIR_TRAZAS as _  # noqa: F401  (falla temprano si falta la configuración)
     DIR.mkdir(parents=True, exist_ok=True)
-    shutil.rmtree(DIR_TRAZAS, ignore_errors=True)
     orq = Orquestador(dir_trazas=str(DIR_TRAZAS))
     salud = orq.salud()
     if not salud["ok"]:
         print("Neo4j u Ollama no están disponibles:", json.dumps(salud, ensure_ascii=False, default=str))
         return 2
+    if not ids:   # una corrida parcial no pisa las trazas de los demás E2E
+        shutil.rmtree(DIR_TRAZAS, ignore_errors=True)
     corridas = []
     for caso in CASOS:
         if ids and caso["id"] not in ids:

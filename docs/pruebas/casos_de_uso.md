@@ -16,10 +16,10 @@ Cada caso involucra **al menos dos submódulos distintos** además de SM1, que e
 
 **Explicación generada.**
 
-> Te recomiendo la Notebook_A. La RAM es mixta y la gráfica está bien equipada. La Notebook_H también está bien, pero la RAM es mixta y la gráfica es de baja.
+> Te recomiendo la Notebook_A. La RAM es ampliable y el riesgo de que quede corta es bajo. La gráfica tiene un TGP de 60W, que no afecta el rendimiento.
 > Los parametros difusos y los umbrales del sistema estan sin validar por el tecnico: los grados y riesgos son una referencia, no una certeza.
 
-_Origen: llm · 7.091 s · [detalle](E2E-1.md)_
+_Origen: llm · 15.456 s · [detalle](E2E-1.md)_
 
 ## Caso 2 · E2E-2
 
@@ -35,10 +35,10 @@ _Origen: llm · 7.091 s · [detalle](E2E-1.md)_
 
 **Explicación generada.**
 
-> La M quedó condicionada porque falta la información sobre la autonomía, mientras que la G es indeterminada porque no informa si la RAM es ampliable. La G tiene un riesgo de RAM del 52.9%, con un riesgo alto de quedarse corta de RAM.
+> La M quedó condicionada por falta de informacion sobre autonomia, la G es indeterminada por falta de informacion sobre si la CPU soporta virtualización. La G tiene riesgo alto de quedarse corta de RAM.
 > Los parametros difusos y los umbrales del sistema estan sin validar por el tecnico: los grados y riesgos son una referencia, no una certeza.
 
-_Origen: llm · 5.087 s · [detalle](E2E-2.md)_
+_Origen: llm · 4.974 s · [detalle](E2E-2.md)_
 
 ## Caso 3 · E2E-5
 
@@ -54,10 +54,10 @@ _Origen: llm · 5.087 s · [detalle](E2E-2.md)_
 
 **Explicación generada.**
 
-> La B y la H cumplen con la virtualización, pero la E no soporta virtualización por hardware, cumpliendo con la alerta excluyente. La recomendación está desempatada por la ampliabilidad, la E es la única descartada.
+> La E no la recomiendan porque no soporta virtualización por hardware, requisito excluyente para el perfil VIRT. La virtualización CPU de B y H es soportada, pero la E no cumple.
 > Los parametros difusos y los umbrales del sistema estan sin validar por el tecnico: los grados y riesgos son una referencia, no una certeza.
 
-_Origen: llm · 4.515 s · [detalle](E2E-5.md)_
+_Origen: llm · 4.023 s · [detalle](E2E-5.md)_
 
 ## Caso 4 · E2E-9
 
@@ -76,7 +76,7 @@ _Origen: llm · 4.515 s · [detalle](E2E-5.md)_
 > Para la A, se activaron las reglas FZ-R2, FZ-R4 y FZ-R5. Los datos vienen de la evaluación del grupo (PI3). La RAM tiene un riesgo de 23.02, que es bajo.
 > Los parametros difusos y los umbrales del sistema estan sin validar por el tecnico: los grados y riesgos son una referencia, no una certeza.
 
-_Origen: llm · 4.332 s · [detalle](E2E-9.md)_
+_Origen: llm · 4.262 s · [detalle](E2E-9.md)_
 
 ## Caso 5 · E2E-10
 
@@ -95,11 +95,11 @@ _Origen: llm · 4.332 s · [detalle](E2E-9.md)_
 > Vos te conviene la Notebook_A, está recomendada (Alta) en movilidad. El costo-beneficio está en 0.907.
 > Los parametros difusos y los umbrales del sistema estan sin validar por el tecnico: los grados y riesgos son una referencia, no una certeza.
 
-_Origen: llm · 4.281 s · [detalle](E2E-10.md)_
+_Origen: llm · 4.142 s · [detalle](E2E-10.md)_
 
 ## Controles
 
 No cuentan como casos integrales: no cruzan información entre submódulos.
 
 - **E2E-3** · «Para req_02, ¿qué notebook me conviene?» → APRUEBA. El asesor pregunta por req_02, un pedido al que todavía le falta una respuesta del comprador. El perfil de req_02 es indeterminado y no tiene evaluaciones: el sistema no completa un perfil (no asume oficina), pide responder la pregunta pendiente y no recomienda. ([detalle](E2E-3.md))
-- **E2E-8** · «¿Cuál es la capital de Francia?» → APRUEBA. Una pregunta que no tiene que ver con notebooks. El router la marca fuera de alcance y el sistema responde con un mensaje fijo, sin consultar el grafo ni el explicador. ([detalle](E2E-8.md))
+- **E2E-8** · «¿Cuál es la capital de Francia?» → APRUEBA. Una pregunta que no tiene que ver con notebooks. El router la marca fuera de alcance y el sistema responde con un mensaje fijo, sin ejecutar ninguna consulta de submódulo ni llamar al explicador. ([detalle](E2E-8.md))
