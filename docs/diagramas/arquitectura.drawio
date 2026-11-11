@@ -1,0 +1,208 @@
+<mxfile host="app.diagrams.net" agent="PG3-10" version="24.7.5" type="device">
+  <diagram id="arquitectura" name="Arquitectura">
+    <mxGraphModel dx="1169" dy="827" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="titulo" value="&lt;b&gt;Arquitectura del asistente de selección de notebooks · PG3 · Grupo 2 · UTN FRM&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=18;fontColor=#111111;align=left;verticalAlign=top;spacing=0;spacingLeft=0;" vertex="1" parent="1">
+          <mxGeometry x="25" y="8" width="1119" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitulo" value="Neo4j maneja la verdad. El LLM interpreta (router) y explica (explicador): no calcula, no decide y no escribe Cypher." style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=12;fontColor=#111111;align=left;verticalAlign=top;spacing=0;spacingLeft=0;" vertex="1" parent="1">
+          <mxGeometry x="25" y="36" width="1119" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="usuario" value="&lt;b&gt;1 · Usuario&lt;/b&gt;&lt;br&gt;asesor o&lt;br&gt;comprador" style="html=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1.5;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="25" y="465" width="85" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="interfaz" value="&lt;b&gt;2 · Interfaz&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot; style=&quot;font-size: 10px;&quot;&gt;api.py · cli.py&lt;/font&gt;&lt;br&gt;API FastAPI:&lt;br&gt;POST /consultar&lt;br&gt;GET /salud&lt;br&gt;Consola (CLI)" style="html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="140" y="440" width="130" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="llm" value="&lt;b&gt;3 · Modelo de lenguaje (LLM)&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot; style=&quot;font-size: 10px;&quot;&gt;asistente/llm.py&lt;/font&gt;&lt;br&gt;LangChain: ChatPromptTemplate | ChatOllama&lt;br&gt;Ollama local · qwen2.5:3b · temperatura 0 · salida estructurada&lt;br&gt;Interpreta (plan JSON) y redacta; no calcula ni escribe Cypher" style="html=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="300" y="75" width="380" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="orq_c" value="&lt;b&gt;4 · Orquestación&lt;/b&gt;" style="html=1;whiteSpace=wrap;fillColor=#fffbee;strokeColor=#d6b656;strokeWidth=1.5;fontSize=12;fontColor=#111111;dashed=1;dashPattern=5 4;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=top;spacing=4;container=1;collapsible=0;recursiveResize=0;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="300" y="225" width="380" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="router" value="&lt;b&gt;Router (prompt maestro)&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot; style=&quot;font-size: 9.5px;&quot;&gt;router.py&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot; style=&quot;font-size: 9.5px;&quot;&gt;prompts/maestro.txt&lt;/font&gt;&lt;br&gt;texto → plan JSON de&lt;br&gt;intenciones cerradas (13)&lt;br&gt;y modelos del catálogo&lt;br&gt;validar() en Python: descarta&lt;br&gt;lo inventado; nunca asume&lt;br&gt;req_01" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=10.5;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="orq_c">
+          <mxGeometry x="12" y="37" width="173" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="explicador" value="&lt;b&gt;Explicador&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot; style=&quot;font-size: 9.5px;&quot;&gt;explicador.py&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot; style=&quot;font-size: 9.5px;&quot;&gt;prompts/explicacion.txt&lt;/font&gt;&lt;br&gt;redacta solo con la evidencia&lt;br&gt;(voseo, ≤ 180 palabras)&lt;br&gt;verificar(): cifras, modelos,&lt;br&gt;reglas, alertas, rangos y&lt;br&gt;estados · ≤ 2 regeneraciones&lt;br&gt;→ plantilla fija" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=10.5;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="orq_c">
+          <mxGeometry x="195" y="37" width="173" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="orquestador" value="&lt;b&gt;Orquestador&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot; style=&quot;font-size: 9.5px;&quot;&gt;asistente/orquestador.py · Orquestador.consultar()&lt;/font&gt;&lt;br&gt;prevalida · lee catálogo y pedidos · pide y valida el plan&lt;br&gt;despacha con RunnableLambda · arma la evidencia común&lt;br&gt;(siempre con L1 si hay pedido) · llama al explicador" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=10.5;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="orq_c">
+          <mxGeometry x="12" y="220" width="356" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="traza" value="&lt;b&gt;Traza JSONL&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot; style=&quot;font-size: 9.5px;&quot;&gt;traza.py → trazas/AAAA-MM-DD.jsonl&lt;/font&gt;&lt;br&gt;una línea por consulta: plan, Cypher con filas, evidencia,&lt;br&gt;intentos y respuesta" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5;fontSize=10.5;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="orq_c">
+          <mxGeometry x="12" y="358" width="356" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="mod_c" value="&lt;b&gt;6 · Módulos de&lt;/b&gt;&lt;br&gt;&lt;b&gt;razonamiento&lt;/b&gt;" style="html=1;whiteSpace=wrap;fillColor=#f3f9f2;strokeColor=#82b366;strokeWidth=1.5;fontSize=12;fontColor=#111111;dashed=1;dashPattern=5 4;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=top;spacing=4;container=1;collapsible=0;recursiveResize=0;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="735" y="225" width="175" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="sm1" value="&lt;b&gt;SM1 · Interpretación&lt;/b&gt;&lt;br&gt;pedido → perfiles, perfil&lt;br&gt;dominante, preguntas (L1)" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="mod_c">
+          <mxGeometry x="10" y="37" width="155" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="sm2" value="&lt;b&gt;SM2 · Rendimiento / RAM&lt;/b&gt;&lt;br&gt;riesgo de RAM (difuso)&lt;br&gt;y virtualización" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="mod_c">
+          <mxGeometry x="10" y="105" width="155" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="sm3" value="&lt;b&gt;SM3 · Gráfica / movilidad&lt;/b&gt;&lt;br&gt;búsqueda por gráfica o&lt;br&gt;movilidad; ficha de modelo" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="mod_c">
+          <mxGeometry x="10" y="173" width="155" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="sm4" value="&lt;b&gt;SM4 · Recomendación&lt;/b&gt;&lt;br&gt;recomendar, explicar,&lt;br&gt;comparar, costo-beneficio" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="mod_c">
+          <mxGeometry x="10" y="241" width="155" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="grupo" value="&lt;b&gt;GRUPO · Traza&lt;/b&gt;&lt;br&gt;reglas activadas (L3) y&lt;br&gt;parámetros sin validar (L4)" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=16;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="mod_c">
+          <mxGeometry x="10" y="309" width="155" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="mod_nota" value="&lt;i&gt;&lt;font color=&quot;#555555&quot;&gt;cada uno: entrada → servicio →&lt;/font&gt;&lt;/i&gt;&lt;br&gt;&lt;i&gt;&lt;font color=&quot;#555555&quot;&gt;repositorio; solo ejecutar()&lt;/font&gt;&lt;/i&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=10;fontColor=#111111;align=center;verticalAlign=top;spacing=0;spacingLeft=0;" vertex="1" parent="mod_c">
+          <mxGeometry x="6" y="379" width="163" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="neo4j" value="&lt;b&gt;5 · Base de&lt;/b&gt;&lt;br&gt;&lt;b&gt;conocimiento&lt;/b&gt;&lt;br&gt;Neo4j · grafo canónico&lt;br&gt;de PG2 (asistente/grafo.py)&lt;br&gt;&lt;br&gt;Conocimiento: perfiles,&lt;br&gt;requisitos, variables y&lt;br&gt;etiquetas difusas, reglas&lt;br&gt;crisp y Mamdani,&lt;br&gt;parámetros «sin validar»&lt;br&gt;&lt;br&gt;Instancias: pedidos y&lt;br&gt;catálogo (9 notebooks)&lt;br&gt;&lt;br&gt;Inferencia: Evaluacion,&lt;br&gt;Lectura, Alerta, Pregunta,&lt;br&gt;Recomendacion&lt;br&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot; style=&quot;font-size: 9px;&quot;&gt;343 nodos · 683 relaciones&lt;/font&gt;" style="html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontSize=10;fontColor=#111111;shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=14;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="970" y="300" width="174" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="fte_c" value="&lt;b&gt;7 · Fuentes de información (PG1 y PG2)&lt;/b&gt;" style="html=1;whiteSpace=wrap;fillColor=#fafafa;strokeColor=#666666;strokeWidth=1.5;fontSize=12;fontColor=#111111;dashed=1;dashPattern=5 4;rounded=1;absoluteArcSize=1;arcSize=16;align=left;verticalAlign=top;spacing=4;container=1;collapsible=0;recursiveResize=0;spacingLeft=8;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="735" y="75" width="409" height="145" as="geometry" />
+        </mxCell>
+        <mxCell id="fte1" value="&lt;b&gt;Técnico&lt;/b&gt;&lt;br&gt;entrevista y&lt;br&gt;consultas directas" style="html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=0;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="fte_c">
+          <mxGeometry x="12" y="28" width="122" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="fte2" value="&lt;b&gt;Fichas técnicas&lt;/b&gt;&lt;br&gt;de fabricantes y&lt;br&gt;reseñas" style="html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=0;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="fte_c">
+          <mxGeometry x="143.5" y="28" width="122" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="fte3" value="&lt;b&gt;Catálogo y precios&lt;/b&gt;&lt;br&gt;tiendas oficiales,&lt;br&gt;Mercado Libre" style="html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=0;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="fte_c">
+          <mxGeometry x="275" y="28" width="122" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="fte4" value="&lt;b&gt;Requisitos&lt;/b&gt;&lt;br&gt;de software (Docker,&lt;br&gt;Adobe, Steam...)" style="html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=0;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="fte_c">
+          <mxGeometry x="12" y="86" width="122" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="fte5" value="&lt;b&gt;Casos publicados&lt;/b&gt;&lt;br&gt;r/SuggestALaptop" style="html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=0;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="fte_c">
+          <mxGeometry x="143.5" y="86" width="122" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="fte6" value="&lt;b&gt;Cátedra&lt;/b&gt;&lt;br&gt;apuntes y guía;&lt;br&gt;ontología de PG1" style="html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=10;fontColor=#111111;rounded=0;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="fte_c">
+          <mxGeometry x="275" y="86" width="122" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="leyenda" value="&lt;b&gt;Los 7 elementos de la consigna (§3.3)&lt;/b&gt;" style="html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#999999;strokeWidth=1;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=8;align=left;verticalAlign=top;spacing=4;container=1;collapsible=0;recursiveResize=0;spacingLeft=8;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="25" y="75" width="255" height="312" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_c0" value="" style="html=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=4;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="leyenda">
+          <mxGeometry x="12" y="31" width="18" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_t0" value="1  Usuario" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=11;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="38" y="29" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_c1" value="" style="html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=4;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="leyenda">
+          <mxGeometry x="12" y="55" width="18" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_t1" value="2  Interfaz" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=11;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="38" y="53" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_c2" value="" style="html=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=4;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="leyenda">
+          <mxGeometry x="12" y="79" width="18" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_t2" value="3  Modelo de lenguaje" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=11;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="38" y="77" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_c3" value="" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=4;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="leyenda">
+          <mxGeometry x="12" y="103" width="18" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_t3" value="4  Componentes de orquestación" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=11;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="38" y="101" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_c4" value="" style="html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=4;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="leyenda">
+          <mxGeometry x="12" y="127" width="18" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_t4" value="5  Base de conocimiento" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=11;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="38" y="125" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_c5" value="" style="html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=4;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="leyenda">
+          <mxGeometry x="12" y="151" width="18" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_t5" value="6  Módulos de razonamiento" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=11;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="38" y="149" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_c6" value="" style="html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=4;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="leyenda">
+          <mxGeometry x="12" y="175" width="18" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_t6" value="7  Fuentes de información" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=11;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="38" y="173" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_tit2" value="&lt;b&gt;Flechas&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=11;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="12" y="207" width="230" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_a1" value="pedido y respuesta" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=10.5;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="75" y="230" width="170" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_a2" value="llamada en una consulta" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=10.5;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="75" y="252" width="170" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="lg_a3" value="carga previa del grafo&lt;br&gt;(no ocurre al consultar)" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=10.5;fontColor=#111111;align=left;verticalAlign=middle;spacing=0;spacingLeft=0;" vertex="1" parent="leyenda">
+          <mxGeometry x="75" y="274" width="175" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="nota1" value="&lt;b&gt;Cómo leer el diagrama&lt;/b&gt;&lt;br&gt;• Neo4j maneja la verdad: cifras, estados, reglas y alertas salen del grafo.&lt;br&gt;• Las reglas crisp y difusas (Mamdani) se calculan al cargar el grafo (cypher/):&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;en cada consulta el asistente solo lee sus resultados (Grafo.leer, READ_ACCESS).&lt;br&gt;• Las consultas Cypher son plantillas fijas de cada submódulo; el LLM no las escribe.&lt;br&gt;• Cada submódulo es un paquete entrada → servicio → repositorio (+ esquemas),&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;expone solo ejecutar(intencion, parametros, grafo) y no importa a otro submódulo." style="html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#999999;strokeWidth=1;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=8;align=left;verticalAlign=top;spacing=4;spacingLeft=6;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="25" y="662" width="560" height="128" as="geometry" />
+        </mxCell>
+        <mxCell id="nota2" value="&lt;b&gt;Caminos de una consulta (numeración de las flechas)&lt;/b&gt;&lt;br&gt;• Camino completo: 1 plan → 2 despacho → 3 explicación → 4 traza.&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;origen_respuesta = llm, o plantilla_fija si el verificador rechaza 3 intentos.&lt;br&gt;• Sin explicador: entrada inválida (validacion), fuera de alcance (mensaje fijo,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;sin tocar el grafo), plan con aclaración, y Neo4j u Ollama caídos (error).&lt;br&gt;• Las fuentes no se consultan en vivo: se curaron en PG1 y PG2 y entran al grafo&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;con cargar_grafo.py. Cada consulta deja su traza (plan, Cypher, filas, respuesta)." style="html=1;whiteSpace=wrap;fillColor=#ffffff;strokeColor=#999999;strokeWidth=1;fontSize=11;fontColor=#111111;rounded=1;absoluteArcSize=1;arcSize=8;align=left;verticalAlign=top;spacing=4;spacingLeft=6;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="600" y="662" width="544" height="128" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;startArrow=block;startFill=1;startSize=6;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="314" as="sourcePoint" />
+            <mxPoint x="92" y="314" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" value="" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="336" as="sourcePoint" />
+            <mxPoint x="92" y="336" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" value="" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;dashed=1;dashPattern=5 4;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="358" as="sourcePoint" />
+            <mxPoint x="92" y="358" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" value="" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;startArrow=block;startFill=1;startSize=6;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="usuario" target="interfaz">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;startArrow=block;startFill=1;startSize=6;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="interfaz" target="orquestador">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="1 planificar" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;labelBackgroundColor=#ffffff;exitX=0.243;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="orquestador" target="router">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" value="plan JSON" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;startArrow=block;startFill=1;startSize=6;labelBackgroundColor=#ffffff;exitX=0.22;exitY=0;exitDx=0;exitDy=0;entryX=0.1316;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="router" target="llm">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="34" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" value="3 explicar" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;labelBackgroundColor=#ffffff;exitX=0.757;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="orquestador" target="explicador">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-38" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" value="redacción" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;startArrow=block;startFill=1;startSize=6;labelBackgroundColor=#ffffff;exitX=0.78;exitY=0;exitDx=0;exitDy=0;entryX=0.868;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="explicador" target="llm">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-34" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" value="4 registra" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="orquestador" target="traza">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="34" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" value="2 despacho" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=9.5;fontColor=#111111;verticalAlign=bottom;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.643;entryDx=0;entryDy=0;" edge="1" parent="1" source="orquestador" target="mod_c">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" value="Cypher fijo&lt;br&gt;(READ)" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;verticalAlign=bottom;labelBackgroundColor=#ffffff;exitX=1;exitY=0.571;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="mod_c" target="neo4j">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" value="carga previa:&lt;br&gt;cypher/*.cypher&lt;br&gt;cargar_grafo.py" style="html=1;rounded=0;endArrow=block;endFill=1;endSize=6;strokeColor=#333333;strokeWidth=1.5;fontSize=10;fontColor=#111111;dashed=1;dashPattern=5 4;exitX=0.8;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="fte_c" target="neo4j">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-72" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
