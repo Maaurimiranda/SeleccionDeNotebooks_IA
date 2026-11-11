@@ -89,6 +89,9 @@ class TestVerificador(unittest.TestCase):
         self.assertEqual(verificar(con("El presupuesto es de 1.000 USD."), self.ram), [])
         self.assertTrue(any(p.startswith("(a)") for p in verificar(con("El presupuesto es de 2.000 USD."), self.ram)))
 
+    def test_millones_con_puntos_no_se_leen_como_decimal(self):
+        self.assertTrue(any(p.startswith("(a)") for p in verificar(con("El presupuesto es de 1.000.000 USD."), self.ram)))
+
     def test_buena_con_estados_con_tilde(self):
         r = con("Notebook_M queda Recomendada condicionada por falta de información, entre 0.504 y 0.826. "
                 "Notebook_A queda Recomendada (Alta) con 0.785 y Notebook_E, Descartada (excluyente incumplido).")
@@ -136,6 +139,7 @@ class TestVerificador(unittest.TestCase):
         codigo, duenos = next((c, d) for c, d in alertas.items() if len(d) == 1)
         ajeno = next(m for m in explicador._MODELO.findall(str(self.todas)) if m not in duenos)
         self.assertDispara("c", con(f"{ajeno} tiene la alerta {codigo}."), self.todas)
+        self.assertDispara("c", con(f"La alerta {codigo} aparece en {ajeno}."), self.todas)   # alerta nombrada antes del modelo
 
     def test_d_largo(self):
         self.assertDispara("d", con(" ".join(["palabra"] * (MAX_PALABRAS + 1))), self.ram)

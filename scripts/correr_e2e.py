@@ -346,6 +346,10 @@ def main(ids: list[str]) -> int:
         return 2
     if not ids:   # una corrida parcial no pisa las trazas de los demás E2E
         shutil.rmtree(DIR_TRAZAS, ignore_errors=True)
+    desconocidos = set(ids) - {c["id"] for c in CASOS}
+    if desconocidos:
+        print("No existen los E2E:", ", ".join(sorted(desconocidos)))
+        return 2
     corridas = []
     for caso in CASOS:
         if ids and caso["id"] not in ids:

@@ -26,7 +26,7 @@ RUTA_PROMPT = Path(__file__).resolve().parent.parent / "prompts" / "explicacion.
 _MODELO = re.compile(r"Notebook_[A-Z]\b")
 _REGLA = re.compile(r"\b[A-Z]{2,4}-RD?\d+\b")
 _IDENTIFICADOR = re.compile(r"Notebook_[A-Z]\b|\breq_\d+\b|\b[A-Z]{1,5}(?:-[A-Za-z0-9_]+)+\b")
-_NUMERO = re.compile(r"(?<![\w.,])\d{1,15}(?:[.,]\d{1,15})?")   # acotado: un número de 40 dígitos no tumba el verificador
+_NUMERO = re.compile(r"(?<![\w.,])\d{1,15}(?:\.\d{3}){2,}(?![\d])|(?<![\w.,])\d{1,15}(?:[.,]\d{1,15})?")   # acotado: un número de 40 dígitos no tumba el verificador
 _PARTIR_POR_MODELO = re.compile(r"(Notebook_[A-Z]\b)")
 
 
@@ -46,7 +46,12 @@ def _oraciones(t: str) -> list[str]:
 
 def _numeros(texto: str) -> list[Decimal]:
     """Números de un texto, con coma o punto decimal, sin los que forman parte de un identificador."""
-    return [Decimal(n.replace(",", ".")) for n in _NUMERO.findall(_IDENTIFICADOR.sub(" ", texto))]
+    salida = []
+    for n in _NUMERO.findall(_IDENTIFICADOR.sub(" ", texto)):
+        if re.fullmatch(r"[1-9]\d{0,2}(?:\.\d{3}){2,}", n):   # «1.000.000»: puntos de miles, no un decimal
+            n = n.replace(".", "")
+        salida.append(Decimal(n.replace(",", ".")))
+    return salida
 
 
 def _redondear(x: Decimal, decimales: int) -> Decimal:
@@ -190,7 +195,7 @@ def _recomendables(evidencia) -> set[str] | None:
     return {m for m, es in por_modelo.items() if any(e.startswith("Recomendada") for e in es)} - fuera
 
 
-_VERBO_RECOMENDAR = re.compile(r"recomiend|recomend|conviene|aconsej|mejor opcion|primer lugar|primera opcion|elegi|elegir")
+_VERBO_RECOMENDAR = re.compile(r"recomiend|recomend(?!acion)|conviene|aconsej|mejor opcion|primer lugar|primera opcion|elegi|elegir")
 _NEGACION = re.compile(r"\b(?:no|nunca|ni)\b")
 
 
@@ -233,13 +238,20 @@ def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS)
             duenos = alertas.get(codigo)
             if m and duenos and m not in duenos:
                 problemas.append(f"(c) la alerta {codigo} es de {', '.join(sorted(duenos))}, no de {m}")
+    for o in oraciones:   # la alerta nombrada antes que la notebook («La alerta X aparece en Notebook_B»)
+        modelos = set(_MODELO.findall(o))
+        if modelos and not _NEGACION.search(_sin_tildes(o)):
+            for codigo in dict.fromkeys(_REGLA.findall(_segmentos(o)[0][1])):
+                duenos = alertas.get(codigo)
+                if duenos and not duenos & modelos:
+                    problemas.append(f"(c) la alerta {codigo} es de {', '.join(sorted(duenos))}, no de {', '.join(sorted(modelos))}")
     for o in oraciones:
         o_sin = _sin_tildes(o)
         for codigo in dict.fromkeys(_REGLA.findall(o)):
             tras_regla = re.search(r"(?:\breglas?|activ\w*)[^.;,]{0,20}" + re.escape(codigo.lower()), o_sin)
             if codigo in alertas and codigo not in reglas and tras_regla:
                 problemas.append(f"(c) {codigo} es una alerta, no una regla activada")
-            elif codigo in reglas and codigo not in alertas and "alerta" in o_sin:
+            elif codigo in reglas and codigo not in alertas and re.search(r"\balerta\b", o_sin):
                 problemas.append(f"(c) {codigo} es una regla, no una alerta")
 
     # (d) largo

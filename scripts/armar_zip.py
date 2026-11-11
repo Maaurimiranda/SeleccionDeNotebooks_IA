@@ -33,10 +33,13 @@ ITEMS = [
     ("l", "l_infografia", "Infografía o resumen ejecutivo", ["docs/infografia", "docs/presentacion", "docs/informe/02_resumen*"]),
 ]
 
-_PLACEHOLDER = re.compile(r"^(?:|…|\.\.\.|<[^>]*>|tu_[\w-]*|cambiar\w*|changeme|xxx+|\$\{?\w+\}?)$", re.IGNORECASE)
-_CLAVE = re.compile(r"(?im)^[ 	]*(?:export[ 	]+)?\w*(?:PASSWORD|PASSWD|SECRET|TOKEN|API_KEY)\w*[ 	]*=[ 	]*(\S*)[ 	]*$")
+_PLACEHOLDER = re.compile(r"^(?:|…|\.\.\.|<[^>]*>|changeme|xxx+|\$\{\w+\})$", re.IGNORECASE)
+_CLAVE = re.compile(r"""(?im)^[ \t]*(?:export[ \t]+|set[ \t]+)?["']?\w*(?:PASSWORD|PASSWD|SECRET|TOKEN|API_KEY)\w*["']?[ \t]*[=:][ \t]*(.*?)[ \t]*(?:#.*)?$""")
+# en el código Python solo importa una cadena literal asignada (lo demás lee el entorno)
+_CLAVE_PY = re.compile(r"""(?i)\w*(?:PASSWORD|PASSWD|SECRET|TOKEN|API_KEY)\w*[ \t]*=[ \t]*["']([^"'\s$<{]{4,})["']""")
+_NOMBRE = re.compile(r"\w*(?:PASSWORD|PASSWD|SECRET|TOKEN|API_KEY)\w*", re.IGNORECASE)
 _AURA = re.compile(r"neo4j\+s://[a-z0-9]{8}", re.IGNORECASE)
-_TEXTO = {".md", ".txt", ".csv", ".json", ".jsonl", ".cypher", ".example", ".env", ".toml", ".yml", ".yaml", ".cfg", ".ini"}
+_TEXTO = {".md", ".txt", ".csv", ".json", ".jsonl", ".cypher", ".example", ".env", ".toml", ".yml", ".yaml", ".cfg", ".ini", ".py"}
 
 
 def _archivos(carpeta: Path):
@@ -64,11 +67,12 @@ def credenciales(rutas: list[Path]) -> list[str]:
             texto = p.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
-        for m in _CLAVE.finditer(texto):
-            if not _PLACEHOLDER.match(m.group(1).strip("'\"")):
-                halladas.append(f"{p.relative_to(RAIZ)}: {m.group(0).strip()[:40]}")
+        patron = _CLAVE_PY if p.suffix == ".py" else _CLAVE
+        for m in patron.finditer(texto):
+            if p.suffix == ".py" or not _PLACEHOLDER.match(m.group(1).strip("'\"")):
+                halladas.append(f"{p.relative_to(RAIZ)}: {_NOMBRE.search(m.group(0)).group(0)} con valor (no se muestra)")
         for m in _AURA.finditer(texto):
-            halladas.append(f"{p.relative_to(RAIZ)}: URI de Aura {m.group(0)}…")
+            halladas.append(f"{p.relative_to(RAIZ)}: URI de Aura (no se muestra)")
     return halladas
 
 
