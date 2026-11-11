@@ -146,7 +146,7 @@ def validar(plan: dict, texto: str, sesion: dict, catalogo: list[str], pedidos: 
             pendientes_nivel_2 = True
             obs.append(f"{intencion} es de nivel 2 y todavía no está disponible")
             continue
-        parametros = _validar_parametros(intencion, c.get("parametros") or {}, catalogo, modelos_texto, obs)
+        parametros = _validar_parametros(intencion, c.get("parametros") or {}, catalogo, modelos_texto, obs, texto)
         clave = (intencion, repr(sorted(parametros.items())))
         if clave in vistas:
             continue
@@ -175,8 +175,18 @@ def validar(plan: dict, texto: str, sesion: dict, catalogo: list[str], pedidos: 
             "observaciones": obs}
 
 
+def _filtro_en_texto(valor, texto: str) -> bool:
+    """Un filtro de SM3 vale solo si el usuario lo dijo: su número aparece en el texto (con punto o coma)
+    o, si es un sí/no, la palabra «dedicada». Un modelo chico copia los filtros del ejemplo del prompt."""
+    if isinstance(valor, bool):
+        return "dedicad" in texto.lower()
+    escritos = {str(valor), f"{valor:g}"}
+    escritos |= {e.replace(".", ",") for e in escritos}
+    return any(re.search(r"(?<![\d.,])" + re.escape(e) + r"(?!\d)", texto) for e in escritos)
+
+
 def _validar_parametros(intencion: str, crudos: dict, catalogo: list[str], modelos_texto: list[str],
-                        obs: list[str]) -> dict:
+                        obs: list[str], texto: str = "") -> dict:
     permitidos = set(INTENCIONES[intencion]["obligatorios"]) | set(INTENCIONES[intencion]["opcionales"])
     p = {k: v for k, v in crudos.items() if k in permitidos and k != "requerimiento_id" and v not in (None, "", [])}
     descartados = set(crudos) - set(p) - {"requerimiento_id"}
@@ -215,6 +225,10 @@ def _validar_parametros(intencion: str, crudos: dict, catalogo: list[str], model
         p["orden"] = p.get("orden") or "mixta"
         if isinstance(p.get("filtros"), dict):
             p["filtros"] = {k: v for k, v in p["filtros"].items() if k in FILTROS_SM3 and v is not None}
+            inventados = [k for k, v in p["filtros"].items() if not _filtro_en_texto(v, texto)]
+            if inventados:
+                obs.append(f"Se descartaron filtros que el texto no pide: {', '.join(inventados)}")
+                p["filtros"] = {k: v for k, v in p["filtros"].items() if k not in inventados}
             if not p["filtros"]:
                 p.pop("filtros")
     return p

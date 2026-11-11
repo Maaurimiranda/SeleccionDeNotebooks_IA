@@ -24,3 +24,9 @@ R22,¿Qué riesgo de RAM tiene la Notebook_G?,,SM2.riesgo_ram,,aclaracion,sin_pe
 R23,¿Qué riesgo de RAM tiene la Notebook_G?,req_01,SM2.riesgo_ram,req_01,plan,pedido_de_sesion
 R24,Mostrame la ficha de la Notebook_Z en req_01,,SM3.ficha,req_01,aclaracion,modelo_inexistente
 R25,¿Por qué la Notebook_Q quedó descartada en req_01?,,SM4.explicar_notebook,req_01,aclaracion,modelo_inexistente
+R26,"Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?",,SM4.recomendar|SM2.riesgo_ram|SM3.buscar,req_01,plan,E2E-1
+R27,"En req_01, ¿por qué la M quedó condicionada y la G indeterminada? ¿Qué riesgo de RAM tiene la G?",,SM4.explicar_notebook|SM2.riesgo_ram,req_01,plan,E2E-2
+R28,"Para req_02, ¿qué notebook me conviene?",,SM4.recomendar,req_02,plan,E2E-3
+R29,"En req_01, la E tiene casi el mismo puntaje que la B y la H, ¿por qué no la recomiendan? ¿Qué pasa con la virtualización?",,SM4.comparar|SM2.virtualizacion,req_01,plan,E2E-5
+R30,"En req_01, ¿qué reglas se activaron para la A, de dónde sale cada dato y qué riesgo de RAM tiene?",,GRUPO.traza_reglas|SM2.riesgo_ram|SM4.explicar_notebook,req_01,plan,E2E-9
+R31,"Para req_01, ¿cuáles son las mejores en movilidad y cómo queda el costo-beneficio?",,SM3.buscar|SM4.costo_beneficio,req_01,plan,E2E-10

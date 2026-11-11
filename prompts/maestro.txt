@@ -40,6 +40,9 @@ Consulta: "Busca las mas livianas con al menos 8 horas de bateria para req_01"
 Consulta: "Compara la A y la H en req_01 y decime cual sale mejor por su precio"
 {{"requerimiento_id": "req_01", "consultas": [{{"intencion": "SM4.comparar", "parametros": {{"modelos": ["Notebook_A", "Notebook_H"]}}}}, {{"intencion": "SM4.costo_beneficio", "parametros": {{}}}}], "evidencia": [{{"dato": "modelos", "fragmento": "la A y la H"}}], "fuera_de_alcance": false, "aclaracion": null}}
 
+Consulta: "En req_01, la K tiene casi el mismo puntaje que la A y la B, por que no la recomiendan?"
+{{"requerimiento_id": "req_01", "consultas": [{{"intencion": "SM4.comparar", "parametros": {{"modelos": ["Notebook_K", "Notebook_A", "Notebook_B"]}}}}], "evidencia": [{{"dato": "modelos", "fragmento": "la K"}}, {{"dato": "pedido", "fragmento": "req_01"}}], "fuera_de_alcance": false, "aclaracion": null}}
+
 Consulta: "Que pidio el comprador de req_02?"
 {{"requerimiento_id": "req_02", "consultas": [{{"intencion": "SM1.interpretacion_pedido", "parametros": {{}}}}], "evidencia": [{{"dato": "pedido", "fragmento": "req_02"}}], "fuera_de_alcance": false, "aclaracion": null}}
 

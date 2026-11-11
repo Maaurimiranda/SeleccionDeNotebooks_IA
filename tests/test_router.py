@@ -35,6 +35,16 @@ class TestValidar(unittest.TestCase):
         self.assertEqual(r["consultas"][0]["parametros"]["modelo"], "Notebook_G")
         self.assertEqual(r["consultas"][1]["parametros"]["modelos"], ["Notebook_G"])
 
+    def test_los_filtros_que_el_texto_no_pide_se_descartan(self):
+        """El modelo chico copia los filtros del ejemplo del prompt: solo valen los que el usuario dijo."""
+        p = plan([{"intencion": "SM3.buscar", "parametros": {"orden": "movilidad",
+                  "filtros": {"peso_max": 2.5, "bateria_min": 8, "dedicada": True}}}], "req_01")
+        r = v(p, "Para req_01, ¿cuáles son las mejores en movilidad?")
+        self.assertNotIn("filtros", r["consultas"][0]["parametros"])
+        self.assertTrue(any("filtros" in o for o in r["observaciones"]))
+        r = v(p, "Para req_01, las de más de 8 horas de batería, con gráfica dedicada y menos de 2,5 kg")
+        self.assertEqual(r["consultas"][0]["parametros"]["filtros"], {"peso_max": 2.5, "bateria_min": 8, "dedicada": True})
+
     def test_intencion_invalida_se_descarta(self):
         r = v(plan([{"intencion": "SM9.volar", "parametros": {}},
                     {"intencion": "SM4.recomendar", "parametros": {}}], "req_01"), "recomendame algo para req_01")
