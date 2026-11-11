@@ -9,9 +9,9 @@ Quién lo lea no necesita saber a quién estaba asignada cada tarea: se sigue po
 | PG3-01 a 04, 06 a 09 (esqueleto, grafo, SM1 a SM3, GRUPO, router; PR #4 de otra persona) | Hecho | **Por hacer:** revisión retroactiva del PR #4 (aprobar `contrato.py`, la excepción de `langchain-ollama`) |
 | PG3-05 Cierre de trazabilidad y conteos | Hecho, validado con Neo4j | Corrido y corregido |
 | PG3-12 SM4 | Hecho | Corrido; 7 de 10 hallazgos corregidos (quedan prioridad `precio`, motivo armado en el Cypher) |
-| PG3-13 Explicador | Hecho | Corrido; corregidos los de corrección. Quedan: parseo de miles (`1.200`), redondeo permisivo de enteros, afirmaciones sin cifra ni notebook |
-| PG3-11 E2E, casos de uso y pruebas | Hecho: 7 de 7 E2E aprueban | Corrido; 6 de 10 corregidos (quedan filtros con números en letras, enlace del video en el ZIP, tests duplicados) |
-| PG3-15 Registro de correcciones | Hecho (`docs/CORRECCIONES.md`) | Solo documentación: no revisada. Quedó desfasada (dice que SM4 y el explicador son stub) |
+| PG3-13 Explicador | Hecho | Corrido; corregidos los de corrección. Corregido el parseo de miles (`1.200`). Quedan: redondeo permisivo de enteros, afirmaciones sin cifra ni notebook |
+| PG3-11 E2E, casos de uso y pruebas | Hecho: 7 de 7 E2E aprueban | Corrido; 10 de 10 atendidos (filtros en letras y con punto de miles, aviso del video en el LEEME del ZIP, test de E2E con una corrida por caso). Falta el re-review de esas correcciones |
+| PG3-15 Registro de correcciones | Hecho (`docs/CORRECCIONES.md`) | Solo documentación: no revisada. Actualizada el 11/11 (SM4 y el explicador ya no son stub) |
 | PG3-16 Manual y README | Hecho | Sin revisar; **falta que una persona lo siga desde cero** |
 | PG3-10 Diagramas | Hecho (`.drawio` y `.png`) | Sin revisar; Draw.io de escritorio no probado |
 | PG3-14 Informe PDF (59 páginas) | Hecho | Sin revisar; **nadie leyó el PDF completo**; usa `mistune` y PyMuPDF (fuera de `RESTRICCIONES.md`) |
