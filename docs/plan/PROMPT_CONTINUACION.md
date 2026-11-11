@@ -2,28 +2,27 @@
 
 Quién lo lea no necesita saber a quién estaba asignada cada tarea: se sigue por dependencias.
 
-## Hecho
-| Tarea | Estado | Dónde |
+## Estado de todas las tareas (11/11, noche)
+| Tarea | Estado | Code review |
 | --- | --- | --- |
-| Validación de la consigna contra el plan, arquitectura B, PG3-05 agregada | Hecho | `docs/plan/`, `docs/ARQUITECTURA.md` |
-| PG3-01 a 04, 06 a 09 (esqueleto, grafo modular, SM1, SM2, SM3, GRUPO, router) | Hecho (PR #4, de otra persona) | `asistente/`, `cypher/` |
-| PG3-05 Cierre de trazabilidad y conteos (origen del conocimiento en `GRUPO.traza_reglas`, conteos 343/683) | Hecho y validado con Neo4j 5.26 | `asistente/submodulos/grupo/`, `scripts/contar_grafo.py` |
-| PG3-12 SM4 (recomendar, explicar_notebook, comparar, costo_beneficio) | Hecho, esperados del issue coinciden con el grafo | `asistente/submodulos/sm4/` |
-| PG3-13 Explicador común | **Casi**: prompt, verificador a–h, plantilla y regeneración listos | `asistente/explicador.py`, `prompts/explicacion.txt` |
-| PG3-15 Registro de correcciones (43 filas) | Hecho | `docs/CORRECCIONES.md` |
-| Medición del router con `qwen2.5:3b` | Intenciones 24/25 = 96 %, resultado final 23/25 = 92 % | R04 (no extrajo `req_01`) y R13 (espera `SM1.aclarar_pedido`, que la arquitectura B no emite) |
+| Validación del plan contra la consigna, arquitectura B | Hecho | — |
+| PG3-01 a 04, 06 a 09 (esqueleto, grafo, SM1 a SM3, GRUPO, router; PR #4 de otra persona) | Hecho | **Por hacer:** revisión retroactiva del PR #4 (aprobar `contrato.py`, la excepción de `langchain-ollama`) |
+| PG3-05 Cierre de trazabilidad y conteos | Hecho, validado con Neo4j | Corrido y corregido |
+| PG3-12 SM4 | Hecho | Corrido; 7 de 10 hallazgos corregidos (quedan prioridad `precio`, motivo armado en el Cypher) |
+| PG3-13 Explicador | Hecho | Corrido; corregidos los de corrección. Quedan: parseo de miles (`1.200`), redondeo permisivo de enteros, afirmaciones sin cifra ni notebook |
+| PG3-11 E2E, casos de uso y pruebas | Hecho: 7 de 7 E2E aprueban | Corrido; 6 de 10 corregidos (quedan filtros con números en letras, enlace del video en el ZIP, tests duplicados) |
+| PG3-15 Registro de correcciones | Hecho (`docs/CORRECCIONES.md`) | Solo documentación: no revisada. Quedó desfasada (dice que SM4 y el explicador son stub) |
+| PG3-16 Manual y README | Hecho | Sin revisar; **falta que una persona lo siga desde cero** |
+| PG3-10 Diagramas | Hecho (`.drawio` y `.png`) | Sin revisar; Draw.io de escritorio no probado |
+| PG3-14 Informe PDF (59 páginas) | Hecho | Sin revisar; **nadie leyó el PDF completo**; usa `mistune` y PyMuPDF (fuera de `RESTRICCIONES.md`) |
+| PG3-17 Exportación y ZIP | Hecho: 11 de 12 ítems | Corrido; parcialmente corregido. **Falta** descomprimir en carpeta limpia y probar |
+| PG3-18 Infografía | Cubierta con `docs/presentacion/resumen_ejecutivo.pdf` (una página) | — |
+| PG3-19 Video | **Por hacer** (persona) | — |
+| PG3-20 Lectura cruzada | **Por hacer** (personas) | — |
+| PG3-21 a 27 (nivel 2) | No se hacen: el informe lo dice como limitación | — |
 
-Suite: 151 tests en verde con Neo4j, 2 salteados (router y explicador con LLM, que piden `PG3_TEST_LLM=1`).
-
-## Pendiente (en este orden)
-1. **`/code-review` de PG3-05, 12 y 13: corrido y corregido el 11/11** (PG3-15 es solo documentación y no se revisó como código). Falta volver a correrlo sobre los commits `fix(...)`.
-2. **PG3-13, lo que falta**: ajustar el prompt y el verificador con los E2E reales. Siguen abiertos del review: el parseo de números con separador de miles (`1.200` se lee como 1,2), el redondeo muy permisivo de enteros y las afirmaciones que contradicen un dato sin nombrar notebook ni estado (por ejemplo, «los parámetros están validados»).
-3. **Orquestador**: la misma intención para dos modelos (E2E-2) ya une las listas `notebooks` (corregido el 11/11, con test).
-4. **PG3-11, hecho el 11/11:** los 7 E2E aprueban (`python -m scripts.correr_e2e`), con casos de uso, pruebas funcionales y secciones 07 y 08 del informe. Falta medir los tiempos en otra máquina. **PG3-17, hecho a medias:** `scripts/exportar_grafo.py` y `scripts/armar_zip.py` andan; faltan b) diagramas, k) video y l) infografía en el ZIP, y la prueba de reproducción en una carpeta limpia.
-5. **En curso con agentes (11/11):** PG3-16 manual y README, PG3-10 diagramas, PG3-14 informe PDF (con el resumen de una página como cobertura del ítem l). Revisar sus ramas o archivos y commitear. **De personas:** PG3-19 video, PG3-20 lectura cruzada.
-6. **Compuerta de PG3-21:** se cumplen las condiciones técnicas (PG3-12 y 13 en `main`, E2E-1 andando), pero **no se toma**: falta tiempo y el nivel 1 cubre la consigna. Nivel 2 (PG3-21 a 27) queda fuera; el informe lo dice como limitación.
-7. **Abiertos menores**: `ORDER BY` sin desempate en SM2 (`riesgo_ram`), `GRUPO.parametros` y `GRUPO.traza_reglas` (los fixtures cambian de orden sin que cambie el grafo); `q.fuente` siempre nula en L3; mover `NO_REGISTRADA` a `contrato.py` (lo aprueba Miranda); `docs/contexto/CONTEXTO_SM3_PG3.md` es una copia vieja (C-20).
-8. **De las personas, no del código**: aprobar `contrato.py` del PR #4, confirmar la excepción de `langchain-ollama` en `RESTRICCIONES.md` §8, avisar a de Coninck que se tocó `grupo/`, y decidir si se prueba `qwen2.5:7b`.
+**Por hacer del review:** volver a correr `/code-review` sobre los commits `fix(...)` (`81417ff`, `539ccae`, `fd535ef`, `8cad4eb`) y revisar el PR #4.
+**Por hacer de verificación:** tiempos de los E2E en otra máquina; seguir el manual desde cero; descomprimir el ZIP y correr E2E-1; leer el PDF y confirmar nombres (README: «Olea, Facundo», comisión 5K09, «Luconi Furque»).
 
 ## Prompt para otra persona (o para otra sesión de IA)
 
