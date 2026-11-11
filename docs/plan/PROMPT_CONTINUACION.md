@@ -16,9 +16,9 @@ Quién lo lea no necesita saber a quién estaba asignada cada tarea: se sigue po
 Suite: 151 tests en verde con Neo4j, 2 salteados (router y explicador con LLM, que piden `PG3_TEST_LLM=1`).
 
 ## Pendiente (en este orden)
-1. **`/code-review` de las tareas ya hechas** (PG3-05, 12, 13 y 15): no se corrió. Antes de abrir los PR.
-2. **PG3-13, lo que falta**: control de recomendación en el verificador (ver la nota `docs/sesiones/2026-11-10_Miranda_PG3-13_explicador.md`, «Qué queda»); ajustar el prompt con los E2E reales.
-3. **Orquestador**: si el plan pide la misma intención para dos modelos (E2E-2), la segunda evidencia pisa a la primera en `asistente/orquestador.py` (`evidencia[sm][corta] = ...`). Unir las listas `notebooks`.
+1. **`/code-review` de PG3-05, 12 y 13: corrido y corregido el 11/11** (PG3-15 es solo documentación y no se revisó como código). Falta volver a correrlo sobre los commits `fix(...)`.
+2. **PG3-13, lo que falta**: ajustar el prompt y el verificador con los E2E reales. Siguen abiertos del review: el parseo de números con separador de miles (`1.200` se lee como 1,2), el redondeo muy permisivo de enteros y las afirmaciones que contradicen un dato sin nombrar notebook ni estado (por ejemplo, «los parámetros están validados»).
+3. **Orquestador**: la misma intención para dos modelos (E2E-2) ya une las listas `notebooks` (corregido el 11/11, con test).
 4. **PG3-11** E2E (E2E-1, 2, 3, 5, 8, 9, 10), `scripts/correr_e2e.py`, `docs/pruebas/`. Sumar al CSV del router las consultas de E2E-9 y E2E-10 y corregir R13 (con la arquitectura B espera `SM1.interpretacion_pedido`).
 5. **PG3-16** manual y README · **PG3-10** diagramas · **PG3-14** informe PDF · **PG3-17** exportación y ZIP · **PG3-18** · **PG3-19** video (humano) · **PG3-20** lectura cruzada (humano).
 6. **Compuerta de PG3-21** (miércoles 11, con PG3-12 y PG3-13 en `main` y E2E-1 andando): pedido nuevo con inferencia. Después, nivel 2 (PG3-22 a 27) solo si sobra tiempo.

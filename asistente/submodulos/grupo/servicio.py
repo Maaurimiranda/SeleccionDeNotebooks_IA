@@ -12,7 +12,7 @@ def _origen_de_reglas(filas: list[dict], ids: list[str]) -> tuple[dict, list[str
     """Agrupa las filas de origen_reglas: {regla: [parámetro...]} y las reglas sin ningún origen."""
     por_regla: dict[str, list] = {i: [] for i in ids}
     for f in filas:
-        if f["parametro"] is None:
+        if f["parametro"] is None and f.get("consulta_experto") is None:
             continue
         item = {k: f[k] for k in _CAMPOS_ORIGEN if f.get(k) is not None}
         if item not in por_regla.setdefault(f["regla"], []):

@@ -41,21 +41,33 @@ RETURN p.submodulo AS submodulo, p.nombre AS nombre, p.valor AS valor,
     # Un parámetro respalda una regla si (a) es el `centros_y_sigmas_<variable>` de la variable de su
     # consecuente (solo esa variable, no las del antecedente) o (b) su `origen` nombra el id de la regla.
     # El borde de palabra (\b) evita atribuir REC-R1 a un origen que dice REC-R15.
+    # Además, una `ConsultaExperto` que valida la regla directamente (p. ej., CE-FZ-R2-R3) es parte de su origen:
+    # sale con `parametro` nulo.
     "origen_reglas": r"""
-UNWIND $reglas AS rid
-MATCH (q:Regla {id: rid})
-OPTIONAL MATCH (p:Parametro)
-WHERE p.nombre = 'centros_y_sigmas_' + split(coalesce(q.consecuente, ''), ' = ')[0]
-   OR p.origen =~ ('.*\\b' + rid + '\\b.*')
-OPTIONAL MATCH (ce:ConsultaExperto)-[:VALIDA]->(p)
-RETURN rid AS regla, p.nombre AS parametro, p.origen AS origen, p.estado_validacion AS validacion,
-       ce.id AS consulta_experto, ce.estado AS estado_consulta
+CALL {
+  UNWIND $reglas AS rid
+  MATCH (q:Regla {id: rid})
+  OPTIONAL MATCH (p:Parametro)
+  WHERE p.nombre = 'centros_y_sigmas_' + split(coalesce(q.consecuente, ''), ' = ')[0]
+     OR p.origen =~ ('.*\\b' + rid + '\\b.*')
+  OPTIONAL MATCH (ce:ConsultaExperto)-[:VALIDA]->(p)
+  RETURN rid AS regla, p.nombre AS parametro, p.origen AS origen, p.estado_validacion AS validacion,
+         ce.id AS consulta_experto, ce.estado AS estado_consulta
+  UNION ALL
+  UNWIND $reglas AS rid
+  MATCH (ce:ConsultaExperto)-[:VALIDA]->(:Regla {id: rid})
+  RETURN rid AS regla, null AS parametro, null AS origen, null AS validacion,
+         ce.id AS consulta_experto, ce.estado AS estado_consulta
+}
+RETURN regla, parametro, origen, validacion, consulta_experto, estado_consulta
 ORDER BY regla, parametro, consulta_experto
 """,
+    # La fuente de la autonomía solo cuenta si la autonomía existe: `Bateria.fuente` está aunque el dato sea desconocido.
     "origen_notebook": """
 MATCH (n:Notebook {modelo:$modelo})
 OPTIONAL MATCH (n)-[:POSEE]->(b:Bateria)
-RETURN n.fuente_precio AS fuente_precio, b.fuente AS fuente_autonomia
+RETURN n.fuente_precio AS fuente_precio,
+       CASE WHEN b.tipo_dato = 'desconocida' THEN null ELSE b.fuente END AS fuente_autonomia
 """,
     "origen_parametros": """
 MATCH (e:EtiquetaDifusa)<-[:TIENE_ETIQUETA]-(v:VariableDifusa)

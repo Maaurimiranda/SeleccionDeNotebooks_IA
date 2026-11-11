@@ -114,9 +114,22 @@ class ConGrafo(unittest.TestCase):
         self.assertNotEqual(o["notebook"]["fuente_precio"], NO_REGISTRADA)
         for rid, parametros in o["reglas"].items():
             for p in parametros:
-                if not p["parametro"].startswith("centros_y_sigmas_"):
+                if "parametro" in p and not p["parametro"].startswith("centros_y_sigmas_"):
                     # el parámetro solo respalda la regla si su origen la nombra completa (REC-R1 no es REC-R15)
                     self.assertRegex(p["origen"], rf"\b{re.escape(rid)}\b")
+
+    def test_la_consulta_que_valida_la_regla_directamente_es_parte_del_origen(self):
+        """CE-FZ-R2-R3 valida FZ-R2 y FZ-R3 sin pasar por un parámetro."""
+        o = grupo.ejecutar("GRUPO.traza_reglas", {"requerimiento_id": "req_01", "modelo": "Notebook_A"},
+                           grafo_real())["evidencia"]["origen"]
+        consultas = {p.get("consulta_experto") for p in o["reglas"].get("FZ-R2", [])}
+        self.assertIn("CE-FZ-R2-R3", consultas)
+
+    def test_la_fuente_de_una_autonomia_desconocida_no_se_inventa(self):
+        """Notebook_M no informa la autonomía: `Bateria.fuente` existe, pero la traza dice «no registrada»."""
+        o = grupo.ejecutar("GRUPO.traza_reglas", {"requerimiento_id": "req_01", "modelo": "Notebook_M"},
+                           grafo_real())["evidencia"]["origen"]
+        self.assertEqual(o["notebook"]["fuente_autonomia"], NO_REGISTRADA)
 
     def test_sin_evaluacion(self):
         with self.assertRaises(Aclaracion):

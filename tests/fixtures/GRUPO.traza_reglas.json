@@ -270,7 +270,7 @@
   },
   {
    "nombre": "GRUPO.origen_reglas",
-   "cypher": "UNWIND $reglas AS rid\nMATCH (q:Regla {id: rid})\nOPTIONAL MATCH (p:Parametro)\nWHERE p.nombre = 'centros_y_sigmas_' + split(coalesce(q.consecuente, ''), ' = ')[0]\n   OR p.origen =~ ('.*\\\\b' + rid + '\\\\b.*')\nOPTIONAL MATCH (ce:ConsultaExperto)-[:VALIDA]->(p)\nRETURN rid AS regla, p.nombre AS parametro, p.origen AS origen, p.estado_validacion AS validacion,\n       ce.id AS consulta_experto, ce.estado AS estado_consulta\nORDER BY regla, parametro, consulta_experto",
+   "cypher": "CALL {\n  UNWIND $reglas AS rid\n  MATCH (q:Regla {id: rid})\n  OPTIONAL MATCH (p:Parametro)\n  WHERE p.nombre = 'centros_y_sigmas_' + split(coalesce(q.consecuente, ''), ' = ')[0]\n     OR p.origen =~ ('.*\\\\b' + rid + '\\\\b.*')\n  OPTIONAL MATCH (ce:ConsultaExperto)-[:VALIDA]->(p)\n  RETURN rid AS regla, p.nombre AS parametro, p.origen AS origen, p.estado_validacion AS validacion,\n         ce.id AS consulta_experto, ce.estado AS estado_consulta\n  UNION ALL\n  UNWIND $reglas AS rid\n  MATCH (ce:ConsultaExperto)-[:VALIDA]->(:Regla {id: rid})\n  RETURN rid AS regla, null AS parametro, null AS origen, null AS validacion,\n         ce.id AS consulta_experto, ce.estado AS estado_consulta\n}\nRETURN regla, parametro, origen, validacion, consulta_experto, estado_consulta\nORDER BY regla, parametro, consulta_experto",
    "parametros": {
     "reglas": [
      "FZ-R2",
@@ -300,6 +300,14 @@
      "origen": "Decision de diseno del grupo (PI3)",
      "validacion": "sin validar",
      "consulta_experto": "CE-riesgo_obsolescencia",
+     "estado_consulta": "pendiente"
+    },
+    {
+     "regla": "FZ-R2",
+     "parametro": null,
+     "origen": null,
+     "validacion": null,
+     "consulta_experto": "CE-FZ-R2-R3",
      "estado_consulta": "pendiente"
     },
     {
@@ -442,7 +450,7 @@
   },
   {
    "nombre": "GRUPO.origen_notebook",
-   "cypher": "MATCH (n:Notebook {modelo:$modelo})\nOPTIONAL MATCH (n)-[:POSEE]->(b:Bateria)\nRETURN n.fuente_precio AS fuente_precio, b.fuente AS fuente_autonomia",
+   "cypher": "MATCH (n:Notebook {modelo:$modelo})\nOPTIONAL MATCH (n)-[:POSEE]->(b:Bateria)\nRETURN n.fuente_precio AS fuente_precio,\n       CASE WHEN b.tipo_dato = 'desconocida' THEN null ELSE b.fuente END AS fuente_autonomia",
    "parametros": {
     "modelo": "Notebook_A"
    },
@@ -668,6 +676,10 @@
       "origen": "Decision de diseno del grupo (PI3)",
       "validacion": "sin validar",
       "consulta_experto": "CE-riesgo_obsolescencia",
+      "estado_consulta": "pendiente"
+     },
+     {
+      "consulta_experto": "CE-FZ-R2-R3",
       "estado_consulta": "pendiente"
      }
     ],
