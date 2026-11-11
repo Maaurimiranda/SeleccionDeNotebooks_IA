@@ -23,7 +23,7 @@ python -m scripts.armar_zip              # arma dist/Grupo_2_PG3_ProyectoFinal.z
 ```
 
 ## Qué queda y dudas
-- **Prueba de reproducción** (descomprimir en una carpeta limpia, seguir el manual, cargar el grafo y correr E2E-1): **no se hizo**. Hacerla antes de entregar.
+- **Prueba de reproducción, hecha a medias:** se recargó el grafo desde `cypher/` en la base (101 sentencias) y E2E-1 y E2E-9 volvieron a aprobar. **No** se descomprimió el ZIP en una carpeta limpia ni se siguió el manual desde cero: hacerlo antes de entregar.
 - **Dump de Neo4j** (`neo4j-admin database dump`): no se agregó; los `.cypher` y los CSV reproducen el grafo.
 - El control de credenciales es por patrón; no reemplaza una lectura final del ZIP.
 - Los `elementId` cambian si se recarga el grafo: el CSV sirve para leer, no como clave estable.
