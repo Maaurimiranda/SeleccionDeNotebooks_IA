@@ -22,7 +22,7 @@ Quién lo lea no necesita saber a quién estaba asignada cada tarea: se sigue po
 | PG3-21 a 27 (nivel 2) | No se hacen: el informe lo dice como limitación | — |
 
 **Por hacer del review:** volver a correr `/code-review` sobre los commits `fix(...)` (`81417ff`, `539ccae`, `fd535ef`, `8cad4eb`) y revisar el PR #4.
-**Por hacer de verificación:** tiempos de los E2E en otra máquina; seguir el manual desde cero; descomprimir el ZIP y correr E2E-1; leer el PDF y confirmar nombres (README: «Olea, Facundo», comisión 5K09, «Luconi Furque»).
+**Por hacer de verificación:** tiempos de los E2E en otra máquina; seguir el manual desde cero; descomprimir el ZIP y correr E2E-1 (el 11/11 se descomprimió y pasan los 182 tests offline; falta E2E-1 con Neo4j y Ollama); al volver a correr con Neo4j, actualizar los «171 tests» de `docs/informe/08_pruebas.md`, `09_evaluacion.md` y `docs/pruebas/funcionales.md` (hoy son 182) y rehacer el PDF; leer el PDF y confirmar nombres (README: «Olea, Facundo», comisión 5K09, «Luconi Furque»).
 
 ## Prompt para otra persona (o para otra sesión de IA)
 

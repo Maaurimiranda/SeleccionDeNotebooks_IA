@@ -468,7 +468,7 @@ No hace falta para usarlo, pero permite comprobar que todo funciona.
 python -m unittest
 ```
 
-Sin Neo4j ni Ollama corre las pruebas que no los necesitan y **saltea** el resto (`s` en la salida). Al 11/11/2026 son 171 pruebas, con 26 salteadas. Pueden salir mensajes de conexión rechazada: son de una prueba que simula a propósito un Neo4j caído, no son un error. Con las variables del `.env` cargadas y el grafo en Neo4j, corren también las que consultan la base. Las que usan el modelo se activan aparte, y son lentas:
+Sin Neo4j ni Ollama corre las pruebas que no los necesitan y **saltea** el resto (`s` en la salida). Al 11/11/2026 son 182 pruebas, con 29 salteadas. Pueden salir mensajes de conexión rechazada: son de una prueba que simula a propósito un Neo4j caído, no son un error. Con las variables del `.env` cargadas y el grafo en Neo4j, corren también las que consultan la base. Las que usan el modelo se activan aparte, y son lentas:
 
 ```powershell
 $env:PG3_TEST_LLM = "1"
