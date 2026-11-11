@@ -158,6 +158,74 @@ class TestVerificador(unittest.TestCase):
         self.assertDispara("h", con("Notebook_A queda Recomendada (Media)."), EV_ESTADOS)
 
 
+class TestVerificadorRevision(unittest.TestCase):
+    """Hallazgos de la revisión de código de PG3-13."""
+
+    def assertDispara(self, control, respuesta, evidencia):
+        problemas = verificar(respuesta, evidencia)
+        self.assertTrue(any(p.startswith(f"({control})") for p in problemas), f"({control}): {problemas}")
+
+    def test_una_cifra_degenerada_no_tumba_el_verificador(self):
+        ev = evidencia_de("SM1.interpretacion_pedido", "SM2.riesgo_ram")
+        self.assertDispara("a", con("El riesgo de Notebook_G es 0." + "9" * 40), ev)
+
+    def test_oracion_con_dos_modelos_atribuye_cada_cifra_a_su_notebook(self):
+        ev = evidencia_de("SM1.interpretacion_pedido", "SM4.comparar")
+        h, b = ev["SM4"]["comparar"]["notebooks"][:2]
+        bien = f"{h['notebook']} cuesta {h['precio_usd']:.0f} USD y {b['notebook']} cuesta {b['precio_usd']:.0f} USD."
+        cruzada = f"{h['notebook']} cuesta {b['precio_usd']:.0f} USD y {b['notebook']} cuesta {h['precio_usd']:.0f} USD."
+        self.assertEqual(verificar(con(bien), ev), [])
+        self.assertDispara("a", con(cruzada), ev)
+
+    def test_oracion_con_dos_modelos_atribuye_cada_estado(self):
+        self.assertDispara("h", con("Notebook_A queda Descartada (excluyente incumplido) y Notebook_E, Recomendada (Alta)."),
+                           EV_ESTADOS)
+
+    def test_una_alerta_de_una_notebook_y_la_otra_sin_alertas_es_correcta(self):
+        ev = {"advertencia": ADVERTENCIA, "SM4": {"recomendar": {"ranking": [
+            {"notebook": "Notebook_X", "alertas": [{"codigo": "GM-R8", "texto": "t", "notebook": "Notebook_X"}]},
+            {"notebook": "Notebook_C", "alertas": []}]}}}
+        self.assertEqual(verificar(con("Notebook_X tiene la alerta GM-R8, y Notebook_C no tiene ninguna."), ev), [])
+
+    def test_otro_dato_dentro_del_rango_en_otra_notebook_no_es_un_promedio(self):
+        r = con("Notebook_M queda entre 0.504 y 0.826, por debajo de Notebook_A con 0.785.")
+        self.assertEqual(verificar(r, EV_ESTADOS), [])
+
+    def test_b_ids_de_reglas_difusas_y_no_subcadenas(self):
+        ev = evidencia_de("SM1.interpretacion_pedido", "GRUPO.traza_reglas", "SM2.riesgo_ram")
+        self.assertDispara("b", con("Aplica INT-RD42."), ev)
+        self.assertDispara("b", con("Alerta REN-R1 en Notebook_G."), ev)   # REN-R1 no es REN-R10
+
+    def test_c_una_alerta_no_es_una_regla_activada(self):
+        ev = evidencia_de("SM1.interpretacion_pedido", "SM2.riesgo_ram")
+        self.assertDispara("c", con("Notebook_G activó la regla FZ-R7 y por eso tiene riesgo entre 49.58 y 81.46."), ev)
+
+    def test_h_no_se_recomienda_lo_que_la_evidencia_descarta(self):
+        self.assertDispara("h", con("Te recomiendo Notebook_E, tiene grado 0.81."), EV_ESTADOS)
+        self.assertEqual(verificar(con("No te recomiendo Notebook_E: está descartada."), EV_ESTADOS), [])
+        self.assertEqual(verificar(con("Te recomiendo Notebook_A, con grado 0.785."), EV_ESTADOS), [])
+
+    def test_h_no_se_recomienda_lo_que_esta_fuera_del_ranking(self):
+        ev = evidencia_de("SM1.interpretacion_pedido", "SM4.recomendar")
+        self.assertDispara("h", con("Te conviene Notebook_X, con grado 0.534."), ev)
+
+    def test_g_perfil_sin_la_palabra_perfil_y_con_la_oracion_de_indeterminado(self):
+        ev = evidencia_de("SM1.interpretacion_pedido.req_02")
+        self.assertDispara("g", con("Como es para gaming, te conviene una con buena gráfica."), ev)
+        self.assertDispara("g", con("El perfil es indeterminado, pero seguro es de oficina."), ev)
+
+    def test_g_repetir_la_pregunta_pendiente_esta_permitido(self):
+        ev = evidencia_de("SM1.interpretacion_pedido.req_02")
+        pregunta = ev["pedido"]["preguntas_pendientes"][0]
+        self.assertEqual(verificar(con(f"Falta definir qué va a hacer con la notebook: {pregunta}"), ev), [])
+
+    def test_plantilla_avisa_si_recorta_reglas_y_marca_el_perfil_provisional(self):
+        ev = evidencia_de("SM1.interpretacion_pedido", "GRUPO.traza_reglas")
+        self.assertIn("y otras (ver la traza)", plantilla_fija(ev))
+        ev["pedido"] = {**ev["pedido"], "perfil_dominante_provisional": True}
+        self.assertIn("(provisional)", plantilla_fija(ev))
+
+
 class TestPlantillaFija(unittest.TestCase):
     def test_la_recomendacion_va_primero_y_cada_fila_es_de_su_notebook(self):
         ev = evidencia_de("SM1.interpretacion_pedido", "SM2.riesgo_ram", "SM3.buscar", "SM4.recomendar")

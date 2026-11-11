@@ -90,5 +90,25 @@ class TestOrquestador(unittest.TestCase):
         self.assertEqual(r["requerimiento_id"], "req_01")
 
 
+    def test_misma_intencion_para_dos_modelos_une_la_evidencia(self):
+        """E2E-2: explicar la M y la G. La segunda evidencia no pisa a la primera."""
+        filas = {m: fixture(f)["consultas"][0]["filas"] for m, f in
+                 (("Notebook_M", "SM4.explicar_notebook"), ("Notebook_G", "SM4.explicar_notebook.G"))}
+
+        class GrafoPorModelo(GrafoFalso):   # el grafo falso no mira los parámetros: acá sí, el modelo
+            def leer(self, cypher, parametros=None):
+                if parametros and parametros.get("modelo"):
+                    return filas[parametros["modelo"]]
+                return super().leer(cypher, parametros)
+
+        grafo = GrafoPorModelo(fixture("SM1.interpretacion_pedido"))
+        plan = {"requerimiento_id": "req_01", "fuera_de_alcance": False, "aclaracion": None, "evidencia": [],
+                "consultas": [{"intencion": "SM4.explicar_notebook", "parametros": {"modelo": "Notebook_M"}},
+                              {"intencion": "SM4.explicar_notebook", "parametros": {"modelo": "Notebook_G"}}]}
+        orq = Orquestador(grafo, LLMFalso(), planificar=plan_fijo(plan), dir_trazas=self.dir)
+        r = orq.consultar("¿Por qué la M quedó condicionada y la G indeterminada? req_01")
+        modelos = [n["notebook"] for n in r["traza"]["evidencia"]["SM4"]["explicar_notebook"]["notebooks"]]
+        self.assertEqual(modelos, ["Notebook_M", "Notebook_G"])
+
 if __name__ == "__main__":
     unittest.main()

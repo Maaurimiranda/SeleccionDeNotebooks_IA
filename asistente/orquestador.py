@@ -111,7 +111,11 @@ class Orquestador:
                 if c["intencion"] == INTENCION_PEDIDO:
                     evidencia["pedido"] = salida["evidencia"]
                 else:
-                    evidencia.setdefault(sm, {})[corta] = salida["evidencia"]
+                    previa = evidencia.setdefault(sm, {}).get(corta)
+                    if previa and isinstance(previa.get("notebooks"), list) and isinstance(salida["evidencia"].get("notebooks"), list):
+                        # la misma intención para otro modelo (p. ej., explicar la M y la G): una sola evidencia, sin pisar la anterior
+                        salida["evidencia"] = {**previa, "notebooks": previa["notebooks"] + salida["evidencia"]["notebooks"]}
+                    evidencia[sm][corta] = salida["evidencia"]
                 if sm not in submodulos:
                     submodulos.append(sm)
             evidencia["advertencia"] = ADVERTENCIA       # siempre que se consulta el grafo (D-07 §7)

@@ -92,10 +92,15 @@ def main():
     args = ap.parse_args()
     if not config.NEO4J_PASSWORD:
         sys.exit("Falta NEO4J_PASSWORD en el entorno (ver .env.example).")
+    if args.canonico and args.hasta is not None:
+        sys.exit("--hasta no se puede combinar con --canonico: el canónico se carga entero.")
     driver = GraphDatabase.driver(config.NEO4J_URI, auth=(config.NEO4J_USER, config.NEO4J_PASSWORD),
                                   notifications_min_severity="OFF")
     try:
-        print(f"Cargando el grafo en {config.NEO4J_URI} ...")
+        print(f"Cargando el grafo en {config.NEO4J_URI} ... (BORRA todo lo que haya en la base)")
+        if args.canonico:
+            print("Ojo: el canónico no tiene los arreglos de D-06 ('provisional' en vez de 'sin validar'): "
+                  "para volver al grafo del proyecto, recargá cypher/ sin --canonico.")
         n = cargar_canonico(driver) if args.canonico else cargar(driver, args.hasta)
         print(f"Listo: {n} sentencias.")
     finally:

@@ -8,7 +8,7 @@ La exactitud la garantiza el verificador, no que el modelo obedezca.
 import json
 import re
 import unicodedata
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from pathlib import Path
 
 from asistente.contrato import ESTADOS
@@ -24,9 +24,10 @@ NOMBRES_DE_PERFIL = ("oficina", "ofimática", "ofimatica", "gamer", "gaming", "p
 RUTA_PROMPT = Path(__file__).resolve().parent.parent / "prompts" / "explicacion.txt"
 
 _MODELO = re.compile(r"Notebook_[A-Z]\b")
-_REGLA = re.compile(r"\b[A-Z]{2,4}-R\d+\b")
+_REGLA = re.compile(r"\b[A-Z]{2,4}-RD?\d+\b")
 _IDENTIFICADOR = re.compile(r"Notebook_[A-Z]\b|\breq_\d+\b|\b[A-Z]{1,5}(?:-[A-Za-z0-9_]+)+\b")
-_NUMERO = re.compile(r"(?<![\w.,])\d+(?:[.,]\d+)?")
+_NUMERO = re.compile(r"(?<![\w.,])\d{1,15}(?:[.,]\d{1,15})?")   # acotado: un número de 40 dígitos no tumba el verificador
+_PARTIR_POR_MODELO = re.compile(r"(Notebook_[A-Z]\b)")
 
 
 # ---------------------------------------------------------------- utilidades
@@ -82,7 +83,16 @@ def _respaldado(n: Decimal, nums: set[Decimal]) -> bool:
     """n está en la evidencia, o es ese número redondeado a los decimales con que se escribió,
     o es un grado (0 a 1) escrito como porcentaje."""
     d = max(0, -n.as_tuple().exponent)
-    return any(_redondear(e, d) == n or (0 <= e <= 1 and _redondear(e * 100, d) == n) for e in nums)
+    try:
+        return any(_redondear(e, d) == n or (0 <= e <= 1 and _redondear(e * 100, d) == n) for e in nums)
+    except InvalidOperation:   # una cifra que no se puede redondear no está respaldada
+        return False
+
+
+def _segmentos(oracion: str) -> list[tuple[str | None, str]]:
+    """Parte la oración en tramos: cada uno es de la notebook nombrada justo antes (el primero, de ninguna)."""
+    partes = _PARTIR_POR_MODELO.split(oracion)
+    return [(None, partes[0])] + [(partes[i], partes[i + 1]) for i in range(1, len(partes) - 1, 2)]
 
 
 def _recorrer(x, contexto=None):
@@ -165,44 +175,70 @@ def _estados_por_modelo(evidencia) -> tuple[set[str], dict[str, set[str]]]:
 
 
 # ---------------------------------------------------------------- verificador
+def _recomendables(evidencia) -> set[str] | None:
+    """Notebooks que la evidencia deja recomendar: las del ranking (`puesto`) o, sin ranking, las de estado
+    `Recomendada*` dentro del presupuesto. None si la evidencia no dice nada (p. ej., solo SM2)."""
+    clasificadas = {d["notebook"] for d, _ in _recorrer(evidencia) if d.get("notebook") and "puesto" in d}
+    if clasificadas:
+        return clasificadas
+    _, por_modelo = _estados_por_modelo(evidencia)
+    if not por_modelo:
+        return None
+    fuera = {m for d, m in _recorrer(evidencia) if m and (d.get("excedente_presupuesto_pct") or 0) > 0}
+    return {m for m, es in por_modelo.items() if any(e.startswith("Recomendada") for e in es)} - fuera
+
+
+_VERBO_RECOMENDAR = re.compile(r"recomiend|recomend|conviene|aconsej|mejor opcion|primer lugar|primera opcion|elegi|elegir")
+_NEGACION = re.compile(r"\b(?:no|nunca|ni)\b")
+
+
 def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS) -> list[str]:
-    """Problemas de la respuesta contra la evidencia (lista vacía = pasa). Controles (a) a (h) de D-07 §6."""
+    """Problemas de la respuesta contra la evidencia (lista vacía = pasa). Controles (a) a (h) de D-07 §6.
+    Lo que se dice de cada notebook se atribuye por tramos: cada tramo es de la notebook nombrada antes."""
     problemas: list[str] = []
     volcado = json.dumps(evidencia, ensure_ascii=False)
     oraciones = _oraciones(respuesta)
+    tramos = [t for o in oraciones for t in _segmentos(o)]
 
-    # (a) cada número está en la evidencia (con tolerancia de redondeo) y, si la oración habla de una sola
-    # notebook, es un dato de esa notebook o del pedido, no de otra
+    # (a) cada número está en la evidencia (con tolerancia de redondeo) y es un dato de la notebook de su tramo
     nums = _numeros_de_la_evidencia(evidencia)
     por_modelo, sin_modelo = _numeros_por_modelo(evidencia)
     for n in dict.fromkeys(_numeros(respuesta)):
         if not _respaldado(n, nums):
             problemas.append(f"(a) la cifra {n} no está en la evidencia")
-    for o in oraciones:
-        modelos = set(_MODELO.findall(o))
-        if len(modelos) == 1 and next(iter(modelos)) in por_modelo:
-            m = next(iter(modelos))
-            for n in dict.fromkeys(_numeros(o)):
+    for m, texto in tramos:
+        if m in por_modelo:
+            for n in dict.fromkeys(_numeros(texto)):
                 if _respaldado(n, nums) and not _respaldado(n, por_modelo[m] | sin_modelo):
                     problemas.append(f"(a) la cifra {n} no es un dato de {m}")
 
-    # (b) los modelos y las reglas citados existen en la evidencia
+    # (b) los modelos y las reglas citados existen en la evidencia (id completo, no una subcadena de otro)
     for m in dict.fromkeys(re.findall(r"\bNotebo\w*", respuesta)):
         if m not in ("Notebook", "Notebooks") and not (_MODELO.fullmatch(m) and m in volcado):
             problemas.append(f"(b) el modelo «{m}» no está en la evidencia")
+    ids_en_evidencia = set(_REGLA.findall(volcado))
     for r in dict.fromkeys(_REGLA.findall(respuesta)):
-        if r not in volcado:
+        if r not in ids_en_evidencia:
             problemas.append(f"(b) la regla {r} no está en la evidencia")
 
-    # (c) cada alerta está atribuida a su notebook
+    # (c) cada alerta está atribuida a su notebook, y una alerta no se presenta como regla activada (ni al revés)
     alertas = _alertas(evidencia)
-    for o in oraciones:
-        modelos = set(_MODELO.findall(o))
-        for codigo in dict.fromkeys(_REGLA.findall(o)):
+    reglas = {d["id"] for d, _ in _recorrer(evidencia) if isinstance(d.get("id"), str)}
+    for m, texto in tramos:
+        if _NEGACION.search(_sin_tildes(texto)):
+            continue
+        for codigo in dict.fromkeys(_REGLA.findall(texto)):
             duenos = alertas.get(codigo)
-            if duenos and any(m not in duenos for m in modelos):
-                problemas.append(f"(c) la alerta {codigo} es de {', '.join(sorted(duenos))}, "
-                                 f"no de {', '.join(sorted(modelos - duenos))}")
+            if m and duenos and m not in duenos:
+                problemas.append(f"(c) la alerta {codigo} es de {', '.join(sorted(duenos))}, no de {m}")
+    for o in oraciones:
+        o_sin = _sin_tildes(o)
+        for codigo in dict.fromkeys(_REGLA.findall(o)):
+            tras_regla = re.search(r"(?:\breglas?|activ\w*)[^.;,]{0,20}" + re.escape(codigo.lower()), o_sin)
+            if codigo in alertas and codigo not in reglas and tras_regla:
+                problemas.append(f"(c) {codigo} es una alerta, no una regla activada")
+            elif codigo in reglas and codigo not in alertas and "alerta" in o_sin:
+                problemas.append(f"(c) {codigo} es una regla, no una alerta")
 
     # (d) largo
     palabras = len(respuesta.split())
@@ -220,9 +256,13 @@ def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS)
     for modelo, lo, hi in _rangos(evidencia):
         propios = por_modelo.get(modelo, set()) | sin_modelo if modelo else nums  # otro dato de la notebook no es un promedio
         for o in oraciones:
-            if modelo and modelo not in o:
-                continue
-            en_o = _numeros(o)
+            if modelo:
+                texto = " ".join(t for m, t in _segmentos(o) if m == modelo)
+                if not texto:
+                    continue
+            else:
+                texto = o
+            en_o = _numeros(texto)
             adentro = [n for n in en_o if lo < n < hi and not _respaldado(n, propios)]
             tiene_lo, tiene_hi = (any(_respaldado(n, {x}) for n in en_o) for x in (lo, hi))
             if adentro:
@@ -231,28 +271,39 @@ def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS)
             elif tiene_lo != tiene_hi:
                 problemas.append(f"(f) da un solo extremo del rango [{lo} ; {hi}]{' de ' + modelo if modelo else ''}")
 
-    # (g) un pedido indeterminado no se completa con un perfil
+    # (g) un pedido indeterminado no se completa con un perfil (repetir la pregunta pendiente sí se puede)
     pedido = evidencia.get("pedido") or {}
     if pedido.get("perfil_dominante") == "indeterminado" or pedido.get("estado_pedido") == "indeterminado":
+        preguntas = _espacios(" ".join(pedido.get("preguntas_pendientes") or []))
         for o in oraciones:
+            if "?" in o or (preguntas and _espacios(o).strip(" .:") in preguntas):
+                continue
+            o_sin = _sin_tildes(o)
             asumido = [p for p in PERFILES if re.search(rf"\b{p}\b", o)]
-            asumido += [p for p in NOMBRES_DE_PERFIL
-                        if "perfil" in o.lower() and p in o.lower() and "indeterminado" not in o.lower()]
+            asumido += [p for p in NOMBRES_DE_PERFIL if p in o_sin]
             if asumido:
                 problemas.append(f"(g) el pedido está indeterminado y la respuesta nombra el perfil {asumido[0]}")
                 break
 
-    # (h) los estados, comparados sin tildes, son los que dice la evidencia
-    globales, por_modelo = _estados_por_modelo(evidencia)
-    for o in oraciones:
-        modelos = set(_MODELO.findall(o))
-        for estado in _estados_en(o):
+    # (h) los estados, comparados sin tildes, son los de cada notebook; solo se recomienda lo que la evidencia recomienda
+    globales, estados = _estados_por_modelo(evidencia)
+    for m, texto in tramos:
+        for estado in _estados_en(texto):
             if not _respalda(estado, globales):
                 problemas.append(f"(h) el estado «{estado}» no está en la evidencia")
-            elif len(modelos) == 1:
+            elif m and estados.get(m) and not _respalda(estado, estados[m]):
+                problemas.append(f"(h) {m} no está «{estado}»: la evidencia dice «{'», «'.join(sorted(estados[m]))}»")
+    recomendables = _recomendables(evidencia)
+    if recomendables is not None:
+        for o in oraciones:
+            modelos = set(_MODELO.findall(o))
+            sin_estados = _sin_tildes(o)
+            for e in _estados_en(o):
+                sin_estados = sin_estados.replace(_sin_tildes(e), " ")
+            if len(modelos) == 1 and _VERBO_RECOMENDAR.search(sin_estados) and not _NEGACION.search(sin_estados):
                 m = next(iter(modelos))
-                if por_modelo.get(m) and not _respalda(estado, por_modelo[m]):
-                    problemas.append(f"(h) {m} no está «{estado}»: la evidencia dice «{'», «'.join(sorted(por_modelo[m]))}»")
+                if m not in recomendables:
+                    problemas.append(f"(h) recomienda {m}, que la evidencia no recomienda")
     return list(dict.fromkeys(problemas))
 
 
@@ -299,7 +350,7 @@ def _lineas_de(nombre: str, ev: dict) -> list[str]:
         elif isinstance(valor, list) and valor and all(isinstance(x, dict) for x in valor):
             if clave == "reglas":
                 ids = list(dict.fromkeys(r["id"] for r in valor if "id" in r))
-                lineas.append(f"Reglas activadas: {', '.join(ids[:12])}.")
+                lineas.append(f"Reglas activadas: {', '.join(ids[:12])}{' y otras (ver la traza)' if len(ids) > 12 else ''}.")
             elif clave != "parametros":
                 lineas.extend(_fila(x) for x in valor[:MAX_FILAS_PLANTILLA])
                 if len(valor) > MAX_FILAS_PLANTILLA:
@@ -317,7 +368,8 @@ def plantilla_fija(evidencia: dict) -> str:
             lineas.append(f"Pedido {pedido.get('requerimiento')}: perfil indeterminado, no se asume ninguno. "
                           f"Presupuesto {_valor(pedido.get('presupuesto'))}. Falta: {falta}")
         else:
-            lineas.append(f"Pedido {pedido.get('requerimiento')}: perfil {pedido.get('perfil_dominante')}, "
+            lineas.append(f"Pedido {pedido.get('requerimiento')}: perfil {pedido.get('perfil_dominante')}"
+                          f"{' (provisional)' if pedido.get('perfil_dominante_provisional') else ''}, "
                           f"presupuesto {_valor(pedido.get('presupuesto'))}, prioridad {pedido.get('prioridad')}.")
     for sm in ("SM4", "SM2", "SM3", "SM1", "GRUPO"):  # lo más importante primero: el recorte es por líneas, desde el final
         for intencion, ev in (evidencia.get(sm) or {}).items():
