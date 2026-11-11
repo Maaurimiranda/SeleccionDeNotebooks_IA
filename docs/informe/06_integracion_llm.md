@@ -14,7 +14,7 @@ El LLM aparece en los dos extremos del flujo, y el conocimiento ocupa el medio:
 - **límites**: no calcula, no inventa modelos, cifras ni pedidos, y nunca supone `req_01`;
 - las **13 intenciones**, una línea cada una, con cuándo usarla;
 - **restricciones negativas** y un **formato cerrado**;
-- **8 ejemplos**, dos de ellos multisubmódulo.
+- **9 ejemplos**, uno de ellos multisubmódulo.
 
 En cada llamada recibe el catálogo, los pedidos cargados y el pedido de la sesión. El plan admite hasta 3 consultas, de modo que una pregunta como «¿Por qué la G quedó indeterminada y qué riesgo de RAM tiene en req_01?» se responde con SM4 y SM2 a la vez.
 
@@ -25,6 +25,22 @@ En cada llamada recibe el catálogo, los pedidos cargados y el pedido de la sesi
 - **Despacho:** cada intención validada va a su submódulo mediante un mapa de `RunnableLambda`.
 - **Sin agentes ni *tool calling*:** qué consulta se ejecuta lo decide el código, no el modelo.
 
+## Explicador y verificador
+`asistente/explicador.py` y `prompts/explicacion.txt` son comunes a todos los submódulos. El LLM recibe la evidencia común **compactada** (reglas repetidas juntas, listas largas cortadas a 12 filas, porque `qwen2.5:3b` tiene poco contexto) y redacta en voseo para el asesor, con un máximo de 150 palabras en el prompt. El verificador compara la respuesta contra la evidencia **original**, sin compactar, con ocho controles:
+
+| Control | Qué exige |
+| --- | --- |
+| a | Cada cifra está en la evidencia (con redondeo y coma o punto) y, si la oración habla de una sola notebook, es un dato de esa notebook o del pedido |
+| b | Cada `Notebook_X` y cada regla citada existen |
+| c | Cada alerta está en la notebook que la tiene |
+| d | Hasta 180 palabras y no vacía |
+| e | Está la advertencia de parámetros sin validar, literal (si el modelo no la copia, la agrega el código) |
+| f | Un rango no se da como un valor intermedio ni con un solo extremo |
+| g | Si el pedido es `indeterminado`, no se nombra un perfil |
+| h | Los estados, comparados sin tildes, son los de la evidencia |
+
+Si algún control falla, se vuelve a pedir la respuesta pasándole al modelo los problemas y su respuesta anterior, hasta `MAX_REGENERACIONES = 2` veces. Si sigue fallando, sale la **plantilla fija**, armada en código solo con la evidencia (`origen_respuesta = "plantilla_fija"`). En los 5 E2E con explicación (11/11/2026) el verificador aprobó a la primera: 0 de 5 salieron de la plantilla. El verificador corta lo inventado, pero no garantiza que la redacción sea buena ni que cada cifra lleve el nombre correcto (sección 9).
+
 ## Qué hace el LLM y qué no
 | Hace | No hace |
 | --- | --- |
@@ -34,15 +50,17 @@ En cada llamada recibe el catálogo, los pedidos cargados y el pedido de la sesi
 | | Completar un pedido o un dato que el usuario no dio |
 
 ## Acierto real del router
-El router se probó con `tests/datos/consultas_router.csv`: 25 consultas que cubren las 13 intenciones, 4 multisubmódulo, 3 fuera de dominio, 2 sin pedido, 1 con pedido de sesión y 2 con modelos inexistentes. La corrida se hizo con `qwen2.5:3b` a temperatura 0 el 10/11/2026 y tardó 217 s.
+El router se probó con `tests/datos/consultas_router.csv`, con `qwen2.5:3b` a temperatura 0. La medición final (11/11/2026) usa **31 consultas**: las 25 de la primera medición, que cubren las 13 intenciones, 4 multisubmódulo, 3 fuera de dominio, 2 sin pedido, 1 con pedido de sesión y 2 con modelos inexistentes, más las 6 consultas de los E2E.
 
-| Medida | Resultado |
+| Medida (31 consultas) | Resultado |
 | --- | --- |
-| Intenciones correctas en el plan del LLM | **24 / 25 (96 %)** |
-| Resultado final después de la validación en Python (plan, aclaración o fuera de alcance) | **25 / 25 (100 %)** |
+| Intenciones correctas en el plan del LLM | **28 / 31 (90 %)** |
+| Resultado final después de la validación en Python (plan, aclaración o fuera de alcance) | **30 / 31 (97 %)** |
 
-El único error del modelo fue planificar «¿Cuál es la capital de Francia?» como `GRUPO.parametros`. La validación lo detectó (el texto no tiene ninguna palabra del dominio) y respondió con el mensaje fijo de fuera de alcance sin consultar el grafo.
+Las tres intenciones que fallan son R13 (responder una pregunta pendiente, que es de nivel 2 y el router rechaza a propósito) y R26 y R30, donde el plan omite una de las intenciones esperadas. Los detalles están en la sección 8.3.
 
-Las consultas sin pedido terminaron en una pregunta («¿Sobre qué pedido?»), nunca en `req_01`, y los modelos inexistentes (Notebook_Z y Notebook_Q) en una aclaración con el catálogo. Ninguna terminó en una excepción no controlada.
+La primera medición (10/11/2026, 25 consultas, 217 s) había dado 24 de 25 intenciones (96 %) y 25 de 25 resultados finales. Su único error fue planificar «¿Cuál es la capital de Francia?» como `GRUPO.parametros`: la validación lo detectó (el texto no tiene ninguna palabra del dominio) y respondió con el mensaje fijo de fuera de alcance sin consultar el grafo. En esa corrida, las consultas sin pedido terminaron en una pregunta («¿Sobre qué pedido?»), nunca en `req_01`, y los modelos inexistentes (Notebook_Z y Notebook_Q) en una aclaración con el catálogo.
 
-El plan tarda entre 5 y 50 s por consulta en una notebook sin GPU dedicada, según si el modelo ya estaba cargado en memoria.
+**Reparo.** La medición no es independiente del prompt: cada uno de los 9 ejemplos del prompt maestro tiene su consulta gemela, exacta o muy cercana, en el conjunto de prueba (sección 9.5).
+
+El plan tardó entre 0,7 y 6,1 s en los E2E del 11/11 (una máquina). En otra, la notebook de Ramiro de Coninck (10/11), tardó entre 10 y 50 s; la primera consulta es la más lenta porque Ollama carga el modelo en memoria. Falta medir los tiempos de punta a punta en esa máquina.
