@@ -12,7 +12,7 @@ Esta sección analiza con espíritu crítico lo que el asistente hace bien, lo q
 | **Un requisito excluyente no se compensa con puntaje.** | E queda `Descartada (excluyente incumplido)` aunque puntúa ≈ 0,81, casi igual que B (0,813) y H (0,811) |
 | **El router se equivoca sin hacer daño.** La validación en Python descarta intenciones, modelos y pedidos inválidos antes de tocar el grafo, y nunca asume `req_01` | Una consulta fuera de dominio termina en un mensaje fijo, sin consultar el grafo (E2E-8: 0,69 s). Los modelos inexistentes terminan en una aclaración |
 | **Cada respuesta es auditable.** La traza guarda plan, Cypher con parámetros, filas, evidencia, intentos y tiempos | Sección 10: reconstrucción completa del E2E-9 |
-| **Es reproducible.** El grafo dividido por dueño equivale al canónico, y la regresión corre sola | 343 nodos y 683 relaciones iguales (57 de 57 filas); CP1 a CP11 en 11 de 11; 171 tests (2 salteados, los que piden Ollama) |
+| **Es reproducible.** El grafo dividido por dueño equivale al canónico, y la regresión corre sola | 343 nodos y 683 relaciones iguales (57 de 57 filas); CP1 a CP11 en 11 de 11; 193 tests (corrida offline del 12/11: OK, con 29 salteados porque piden Neo4j u Ollama; la última corrida con Neo4j, del 11/11 con 171 tests, dio OK con 2 salteados) |
 | **Corre local y sin costo de API**, en una notebook común | `qwen2.5:3b` ocupa unos 4 GB de RAM |
 
 ## 9.2 Limitaciones
@@ -47,7 +47,7 @@ Son casos reales de las corridas. En todos, **el E2E aprobó**, porque aprueba p
 | El router elige una intención que no existe, un modelo inexistente o un pedido inventado | `validar()` en Python: intención del conjunto cerrado, modelo del catálogo, fragmento literal, pedido existente | Una intención válida pero equivocada, o que falta (casos R26 y R30 del router) |
 | La respuesta cita una cifra, un modelo o una regla inventados | Verificador (controles a a h): regenera hasta 2 veces y después usa la plantilla fija | Una cifra real atribuida a otro concepto (lo encontramos en el E2E-2). Los errores de relación de PI4 de SM4 (CP1: Notebook_X «descartada»; CP5: la alerta de falta de información de M atribuida a B) ya se detectan: el control es por notebook también para alertas dichas en palabras y estados dichos como verbo (`tests/test_explicador.py::TestValidacionPorEntidadYEstado`). Siguen abiertos desde la revisión de código de PG3-13 otros dos: una afirmación que contradice un dato sin nombrar notebook ni estado (por ejemplo, «los parámetros están validados») y el parseo de números con separador de miles (`1.200` se lee como 1,2) |
 | Un rango se reduce a un número | Control (f) del verificador | Lo que no se dice como rango pero lo parece, como el caso del 52,9 % |
-| Un parámetro mal calibrado cambia un estado | La advertencia de `sin validar` en cada respuesta | Nada hasta que el técnico los valide |
+| Un parámetro mal calibrado cambia un estado | La advertencia de `sin validar` en cada respuesta y, en las de SM4, el aviso de los 9 parámetros de recomendación sin validar, contados desde el grafo | Nada hasta que el técnico los valide |
 | Un precio o una ficha desactualizados | La fuente y la fecha del precio salen en la traza | No hay actualización automática |
 | Ollama o Neo4j no responden | El sistema devuelve `origen_respuesta = "error"` con un mensaje fijo | — |
 | Cargar el grafo en una base compartida | `python -m scripts.cargar_grafo` **borra la base**: se usa solo en una instancia propia | No hay confirmación antes de borrar |

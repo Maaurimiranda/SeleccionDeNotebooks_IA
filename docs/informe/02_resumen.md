@@ -13,7 +13,7 @@
 | Medida (corridas del 11/11/2026) | Resultado |
 | --- | --- |
 | Regresión del grafo (CP1 a CP11) | 11 de 11 |
-| Pruebas automáticas (`unittest`) | 171, con 2 salteadas (piden Ollama) |
+| Pruebas automáticas (`unittest`) | 193; offline (12/11) OK, con 29 salteadas que piden Neo4j u Ollama |
 | E2E (5 integrales y 2 controles) | 7 de 7 aprueban; 4,3 a 7,1 s las que redacta el LLM (una máquina) |
 | Router: intenciones / resultado final | 28 de 31 (90 %) / 30 de 31 (97 %) |
 | Respuestas con explicación que salieron de la plantilla fija | 0 de 5 |

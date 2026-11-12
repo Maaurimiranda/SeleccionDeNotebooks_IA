@@ -19,10 +19,11 @@ Quién lo lea no necesita saber a quién estaba asignada cada tarea: se sigue po
 | PG3-18 Infografía | Cubierta con `docs/presentacion/resumen_ejecutivo.pdf` (una página) | — |
 | PG3-19 Video | **Por hacer** (persona) | — |
 | PG3-20 Lectura cruzada | **Por hacer** (personas) | — |
+| Devolución docente del PI4 de SM4: validación por entidad y estado, y los 9 parámetros de recomendación sin validar (PR #5) | Hecho, offline (193 tests) | **Por hacer:** revisión de otro integrante; regenerar los fixtures de SM4 con Neo4j (Q8) |
 | PG3-21 a 27 (nivel 2) | No se hacen: el informe lo dice como limitación | — |
 
 **Por hacer del review:** volver a correr `/code-review` sobre los commits `fix(...)` (`81417ff`, `539ccae`, `fd535ef`, `8cad4eb`) y revisar el PR #4.
-**Por hacer de verificación:** tiempos de los E2E en otra máquina; seguir el manual desde cero; descomprimir el ZIP y correr E2E-1 (el 11/11 se descomprimió y pasan los 182 tests offline; falta E2E-1 con Neo4j y Ollama); al volver a correr con Neo4j, actualizar los «171 tests» de `docs/informe/08_pruebas.md`, `09_evaluacion.md` y `docs/pruebas/funcionales.md` (hoy son 182) y rehacer el PDF; leer el PDF y confirmar nombres (README: «Olea, Facundo», comisión 5K09, «Luconi Furque»).
+**Por hacer de verificación:** tiempos de los E2E en otra máquina; seguir el manual desde cero; descomprimir el ZIP y correr E2E-1 (el 11/11 se descomprimió y pasan los 182 tests offline; falta E2E-1 con Neo4j y Ollama); al volver a correr con Neo4j, actualizar `docs/pruebas/funcionales.md` (dice 171; hoy son 193) y la corrida con Neo4j de `docs/informe/08_pruebas.md`, `02_resumen.md` y `09_evaluacion.md`, y rehacer el PDF; leer el PDF y confirmar nombres (README: «Olea, Facundo», comisión 5K09, «Luconi Furque»).
 
 ## Prompt para otra persona (o para otra sesión de IA)
 

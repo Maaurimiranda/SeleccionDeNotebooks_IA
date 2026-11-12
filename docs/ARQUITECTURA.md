@@ -150,10 +150,10 @@ def ejecutar(intencion: str, parametros: dict, grafo: "Grafo") -> dict:
 | `SM2.virtualizacion` | `requerimiento_id` · *`modelos`* | C1 | 1 |
 | `SM3.buscar` | `requerimiento_id`, `orden` (`grafica`/`movilidad`/`mixta`) · *`filtros`: `dedicada`, `gama_min`, `peso_max`, `bateria_min`, `srgb_min`* | unificada | 1 |
 | `SM3.ficha` | `requerimiento_id`, `modelo` | por modelo | 1 |
-| `SM4.recomendar` | `requerimiento_id` | Q1, Q2, Q3, Q6B | 1 |
-| `SM4.explicar_notebook` | `requerimiento_id`, `modelo` | Q4 (L2) | 1 |
-| `SM4.comparar` | `requerimiento_id`, `modelos` (2 o 3) | Q6, Q6B | 1 |
-| `SM4.costo_beneficio` | `requerimiento_id` | Q7 | 1 |
+| `SM4.recomendar` | `requerimiento_id` | Q1, Q2, Q3, Q6B, Q8 | 1 |
+| `SM4.explicar_notebook` | `requerimiento_id`, `modelo` | Q4 (L2), Q8 | 1 |
+| `SM4.comparar` | `requerimiento_id`, `modelos` (2 o 3) | Q6, Q6B, Q8 | 1 |
+| `SM4.costo_beneficio` | `requerimiento_id` | Q7, Q8 | 1 |
 | `GRUPO.traza_reglas` | `requerimiento_id`, `modelo` | L3 | 1 |
 | `GRUPO.parametros` | — | L4 | 1 |
 
@@ -185,6 +185,8 @@ Los modelos se normalizan a `Notebook_X` antes de llamar a `ejecutar`. El router
 ```json
 {"pedido": {...L1...}, "SM2": {...}, "SM4": {...}, "advertencia": "Los parámetros ... están sin validar por el técnico ..."}
 ```
+
+Toda evidencia de SM4 suma `validacion_parametros` (Q8), con la cuenta de los parámetros de recomendación sin validar y un `aviso_validacion`. El explicador exige cada `aviso_validacion` literal, igual que la advertencia.
 
 `asistente.orquestador.Orquestador.consultar(texto, requerimiento_id=None) -> dict` devuelve:
 
