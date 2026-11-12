@@ -16,7 +16,9 @@ Estado: hecho, con 193 tests en verde offline (29 salteados por falta de Neo4j u
 | `tests/test_explicador.py` | `TestValidacionPorEntidadYEstado`: las frases reales de CP1 y CP5, variantes, lo correcto que tiene que pasar y un caso de SM2 (el verificador es común). |
 | `tests/test_sm4.py`, `tests/test_orquestador.py` | Q8 en las listas de consultas esperadas, y el aviso en la respuesta de punta a punta. |
 | `tests/fixtures/SM4.*.json` | La consulta Q8 con sus filas (9 de 9 sin validar) y la evidencia regenerada con el grafo falso. |
-| `docs/MANUAL_DE_USO.md`, `docs/informe/09_evaluacion.md` | El aviso nuevo, y que CP1 y CP5 ya se detectan. |
+| `docs/MANUAL_DE_USO.md`, `docs/ARQUITECTURA.md`, `docs/informe/` (secciones 2, 5, 6, 8 y 9) | El aviso nuevo, Q8 en las consultas de SM4, los controles (c), (e) y (h) actualizados, que CP1 y CP5 ya se detectan, y la cantidad de tests (193). |
+| `docs/CORRECCIONES.md`, `docs/plan/PROMPT_CONTINUACION.md` | Filas C-44 y C-45, y el PR #5 en el estado de tareas. |
+| `docs/informe/Grupo_2_PG3_Informe.pdf`, `docs/presentacion/resumen_ejecutivo.pdf` | Rehechos con `python docs/informe/armar_pdf.py` (59 páginas y 1 página). |
 
 ## Cómo funciona (para alguien que no estuvo)
 El verificador (REC-R11, D-07 §6) ya partía cada oración en **tramos**: cada tramo es de la notebook nombrada justo antes. «Notebook_A queda primera y Notebook_X, descartada» tiene un tramo de A y uno de X. Con eso comparaba cifras, alertas por su código (`REC-R15`) y estados escritos con el literal de D-06.
