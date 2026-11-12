@@ -53,6 +53,24 @@ def archivos(hasta: int | None = None):
         yield ruta
 
 
+def comprobar_archivos(canonico: bool = False, hasta: int | None = None) -> list[Path]:
+    """Lo que se va a cargar. Si no hay nada, corta con exit 1 antes de conectarse (y, por lo tanto, antes de borrar).
+
+    Pasa, por ejemplo, si se corre desde una carpeta que no tiene cypher/ (un ZIP armado a mano o la carpeta equivocada).
+    """
+    if canonico:
+        if not CANONICO.is_file():
+            sys.exit(f"ERROR: no encontré {CANONICO}. No se tocó la base. "
+                     "Corré el comando desde la raíz del proyecto (con el ZIP, desde e_codigo_fuente/).")
+        return [CANONICO]
+    lista = list(archivos(hasta))
+    if not lista:
+        filtro = f" con prefijo <= {hasta:02d}" if hasta is not None else ""
+        sys.exit(f"ERROR: no hay archivos {DIR_CYPHER / 'NN_*.cypher'}{filtro} para cargar. No se tocó la base. "
+                 "Corré el comando desde la raíz del proyecto (con el ZIP, desde e_codigo_fuente/).")
+    return lista
+
+
 def _ejecutar(s, nombre: str, lista: list, verbose: bool) -> int:
     for linea, texto in lista:
         try:
@@ -94,6 +112,7 @@ def main():
         sys.exit("Falta NEO4J_PASSWORD en el entorno (ver .env.example).")
     if args.canonico and args.hasta is not None:
         sys.exit("--hasta no se puede combinar con --canonico: el canónico se carga entero.")
+    comprobar_archivos(args.canonico, args.hasta)
     driver = GraphDatabase.driver(config.NEO4J_URI, auth=(config.NEO4J_USER, config.NEO4J_PASSWORD),
                                   notifications_min_severity="OFF")
     try:

@@ -2,9 +2,13 @@
 
     python -m scripts.armar_zip            # arma dist/Grupo_2_PG3_ProyectoFinal.zip
     python -m scripts.armar_zip --verificar   # solo busca credenciales y lista lo que falta
+    python -m scripts.armar_zip --salida RUTA.zip   # lo arma en otra ruta (lo usan los tests)
 
 Una carpeta por ítem y un LEEME.md que dice qué archivos hay en cada una y qué falta. Excluye .env, .venv, trazas,
 __pycache__, .git y .claude. Si encuentra una credencial, no arma el ZIP.
+
+e_codigo_fuente/ es un proyecto ejecutable por sí solo (código, Cypher, tests y .env.example): con el ZIP, todos los
+comandos del manual se corren desde ahí. Por eso repite archivos que también están en c), f) y g).
 """
 import re
 import sys
@@ -21,7 +25,8 @@ ITEMS = [
     ("b", "b_diagramas", "Diagramas", ["docs/diagramas", "docs/informe/diagramas"]),
     ("c", "c_casos_de_prueba", "Casos de prueba, E2E y pruebas funcionales", ["docs/pruebas", "tests"]),
     ("d", "d_manual_de_uso", "Manual de uso", ["docs/MANUAL_DE_USO.md", "README.md"]),
-    ("e", "e_codigo_fuente", "Código fuente y requirements.txt", ["asistente", "scripts", "prompts", "requirements.txt"]),
+    ("e", "e_codigo_fuente", "Código fuente ejecutable: los comandos del manual se corren desde acá",
+     ["asistente", "scripts", "prompts", "cypher", "docs/cypher", "tests", "requirements.txt", ".env.example"]),
     ("f", "f_scripts_cypher", "Scripts Cypher", ["cypher", "docs/cypher"]),
     ("g", "g_configuracion", "Archivos de configuración", [".env.example"]),
     ("h", "h_recursos", "Recursos complementarios (arquitectura, decisiones, contextos, notas de sesión)",
@@ -92,7 +97,17 @@ def contienen_la_clave(rutas: list[Path]) -> list[str]:
     return [str(p.relative_to(RAIZ)) for p in rutas if clave and clave in p.read_bytes()] if clave else []
 
 
+def _salida(argv: list[str]) -> Path:
+    if "--salida" not in argv:
+        return SALIDA
+    i = argv.index("--salida")
+    if i + 1 >= len(argv):
+        raise SystemExit("--salida necesita una ruta, por ejemplo --salida C:/tmp/prueba.zip")
+    return Path(argv[i + 1]).resolve()
+
+
 def main(argv: list[str]) -> int:
+    salida = _salida(argv)
     contenido: dict[str, list[Path]] = {}
     for letra, carpeta, _, patrones in ITEMS:
         vistos: dict[Path, None] = {}
@@ -113,20 +128,22 @@ def main(argv: list[str]) -> int:
         return 0
     leeme = ["# Grupo 2 · PG3 · Asistente experto para la selección de notebooks", "",
              "Proyecto final de PG3 (UTN FRM). Este ZIP tiene una carpeta por ítem de la consigna §4. "
-             "Para reproducirlo: `e_codigo_fuente/` y `d_manual_de_uso/` (cómo instalarlo y correrlo), `f_scripts_cypher/` (cargar el grafo) y `g_configuracion/` (variables de entorno).", "",
+             "Para reproducirlo, seguí `d_manual_de_uso/docs/MANUAL_DE_USO.md` y **corré todos los comandos desde `e_codigo_fuente/`**: "
+             "es un proyecto completo por sí solo (código, `requirements.txt`, `.env.example`, `cypher/`, `docs/cypher/` y `tests/`). "
+             "Las carpetas `c_`, `f_` y `g_` repiten parte de esos archivos para que cada ítem se pueda revisar por separado.", "",
              "| Ítem | Carpeta | Contenido | Estado |", "| --- | --- | --- | --- |"]
     pendiente = {"k": "**pendiente**: el enlace al video va en `docs/video/ENLACE.md` (volver a correr `python -m scripts.armar_zip`)"}
     for letra, carpeta, desc, _ in ITEMS:
         n = len(contenido[letra])
         leeme.append(f"| {letra}) | `{carpeta}/` | {desc} | "
                      f"{f'{n} archivos' if n else pendiente.get(letra, '**pendiente** (ver el aviso del grupo)')} |")
-    SALIDA.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(SALIDA, "w", zipfile.ZIP_DEFLATED) as z:
+    salida.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(salida, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("LEEME.md", "\n".join(leeme) + "\n")
         for letra, carpeta, _, patrones in ITEMS:
             for p in contenido[letra]:
                 z.write(p, f"{carpeta}/{p.relative_to(RAIZ).as_posix()}")
-    print(f"Listo: {SALIDA.relative_to(RAIZ)} ({SALIDA.stat().st_size / 1e6:.1f} MB)")
+    print(f"Listo: {salida} ({salida.stat().st_size / 1e6:.1f} MB)")
     return 0
 
 
