@@ -33,11 +33,13 @@ class TestOrquestador(unittest.TestCase):
         self.assertEqual(ev["SM4"]["explicar_notebook"]["notebooks"][0]["estado"],
                          "Indeterminada: completar informacion")           # SM4 real, con filas del grafo
         self.assertEqual(ev["advertencia"], ADVERTENCIA)
+        self.assertIn("Los 9 parametros de recomendacion de SM4", r["respuesta"])   # devolución docente de PI4
         # la traza quedó escrita, con submódulo y duración por consulta
         lineas = list(Path(self.dir).glob("*.jsonl"))[0].read_text(encoding="utf-8").splitlines()
         t = json.loads(lineas[-1])
-        self.assertEqual([c["sm"] for c in t["consultas"]], ["SM1", "SM4", "SM2"])
-        self.assertTrue(all("ms" in c for c in t["consultas"]))
+        self.assertEqual([c["sm"] for c in t["consultas"]], ["SM1", "SM4", "SM4", "SM2"])   # SM4: Q4 y Q8 (parámetros)
+        # la duración de cada submódulo va en su última consulta (orquestador.py): SM4 hace dos
+        self.assertEqual(["ms" in c for c in t["consultas"]], [True, False, True, True])
         self.assertTrue({"plan", "consultas", "explicacion"} <= set(t["duracion_ms"]))
 
     def test_despacho_por_mapa_de_runnables(self):

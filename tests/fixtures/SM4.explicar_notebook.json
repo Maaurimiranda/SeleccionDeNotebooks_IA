@@ -55,6 +55,28 @@
      ]
     }
    ]
+  },
+  {
+   "nombre": "SM4.Q8_PARAMETROS_SM4",
+   "cypher": "MATCH (v:VariableDifusa {submodulo:'SM4'})-[:TIENE_ETIQUETA]->(e:EtiquetaDifusa)\nRETURN count(e) AS parametros,\n       count(CASE WHEN e.estado_validacion = 'sin validar' THEN 1 END) AS sin_validar,\n       collect(v.nombre + '.' + e.nombre) AS nombres",
+   "parametros": {},
+   "filas": [
+    {
+     "parametros": 9,
+     "sin_validar": 9,
+     "nombres": [
+      "adecuacion_global.baja",
+      "adecuacion_global.media",
+      "adecuacion_global.alta",
+      "excedente_presupuesto.dentro",
+      "excedente_presupuesto.levemente",
+      "excedente_presupuesto.muy",
+      "grado_recomendacion.descartar",
+      "grado_recomendacion.considerar",
+      "grado_recomendacion.recomendar"
+     ]
+    }
+   ]
   }
  ],
  "evidencia": {
@@ -105,6 +127,22 @@
      "La ficha no informa la autonomia: la adecuacion se informa como rango"
     ]
    }
-  ]
+  ],
+  "validacion_parametros": {
+   "parametros": 9,
+   "sin_validar": 9,
+   "nombres": [
+    "adecuacion_global.alta",
+    "adecuacion_global.baja",
+    "adecuacion_global.media",
+    "excedente_presupuesto.dentro",
+    "excedente_presupuesto.levemente",
+    "excedente_presupuesto.muy",
+    "grado_recomendacion.considerar",
+    "grado_recomendacion.descartar",
+    "grado_recomendacion.recomendar"
+   ],
+   "aviso_validacion": "Los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico."
+  }
  }
 }

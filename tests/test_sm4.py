@@ -53,7 +53,7 @@ class TestSM4Offline(unittest.TestCase):
         e = r["evidencia"]
         self.assertEqual([c["nombre"] for c in r["consultas"]],
                          ["SM4.Q1_RECOMENDACION", "SM4.Q2_NO_PROPUESTAS", "SM4.Q3_SIN_ALTERNATIVA",
-                          "SM4.Q6B_CRITERIO_DESEMPATE"])
+                          "SM4.Q6B_CRITERIO_DESEMPATE", "SM4.Q8_PARAMETROS_SM4"])
         self.assertEqual([(n["puesto"], n["notebook"]) for n in e["ranking"]],
                          [(1, "Notebook_A"), (2, "Notebook_H"), (3, "Notebook_B")])
         a, h, b = e["ranking"]
@@ -101,7 +101,7 @@ class TestSM4Offline(unittest.TestCase):
 
     def test_explicar_m_con_rango_y_falta_verificar_autonomia(self):
         r = ejecutar_fixture("SM4.explicar_notebook")
-        self.assertEqual([c["nombre"] for c in r["consultas"]], ["SM4.Q4_EXPLICAR_NOTEBOOK"])
+        self.assertEqual([c["nombre"] for c in r["consultas"]], ["SM4.Q4_EXPLICAR_NOTEBOOK", "SM4.Q8_PARAMETROS_SM4"])
         e = r["evidencia"]
         m = e["notebooks"][0]
         self.assertEqual(m["notebook"], "Notebook_M")
@@ -126,7 +126,8 @@ class TestSM4Offline(unittest.TestCase):
     def test_comparar_e_b_h_el_excluyente_gana_al_puntaje(self):
         r = ejecutar_fixture("SM4.comparar")
         self.assertEqual([c["nombre"] for c in r["consultas"]],
-                         ["SM4.Q6_COMPARAR", "SM4.Q6B_CRITERIO_DESEMPATE", "SM4.Q1_RECOMENDACION"])
+                         ["SM4.Q6_COMPARAR", "SM4.Q6B_CRITERIO_DESEMPATE", "SM4.Q1_RECOMENDACION",
+                          "SM4.Q8_PARAMETROS_SM4"])
         e = r["evidencia"]
         nbs = e["notebooks"]
         self.assertEqual([n["notebook"] for n in nbs], ["Notebook_H", "Notebook_B", "Notebook_E"])
@@ -142,7 +143,7 @@ class TestSM4Offline(unittest.TestCase):
 
     def test_costo_beneficio_ordenado_por_indice(self):
         r = ejecutar_fixture("SM4.costo_beneficio")
-        self.assertEqual([c["nombre"] for c in r["consultas"]], ["SM4.Q7_COSTO_BENEFICIO"])
+        self.assertEqual([c["nombre"] for c in r["consultas"]], ["SM4.Q7_COSTO_BENEFICIO", "SM4.Q8_PARAMETROS_SM4"])
         e = r["evidencia"]
         nbs = e["notebooks"]
         indices = [n["indice_costo_beneficio"] for n in nbs]
@@ -242,9 +243,9 @@ class TestSM4Offline(unittest.TestCase):
             sm4.ejecutar("SM2.riesgo_ram", {"requerimiento_id": "req_01"}, GrafoFalso())
 
     def test_filtra_por_el_pedido(self):
-        """Todas las consultas, salvo el criterio de desempate, filtran por $requerimiento_id."""
+        """Todas las consultas, salvo el criterio de desempate y los parámetros (Q8), filtran por $requerimiento_id."""
         for nombre, c in CONSULTAS.items():
-            if nombre != "Q6B_CRITERIO_DESEMPATE":
+            if nombre not in ("Q6B_CRITERIO_DESEMPATE", "Q8_PARAMETROS_SM4"):
                 self.assertIn("{id:$requerimiento_id}", c, nombre)
 
     def test_cada_consulta_recibe_sus_parametros(self):
@@ -271,7 +272,8 @@ class TestSM4Offline(unittest.TestCase):
 
     def test_todo_order_by_termina_en_un_desempate(self):
         """Dos corridas dan el mismo orden: la última clave de cada ORDER BY es única (modelo, motivo o regla)."""
-        self.assertEqual({n for n, c in CONSULTAS.items() if "ORDER BY" not in c}, {"Q6B_CRITERIO_DESEMPATE"})
+        self.assertEqual({n for n, c in CONSULTAS.items() if "ORDER BY" not in c},
+                         {"Q6B_CRITERIO_DESEMPATE", "Q8_PARAMETROS_SM4"})
         for nombre, c in CONSULTAS.items():
             for o in re.findall(r"ORDER BY ([^\n]+)", c):
                 ultima = re.sub(r"\s+(LIMIT \d+|DESC|ASC)\b", "", o.strip()).split(",")[-1].strip()

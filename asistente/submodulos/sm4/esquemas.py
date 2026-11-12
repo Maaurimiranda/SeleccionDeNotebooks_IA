@@ -48,8 +48,16 @@ class CriterioDesempate(TypedDict, total=False):
     validacion_margen: str
 
 
+class ValidacionParametros(TypedDict, total=False):
+    parametros: int                             # etiquetas difusas de SM4 en el grafo (hoy 9)
+    sin_validar: int                            # las que siguen 'sin validar'
+    nombres: list[str]                          # variable.etiqueta
+    aviso_validacion: str                       # solo si sin_validar > 0: el explicador lo exige literal
+
+
 class EvidenciaRecomendar(TypedDict, total=False):
     requerimiento_id: str
+    validacion_parametros: ValidacionParametros  # Q8: parámetros de recomendación sin validar con el técnico
     ranking: list[NotebookSM4]                  # hasta 3, dentro del presupuesto
     fuera_de_presupuesto: Any                   # NotebookSM4 o None (máximo una)
     no_propuestas: list[NotebookSM4]            # evaluadas que no figuran, con motivo y regla
@@ -59,6 +67,7 @@ class EvidenciaRecomendar(TypedDict, total=False):
 
 class EvidenciaExplicar(TypedDict, total=False):
     requerimiento_id: str
+    validacion_parametros: ValidacionParametros  # Q8: parámetros de recomendación sin validar con el técnico
     perfil: str
     presupuesto_usd: Any
     notebooks: list[NotebookSM4]                # una sola
@@ -66,6 +75,7 @@ class EvidenciaExplicar(TypedDict, total=False):
 
 class EvidenciaComparar(TypedDict, total=False):
     requerimiento_id: str
+    validacion_parametros: ValidacionParametros  # Q8: parámetros de recomendación sin validar con el técnico
     notebooks: list[NotebookSM4]
     criterio_desempate: Any
 
@@ -78,6 +88,7 @@ class ReglaCostoBeneficio(TypedDict, total=False):
 
 class EvidenciaCostoBeneficio(TypedDict, total=False):
     requerimiento_id: str
+    validacion_parametros: ValidacionParametros  # Q8: parámetros de recomendación sin validar con el técnico
     regla: ReglaCostoBeneficio | None           # None si ninguna notebook quedó recomendada
     notebooks: list[NotebookSM4]                # de mayor a menor índice
     sin_alternativa: str                        # solo si no hay recomendadas: el motivo de REC-R10
