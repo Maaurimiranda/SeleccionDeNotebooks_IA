@@ -76,6 +76,9 @@ git clone <URL del repositorio>
 
 Abrí PowerShell **en la carpeta raíz del proyecto**, la que tiene `requirements.txt`. Todos los comandos de este manual se corren desde ahí.
 
+- **Con Git:** la raíz es la carpeta del repositorio clonado.
+- **Con el ZIP:** la raíz es **`e_codigo_fuente/`**, dentro de la carpeta descomprimida. Tiene todo lo que hace falta para correr el sistema: el código, `requirements.txt`, `.env.example`, `cypher/`, `docs/cypher/` y `tests/`. Las demás carpetas del ZIP (`c_`, `f_`, `g_`, …) son para revisar cada ítem por separado, y desde ellas los comandos no andan. Por ejemplo, si corrés `python -m scripts.cargar_grafo` desde otra carpeta, termina con un error y no toca la base.
+
 ### 2.2 Python: entorno virtual y dependencias
 
 ```powershell
