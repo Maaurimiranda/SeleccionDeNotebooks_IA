@@ -170,6 +170,15 @@ RETURN q.id AS regla, q.enunciado AS enunciado, q.estado_validacion AS validacio
        """ + _COLUMNAS + """
 ORDER BY indice_costo_beneficio DESC, notebook
 """,
+
+    # Q8 · los parámetros de recomendación (etiquetas difusas de SM4) y cuántos siguen sin validar con el técnico.
+    # Va en toda respuesta de SM4 (contexto de SM4 §5, «Siempre: Q8»; devolución docente de PI4).
+    "Q8_PARAMETROS_SM4": """
+MATCH (v:VariableDifusa {submodulo:'SM4'})-[:TIENE_ETIQUETA]->(e:EtiquetaDifusa)
+RETURN count(e) AS parametros,
+       count(CASE WHEN e.estado_validacion = 'sin validar' THEN 1 END) AS sin_validar,
+       collect(v.nombre + '.' + e.nombre) AS nombres
+""",
 }
 
 
@@ -205,3 +214,7 @@ def criterio_desempate(grafo):
 def costo_beneficio(grafo, requerimiento_id: str):
     return leer_consulta(grafo, SM, "Q7_COSTO_BENEFICIO", CONSULTAS["Q7_COSTO_BENEFICIO"],
                          {"requerimiento_id": requerimiento_id})
+
+
+def parametros_sm4(grafo):
+    return leer_consulta(grafo, SM, "Q8_PARAMETROS_SM4", CONSULTAS["Q8_PARAMETROS_SM4"], {})

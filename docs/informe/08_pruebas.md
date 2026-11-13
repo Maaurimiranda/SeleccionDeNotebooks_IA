@@ -6,7 +6,7 @@ Todo se corrió el 11/11/2026 sobre Neo4j 5.26 (instancia local con el grafo car
 
 | Prueba | Qué cubre | Resultado |
 | --- | --- | --- |
-| `python -m unittest` | Submódulos, grafo, router, orquestador, explicador, API | 171 tests, 2 salteados (los que piden Ollama) |
+| `python -m unittest` | Submódulos, grafo, router, orquestador, explicador, API | 193 tests (corrida offline del 12/11: OK, con 29 salteados porque piden Neo4j u Ollama; la última corrida con Neo4j, del 11/11 con 171 tests, dio OK con 2 salteados) |
 | `python -m scripts.verificar_grafo` | Casos de prueba CP1 a CP11 del grafo | 11 de 11 |
 | `python -m scripts.contar_grafo` | El grafo dividido (`cypher/`) contra el canónico | 343 nodos y 683 relaciones, coinciden |
 | `python -m scripts.correr_e2e` | Los 7 E2E con el orquestador real | 7 de 7 aprueban (5 integrales y 2 controles) |

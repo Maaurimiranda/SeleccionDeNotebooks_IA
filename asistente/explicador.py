@@ -2,6 +2,8 @@
 
 El LLM redacta con `prompts/explicacion.txt`; el verificador comprueba cada respuesta contra la evidencia
 (cifras, modelos, reglas, atribución de alertas, rangos, estados, perfil indeterminado, advertencia y largo).
+Cada afirmación se controla contra la notebook a la que corresponde (validación por entidad y estado): también las
+alertas dichas en palabras («alerta de falta de información») y los estados dichos como verbo («se descartó»).
 Si falla `MAX_REGENERACIONES` veces, sale la plantilla fija, armada en código solo con la evidencia (REC-R11).
 La exactitud la garantiza el verificador, no que el modelo obedezca.
 """
@@ -169,6 +171,13 @@ def _respalda(estado: str, permitidos: set[str]) -> bool:
     return any(p == estado or p.startswith(estado + " ") for p in permitidos)
 
 
+def _negado(estado: str, texto: str) -> bool:
+    """«Notebook_X no fue descartada»: el estado aparece negado justo antes (no es una afirmación de ese estado)."""
+    t, norm = _sin_tildes(texto), _sin_tildes(estado)
+    i = t.find(norm)
+    return i >= 0 and bool(_NEGACION.search(t[max(0, i - 15):i]))
+
+
 def _estados_por_modelo(evidencia) -> tuple[set[str], dict[str, set[str]]]:
     globales: set[str] = set()
     por_modelo: dict[str, set[str]] = {}
@@ -179,6 +188,93 @@ def _estados_por_modelo(evidencia) -> tuple[set[str], dict[str, set[str]]]:
                 if modelo:
                     por_modelo.setdefault(modelo, set()).add(_ESTADOS_NORM[_sin_tildes(v)])
     return globales, por_modelo
+
+
+def _avisos(evidencia) -> list[str]:
+    """Textos que la respuesta copia literal: la advertencia general y los `aviso_validacion` de los submódulos
+    (p. ej., los parámetros de recomendación de SM4 que siguen sin validar con el técnico)."""
+    avisos = [evidencia["advertencia"]] if isinstance(evidencia.get("advertencia"), str) else []
+    for d, _ in _recorrer(evidencia):
+        if isinstance(d.get("aviso_validacion"), str):
+            avisos.append(d["aviso_validacion"])
+    return list(dict.fromkeys(a for a in avisos if a.strip()))
+
+
+# Una alerta dicha en palabras, sin su código (CP5 de PI4: «Notebook_B tiene una alerta de falta de información»).
+_FALTA_INFO = re.compile(r"falta(?:n)? (?:de )?(?:informacion|datos?)|informacion incompleta|incomplet[ao]s?"
+                         r"|no (?:se )?inform(?:a|an|ada|ado)\b|sin (?:el |ese )?dato|datos? faltantes?"
+                         r"|falta(?:n)? (?:el|la|los|las) (?:dato|autonomia|informacion)")
+_ALERTA = re.compile(r"\balertas?\b")
+_FALTA_EN_EVIDENCIA = re.compile(r"no inform|falta|desconocid|incomplet|indetermin|sin dato")
+
+
+def _notebooks_por_tema(evidencia) -> tuple[set[str], set[str], set[str]]:
+    """(notebooks a las que les falta información, notebooks con alguna alerta, notebooks cuyas alertas informa
+    la evidencia). La falta de información sale de sus alertas, su estado, `dato_faltante`, `datos_faltantes` y
+    `falta_verificar`: cualquier texto suyo que diga que un dato falta o no se informa."""
+    falta, con_alerta, informadas = set(), set(), set()
+    for d, modelo in _recorrer(evidencia):
+        if not modelo:
+            continue
+        if isinstance(d.get("alertas"), list):
+            informadas.add(modelo)
+            if any(isinstance(a, dict) and a.get("codigo") for a in d["alertas"]):
+                con_alerta.add(modelo)
+        for v in d.values():
+            for hoja in (v if isinstance(v, list) else [v]):
+                if isinstance(hoja, str) and _FALTA_EN_EVIDENCIA.search(_sin_tildes(hoja)):
+                    falta.add(modelo)
+    return falta, con_alerta, informadas
+
+
+def _afirma(texto: str, patron: re.Pattern) -> bool:
+    """El texto dice lo del patrón y no lo niega («no informa» es parte del tema, no una negación)."""
+    t = _sin_tildes(texto)
+    if not patron.search(t):
+        return False
+    return not _NEGACION.search(patron.sub(" ", _FALTA_INFO.sub(" ", t)))
+
+
+# Estados dichos como verbo o en corto, que no son el literal de D-06 (CP1 de PI4: «se descartó la Notebook_X»).
+_ESTADO_EN_PALABRAS = [
+    (re.compile(r"\bdescart(?:o|e|aron|amos|aste|ar|aria|arla|arlas|arlo|arlos|ada|adas|ado|ados)\b"), "Descartada"),
+    (re.compile(r"\bindeterminad[ao]s?\b"), "Indeterminada: completar informacion"),
+    (re.compile(r"\bcondicionad[ao]s?\b"), "Recomendada condicionada por falta de informacion"),
+]
+_CONECTOR = re.compile(r"[\s,;:()]*(?:y|e|o|ni|la|el|las|los|,)?[\s,;:()]*")
+
+
+def _estados_en_palabras(texto: str) -> set[str]:
+    """Estados que el texto afirma en palabras, fuera de los literales completos (esos los cuenta `_estados_en`)."""
+    t = _sin_tildes(texto)
+    for norm in _ORDEN_ESTADOS:
+        t = t.replace(norm, " ")
+    hallados = set()
+    for patron, estado in _ESTADO_EN_PALABRAS:
+        for m in patron.finditer(t):
+            if not _NEGACION.search(t[max(0, m.start() - 15):m.start()]):   # «no fue descartada»
+                hallados.add(estado)
+    return hallados
+
+
+def _estados_por_tramo(oracion: str) -> list[tuple[str, str]]:
+    """(notebook, estado en palabras) de una oración. Un estado dicho antes del primer nombre («Se descartó la
+    Notebook_X») es de esa notebook; en una enumeración («Notebook_E y Notebook_X quedaron descartadas»), lo que se
+    dice al final es de todas las enumeradas."""
+    seg = _segmentos(oracion)
+    salida = []
+    previos = [e for e in _estados_en_palabras(seg[0][1])] if len(seg) > 1 else []
+    pendientes: list[str] = []
+    for i, (m, texto) in enumerate(seg[1:]):
+        if i == 0:
+            salida += [(m, e) for e in previos]
+        if _CONECTOR.fullmatch(_sin_tildes(texto)) and i < len(seg) - 2:
+            pendientes.append(m)
+            continue
+        estados = _estados_en_palabras(texto)
+        salida += [(x, e) for x in pendientes + [m] for e in estados]
+        pendientes = []
+    return salida
 
 
 # ---------------------------------------------------------------- verificador
@@ -254,6 +350,23 @@ def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS)
             elif codigo in reglas and codigo not in alertas and re.search(r"\balerta\b", o_sin):
                 problemas.append(f"(c) {codigo} es una regla, no una alerta")
 
+    # (c) también una alerta dicha en palabras, sin el código, es de la notebook que la tiene
+    falta, con_alerta, informadas = _notebooks_por_tema(evidencia)
+    for m, texto in tramos:
+        if not m:
+            continue
+        if falta is not None and _afirma(texto, _FALTA_INFO) and m not in falta and (falta or m in informadas):
+            problemas.append(f"(c) la falta de información es de {', '.join(sorted(falta)) or 'ninguna notebook'}, "
+                             f"no de {m}")
+        elif _afirma(texto, _ALERTA) and m in informadas and m not in con_alerta and not _REGLA.search(texto):
+            problemas.append(f"(c) {m} no tiene alertas en la evidencia")
+    for o in oraciones:   # el tema antes que la notebook («La alerta de falta de información es de Notebook_B»)
+        modelos = set(_MODELO.findall(o))
+        inicio = _segmentos(o)[0][1]
+        if modelos and _afirma(inicio, _FALTA_INFO) and (falta or modelos & informadas) and not modelos & falta:
+            problemas.append(f"(c) la falta de información es de {', '.join(sorted(falta)) or 'ninguna notebook'}, "
+                             f"no de {', '.join(sorted(modelos))}")
+
     # (d) largo
     palabras = len(respuesta.split())
     if not palabras:
@@ -262,9 +375,10 @@ def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS)
         problemas.append(f"(d) tiene {palabras} palabras y el máximo es {max_palabras}")
 
     # (e) advertencia
-    advertencia = evidencia.get("advertencia")
-    if advertencia and _espacios(advertencia) not in _espacios(respuesta):
-        problemas.append("(e) falta la advertencia, copiada literal")
+    for aviso in _avisos(evidencia):
+        if _espacios(aviso) not in _espacios(respuesta):
+            cual = "la advertencia" if aviso == evidencia.get("advertencia") else f"el aviso «{aviso}»"
+            problemas.append(f"(e) falta {cual}, copiado literal")
 
     # (f) un rango se dice como rango: ni un valor intermedio ni un solo extremo
     for modelo, lo, hi in _rangos(evidencia):
@@ -305,7 +419,11 @@ def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS)
         for estado in _estados_en(texto):
             if not _respalda(estado, globales):
                 problemas.append(f"(h) el estado «{estado}» no está en la evidencia")
-            elif m and estados.get(m) and not _respalda(estado, estados[m]):
+            elif m and estados.get(m) and not _respalda(estado, estados[m]) and not _negado(estado, texto):
+                problemas.append(f"(h) {m} no está «{estado}»: la evidencia dice «{'», «'.join(sorted(estados[m]))}»")
+    for o in oraciones:   # estados en palabras: «se descartó la Notebook_X», «Notebook_X quedó descartada»
+        for m, estado in _estados_por_tramo(o):
+            if estados.get(m) and not _respalda(estado, estados[m]):
                 problemas.append(f"(h) {m} no está «{estado}»: la evidencia dice «{'», «'.join(sorted(estados[m]))}»")
     recomendables = _recomendables(evidencia)
     if recomendables is not None:
@@ -356,7 +474,7 @@ def _lineas_de(nombre: str, ev: dict) -> list[str]:
         lineas.append(resumen + ".")
     for clave, valor in ev.items():
         etiqueta = clave.replace("_", " ")
-        if isinstance(valor, dict) and clave not in ("origen", "pesos") and not _es_rango(valor):
+        if isinstance(valor, dict) and clave not in ("origen", "pesos", "validacion_parametros") and not _es_rango(valor):
             if valor.get("notebook"):
                 lineas.append(f"{etiqueta}: " + _fila(valor)[2:])
             elif _escalares(valor):
@@ -388,7 +506,7 @@ def plantilla_fija(evidencia: dict) -> str:
     for sm in ("SM4", "SM2", "SM3", "SM1", "GRUPO"):  # lo más importante primero: el recorte es por líneas, desde el final
         for intencion, ev in (evidencia.get(sm) or {}).items():
             lineas.extend(_lineas_de(f"{sm}.{intencion}", ev))
-    cierre = [f"Advertencia: {evidencia['advertencia']}"] if evidencia.get("advertencia") else []
+    cierre = [f"Advertencia: {a}" if a == evidencia.get("advertencia") else a for a in _avisos(evidencia)]
     reserva = sum(len(x.split()) for x in cierre) + 12
     salida, usadas = [], 0
     for i, linea in enumerate(lineas):
@@ -437,11 +555,11 @@ def _correcciones(anterior: str, problemas: list[str]) -> str:
 
 
 def _con_advertencia(respuesta: str, evidencia: dict) -> str:
-    """El modelo chico suele omitir la advertencia: si falta, la agrega el código, literal."""
-    advertencia = evidencia.get("advertencia")
-    if respuesta.strip() and advertencia and _espacios(advertencia) not in _espacios(respuesta):
-        return f"{respuesta}\n{advertencia}"
-    return respuesta
+    """El modelo chico suele omitir la advertencia y los avisos: si falta alguno, lo agrega el código, literal."""
+    if not respuesta.strip():
+        return respuesta
+    faltan = [a for a in _avisos(evidencia) if _espacios(a) not in _espacios(respuesta)]
+    return "\n".join([respuesta] + faltan)
 
 
 def explicar(texto: str, evidencia: dict, llm) -> dict:

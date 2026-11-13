@@ -32,14 +32,16 @@ En cada llamada recibe el catálogo, los pedidos cargados y el pedido de la sesi
 | --- | --- |
 | a | Cada cifra está en la evidencia (con redondeo y coma o punto) y, si la oración habla de una sola notebook, es un dato de esa notebook o del pedido |
 | b | Cada `Notebook_X` y cada regla citada existen |
-| c | Cada alerta está en la notebook que la tiene |
+| c | Cada alerta está en la notebook que la tiene, también si se nombra en palabras («alerta de falta de información») y no por su código |
 | d | Hasta 180 palabras y no vacía |
-| e | Está la advertencia de parámetros sin validar, literal (si el modelo no la copia, la agrega el código) |
+| e | Están la advertencia de parámetros sin validar y cada aviso de validación (en SM4, el de los 9 parámetros de recomendación), literales. Si el modelo no los copia, los agrega el código |
 | f | Un rango no se da como un valor intermedio ni con un solo extremo |
 | g | Si el pedido es `indeterminado`, no se nombra un perfil |
-| h | Los estados, comparados sin tildes, son los de la evidencia |
+| h | El estado que se afirma de cada notebook es el suyo, comparado sin tildes, también cuando se dice como verbo («se descartó»), antes del nombre o en una enumeración |
 
 Si algún control falla, se vuelve a pedir la respuesta pasándole al modelo los problemas y su respuesta anterior, hasta `MAX_REGENERACIONES = 2` veces. Si sigue fallando, sale la **plantilla fija**, armada en código solo con la evidencia (`origen_respuesta = "plantilla_fija"`). En los 5 E2E con explicación (11/11/2026) el verificador aprobó a la primera: 0 de 5 salieron de la plantilla. El verificador corta lo inventado, pero no garantiza que la redacción sea buena ni que cada cifra lleve el nombre correcto (sección 9).
+
+**Validación por entidad y estado (devolución docente del PI4 de SM4).** En el PI4, `qwen2.5:3b` dijo que Notebook_X estaba descartada (CP1; es `Recomendada (Media)`, fuera de presupuesto) y le atribuyó a Notebook_B la alerta de falta de información de Notebook_M (CP5). El control de entonces verificaba que existieran los números y los nombres, pero no a qué notebook correspondía cada afirmación. Ahora cada oración se parte en tramos, uno por notebook nombrada, y los controles c y h comparan cada tramo con la evidencia de esa notebook. Con la evidencia real de `req_01`, el verificador anterior dejaba pasar «Se descartó la Notebook_X» y «Notebook_B tiene una alerta de falta de información», y el actual las rechaza (`tests/test_explicador.py::TestValidacionPorEntidadYEstado`).
 
 ## Qué hace el LLM y qué no
 | Hace | No hace |

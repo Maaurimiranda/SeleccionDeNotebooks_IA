@@ -389,6 +389,12 @@ Toda respuesta que consulta el grafo cierra con este texto, copiado literal:
 
 Es una limitación real: los parámetros del modelo difuso (centros, sigmas y umbrales) todavía **no los validó un técnico**. Los grados y los riesgos sirven para ordenar y comparar, no como un dato cierto. Si el modelo se olvida de copiarla, la agrega el código.
 
+Las respuestas de recomendación (SM4: recomendar, explicar una notebook, comparar y costo-beneficio) suman un aviso más, con la cuenta que sale del grafo:
+
+> Los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico.
+
+Son las 9 etiquetas difusas de SM4: adecuación global (baja, media y alta), excedente de presupuesto (dentro, levemente y muy) y grado de recomendación (descartar, considerar y recomendar). Si el técnico valida alguno, el número baja solo; con todos validados, el aviso desaparece.
+
 ---
 
 ## 7. Ver la traza
@@ -471,7 +477,7 @@ No hace falta para usarlo, pero permite comprobar que todo funciona.
 python -m unittest
 ```
 
-Sin Neo4j ni Ollama corre las pruebas que no los necesitan y **saltea** el resto (`s` en la salida). Al 13/11/2026 son 186 pruebas, con 29 salteadas. Pueden salir mensajes de conexión rechazada: son de una prueba que simula a propósito un Neo4j caído, no son un error. Con las variables del `.env` cargadas y el grafo en Neo4j, corren también las que consultan la base. Las que usan el modelo se activan aparte, y son lentas:
+Sin Neo4j ni Ollama corre las pruebas que no los necesitan y **saltea** el resto (`s` en la salida). Al 12/11/2026 son 193 pruebas, con 29 salteadas. Pueden salir mensajes de conexión rechazada: son de una prueba que simula a propósito un Neo4j caído, no son un error. Con las variables del `.env` cargadas y el grafo en Neo4j, corren también las que consultan la base. Las que usan el modelo se activan aparte, y son lentas:
 
 ```powershell
 $env:PG3_TEST_LLM = "1"

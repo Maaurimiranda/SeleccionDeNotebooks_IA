@@ -60,8 +60,11 @@ class LLMFalso:
         return self.respuestas[min(len(self.llamadas), len(self.respuestas)) - 1]
 
 
-def con(texto: str, advertencia: bool = True) -> str:
-    return f"{texto} {ADVERTENCIA}" if advertencia else texto
+def con(texto: str, advertencia: bool = True, ev: dict | None = None) -> str:
+    """La respuesta con la advertencia; con `ev`, con todos los avisos que esa evidencia exige (p. ej., el de SM4)."""
+    if not advertencia:
+        return texto
+    return " ".join([texto] + (explicador._avisos(ev) if ev is not None else [ADVERTENCIA]))
 
 
 class TestVerificador(unittest.TestCase):
@@ -118,7 +121,7 @@ class TestVerificador(unittest.TestCase):
     def test_a_la_cifra_de_su_notebook_pasa(self):
         ev = evidencia_de("SM1.interpretacion_pedido", "SM4.comparar")
         h = ev["SM4"]["comparar"]["notebooks"][0]
-        self.assertEqual(verificar(con(f"{h['notebook']} cuesta {h['precio_usd']:.0f}."), ev), [])
+        self.assertEqual(verificar(con(f"{h['notebook']} cuesta {h['precio_usd']:.0f}.", ev=ev), ev), [])
 
     def test_d_respuesta_vacia(self):
         self.assertDispara("d", "", self.ram)
@@ -182,8 +185,8 @@ class TestVerificadorRevision(unittest.TestCase):
         h, b = ev["SM4"]["comparar"]["notebooks"][:2]
         bien = f"{h['notebook']} cuesta {h['precio_usd']:.0f} USD y {b['notebook']} cuesta {b['precio_usd']:.0f} USD."
         cruzada = f"{h['notebook']} cuesta {b['precio_usd']:.0f} USD y {b['notebook']} cuesta {h['precio_usd']:.0f} USD."
-        self.assertEqual(verificar(con(bien), ev), [])
-        self.assertDispara("a", con(cruzada), ev)
+        self.assertEqual(verificar(con(bien, ev=ev), ev), [])
+        self.assertDispara("a", con(cruzada, ev=ev), ev)
 
     def test_oracion_con_dos_modelos_atribuye_cada_estado(self):
         self.assertDispara("h", con("Notebook_A queda Descartada (excluyente incumplido) y Notebook_E, Recomendada (Alta)."),
@@ -234,6 +237,84 @@ class TestVerificadorRevision(unittest.TestCase):
         self.assertIn("(provisional)", plantilla_fija(ev))
 
 
+class TestValidacionPorEntidadYEstado(unittest.TestCase):
+    """Devolución docente de PI4: cada afirmación se controla contra la notebook a la que corresponde.
+    CP1 y CP5 son los errores reales de qwen2.5:3b en el PI4 de SM4 (contexto de SM4 §6.7)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.rec = evidencia_de("SM1.interpretacion_pedido", "SM4.recomendar")
+        cls.cb = evidencia_de("SM1.interpretacion_pedido", "SM4.costo_beneficio")
+        cls.ram = evidencia_de("SM1.interpretacion_pedido", "SM2.riesgo_ram.todas")
+
+    def assertDispara(self, control, respuesta, evidencia):
+        problemas = verificar(respuesta, evidencia)
+        self.assertTrue(any(p.startswith(f"({control})") for p in problemas), f"({control}): {problemas}")
+
+    def assertPasa(self, texto, evidencia):
+        self.assertEqual(verificar(con(texto, ev=evidencia), evidencia), [])
+
+    # --- CP1: el estado de Notebook_X (alternativa fuera de presupuesto, Recomendada (Media))
+    def test_cp1_x_descartada_tal_como_lo_dijo_el_llm(self):
+        self.assertDispara("h", con("Notebook_X fue descartada por el excedente del 5 %.", ev=self.rec), self.rec)
+
+    def test_cp1_estado_como_verbo_y_antes_del_nombre(self):
+        for texto in ("Se descartó la Notebook_X por el precio.", "A la Notebook_X la descartamos por el precio.",
+                      "Descartamos Notebook_X porque se pasa del presupuesto."):
+            with self.subTest(texto):
+                self.assertDispara("h", con(texto, ev=self.rec), self.rec)
+
+    def test_cp1_enumeracion_atribuye_el_estado_a_todas(self):
+        self.assertDispara("h", con("Notebook_E y Notebook_X quedaron descartadas.", ev=self.rec), self.rec)
+        self.assertPasa("Notebook_E y Notebook_C quedaron descartadas.", self.rec)
+
+    def test_cp1_lo_correcto_pasa(self):
+        self.assertPasa("Notebook_X queda Recomendada (Media), pero se pasa un 5 % del presupuesto.", self.rec)
+        self.assertPasa("Notebook_X no fue descartada: se pasa un 5 % del presupuesto.", self.rec)
+        self.assertPasa("Se descartó la Notebook_E.", self.rec)
+        self.assertPasa("Notebook_M queda condicionada.", self.rec)
+
+    # --- CP5: la alerta de falta de información es de Notebook_M, no de Notebook_B
+    def test_cp5_alerta_en_palabras_atribuida_a_otra_notebook(self):
+        for texto in ("Notebook_B tiene una alerta de falta de información.",
+                      "Ojo con Notebook_B: tiene información incompleta.",
+                      "La alerta de falta de información es de Notebook_B."):
+            with self.subTest(texto):
+                self.assertDispara("c", con(texto, ev=self.cb), self.cb)
+
+    def test_cp5_alerta_a_una_notebook_sin_alertas(self):
+        self.assertDispara("c", con("Notebook_B tiene una alerta.", ev=self.cb), self.cb)
+
+    def test_cp5_lo_correcto_pasa(self):
+        self.assertPasa("Notebook_M tiene una alerta de falta de información: la ficha no informa la autonomía.", self.cb)
+        self.assertPasa("Notebook_B no tiene alertas y Notebook_M tiene la alerta REC-R15.", self.cb)
+        self.assertPasa("La alerta de falta de información es de Notebook_M.", self.cb)
+        self.assertPasa("Notebook_B no tiene falta de información.", self.cb)
+
+    def test_otros_submodulos_la_falta_de_informacion_de_sm2(self):
+        """El verificador es común: en SM2 la falta de información es de la G (REN-R10)."""
+        self.assertPasa("Notebook_G no informa si la RAM es ampliable.", self.ram)
+        self.assertDispara("c", con("Notebook_A no informa si la RAM es ampliable.", ev=self.ram), self.ram)
+
+    # --- los nueve parámetros de recomendación, visibles en toda respuesta de SM4
+    def test_sm4_exige_el_aviso_de_los_9_parametros(self):
+        aviso = self.rec["SM4"]["recomendar"]["validacion_parametros"]["aviso_validacion"]
+        self.assertEqual(aviso, "Los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico.")
+        problemas = verificar(con("Notebook_A queda primera."), self.rec)
+        self.assertTrue(any(p.startswith("(e) falta el aviso") for p in problemas), problemas)
+        self.assertPasa("Notebook_A queda primera.", self.rec)
+
+    def test_el_aviso_lo_agrega_el_codigo_y_sale_en_la_plantilla(self):
+        aviso = self.rec["SM4"]["recomendar"]["validacion_parametros"]["aviso_validacion"]
+        r = explicar("¿Qué le recomiendo?", self.rec, LLMFalso("Notebook_A queda primera."))
+        self.assertEqual(r["origen_respuesta"], "llm")
+        self.assertIn(aviso, r["respuesta"])
+        self.assertIn(aviso, plantilla_fija(self.rec))
+
+    def test_sin_sm4_no_hay_aviso_de_recomendacion(self):
+        self.assertEqual(explicador._avisos(self.ram), [ADVERTENCIA])
+
+
 class TestPlantillaFija(unittest.TestCase):
     def test_la_recomendacion_va_primero_y_cada_fila_es_de_su_notebook(self):
         ev = evidencia_de("SM1.interpretacion_pedido", "SM2.riesgo_ram", "SM3.buscar", "SM4.recomendar")
@@ -249,6 +330,8 @@ class TestPlantillaFija(unittest.TestCase):
                 self.assertEqual(verificar(respuesta, ev, MAX_PALABRAS_PLANTILLA), [])
                 self.assertLessEqual(len(respuesta.split()), MAX_PALABRAS_PLANTILLA)
                 self.assertIn(ADVERTENCIA, respuesta)
+                for aviso in explicador._avisos(ev):
+                    self.assertIn(aviso, respuesta)
 
     def test_pedido_indeterminado_no_asume_perfil(self):
         r = plantilla_fija(evidencia_de("SM1.interpretacion_pedido.req_02"))
