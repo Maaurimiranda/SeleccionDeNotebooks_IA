@@ -19,7 +19,7 @@ El problema grave estaba en `cargar_grafo`. El script busca `cypher/NN_*.cypher`
 
 Ahora pasa esto:
 1. `main()` llama a `comprobar_archivos()` **antes** de crear el driver de Neo4j. Sin driver no hay sesión, y sin sesión no se puede borrar nada.
-2. Si la lista está vacía (falta `cypher/`, o `--hasta 5` deja afuera todos los archivos), sale con `ERROR: ... No se tocó la base` y código 1.
+2. Si la lista está vacía, sale con `ERROR: ... No se tocó la base` y código 1. Pasa si falta `cypher/` o si `--hasta` deja afuera todos los archivos. Ojo: en el proyecto real, `--hasta 5` **no** frena. Incluye `00_esquema.cypher`, así que borra la base y carga los bloques 00 a 02. Solo un `--hasta` negativo deja la lista vacía.
 3. El ZIP repite en `e_codigo_fuente/` lo necesario para correr todo. Las carpetas `c_`, `f_` y `g_` no cambian, así cada ítem se puede revisar por separado.
 
 ## Decisiones y por qué
@@ -42,7 +42,8 @@ La prueba real que se hizo el 12/11 (Neo4j 5.26 local, Ollama corriendo):
 6. Se renombró `cypher/` y se volvió a correr `cargar_grafo` → exit 1, y la base siguió con 343 nodos antes y después.
 
 ## Qué queda y dudas
-- **Los tests con LLM no se corrieron desde el ZIP** (`PG3_TEST_LLM=1`, son lentos). Tampoco se corrió E2E-1 desde ahí.
-- **Las cifras de tests en el informe:** `docs/informe/08_pruebas.md`, `09_evaluacion.md` y `docs/pruebas/funcionales.md` dicen 171. En `main` con este PR son 186 (182 + los 4 nuevos). La rama `pg3-00-validacion-entidad-estado` suma más tests; al unir las dos hay que recontar. No se tocaron acá; hay que actualizarlas junto con el PDF.
+- **Falta cerrar un criterio de aceptación de PG3-17:** correr el E2E-1 desde el ZIP descomprimido (`python -m scripts.correr_e2e E2E-1` desde `e_codigo_fuente/`). Tampoco se corrieron desde ahí los tests con LLM (`PG3_TEST_LLM=1`, son lentos).
+- **`e_codigo_fuente/` no trae `docs/pruebas/` ni `datos/`.** `correr_e2e` crea la carpeta que le falta (`mkdir`, no se probó desde el ZIP), así que dejaría los resultados en `e_codigo_fuente/docs/pruebas/` y no junto a los E2E de `c_casos_de_prueba/`. `exportar_grafo` lee las trazas de `docs/pruebas/trazas/`, así que desde el ZIP no las encuentra y no genera `traza_ejemplo.jsonl`. Para reproducir el sistema no hacen falta, pero hay que tenerlo en cuenta si se quiere regenerar la evidencia desde el ZIP.
+- **Las cifras de tests en el informe:** `docs/informe/02_resumen.md`, `08_pruebas.md`, `09_evaluacion.md` y `docs/pruebas/funcionales.md` dicen 171. El resumen también va al ítem l) del ZIP. En `main` con este PR son 186 (182 + los 4 nuevos; sin Neo4j ni Ollama se saltean 29), y el manual §9 ya lo dice. La rama `pg3-00-validacion-entidad-estado` suma más tests; al unir las dos hay que recontar. No se tocaron acá; hay que actualizarlas junto con el PDF.
 - Correr un comando desde una carpeta que no es `e_codigo_fuente/` (por ejemplo `f_scripts_cypher/`) da `ModuleNotFoundError: scripts`, que tampoco toca la base.
 - **Revisor:** Miranda, porque `scripts/` es suyo.
