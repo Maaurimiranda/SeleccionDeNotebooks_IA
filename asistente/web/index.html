@@ -153,6 +153,13 @@
            border-radius: 50%; animation: gira 0.8s linear infinite; }
   @keyframes gira { to { transform: rotate(360deg); } }
   footer { text-align: center; color: var(--apagado); font-size: 12px; margin-top: 30px; }
+  .pedidos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .pedido { text-align: left; background: var(--blanco); border: 1.5px solid var(--linea-2); border-radius: 12px;
+            padding: 10px 12px; color: var(--texto); }
+  .pedido:hover { border-color: var(--violeta); }
+  .pedido[aria-checked="true"] { border-color: var(--frambuesa); box-shadow: 0 0 0 3px var(--frambuesa-suave); }
+  .pedido .cab { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .pedido .cita { font-size: 13px; font-style: italic; color: var(--berenjena-2); }
   @media (max-width: 720px) { .form { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -174,18 +181,19 @@
 <main>
   <section class="tarjeta">
     <h2><span class="num">?</span>Consulta en lenguaje natural</h2>
+    <div class="apagado" style="margin-bottom:10px">
+      El asistente razona sobre los pedidos de compra ya cargados en el grafo. Elegí el que más se parezca a tu caso
+      y preguntá sobre él: por qué se recomienda una notebook, qué riesgo de RAM tiene, qué reglas se activaron…
+    </div>
+    <div class="pedidos" id="pedidos" role="radiogroup" aria-label="Pedido"></div>
     <form id="form" class="form">
       <div>
-        <textarea id="texto" placeholder="Por ejemplo: Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?"></textarea>
+        <textarea id="texto" placeholder="Por ejemplo: ¿Qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?"></textarea>
         <div class="contador" id="contador"></div>
       </div>
       <div class="lateral">
-        <div>
-          <label for="req">Pedido (opcional)</label>
-          <input id="req" list="pedidos" placeholder="req_01">
-          <datalist id="pedidos"><option value="req_01"><option value="req_02"><option value="req_03"></datalist>
-        </div>
         <button type="submit" class="primario" id="enviar">Consultar</button>
+        <div class="apagado" style="font-size:12px">Si el texto nombra otro pedido (por ejemplo «en req_02»), manda el del texto.</div>
       </div>
     </form>
     <div class="chips" id="ejemplos"></div>
@@ -216,6 +224,18 @@ const EJEMPLOS = [
   ["Pregunta pendiente", "Para req_02, ¿qué notebook me conviene?"],
   ["Fuera de alcance", "¿Cuál es la capital de Francia?"],
 ];
+
+// Los tres pedidos cargados en el grafo (cypher/02_instancias.cypher). Solo para mostrarlos: los datos
+// que usa el asistente salen de Neo4j.
+const PEDIDOS = [
+  { id: "req_01", resumen: "1000 USD · prioridad rendimiento",
+    texto: "Necesito una notebook para programar, usar máquinas virtuales y Docker, y a veces jugar al Stardew Valley." },
+  { id: "req_02", resumen: "600 USD · falta información",
+    texto: "Quiero una notebook para la facu." },
+  { id: "req_03", resumen: "1000 USD · prioridad portabilidad",
+    texto: "Estoy mirando la Notebook_K. ¿Me sirve para la facu? Word, Excel y el navegador, y la llevo a todos lados." },
+];
+let pedidoElegido = "req_01";
 
 const ORIGEN = {
   llm: ["Redactada por el LLM con la evidencia del grafo", "menta"],
@@ -600,11 +620,24 @@ $("form").addEventListener("submit", (e) => {
   e.preventDefault();
   const texto = $("texto").value.trim();
   if (!texto) { $("texto").focus(); return; }
-  consultar(texto, $("req").value.trim());
+  consultar(texto, pedidoElegido);
 });
+function elegirPedido(id) {
+  pedidoElegido = id;
+  for (const b of $("pedidos").children) b.setAttribute("aria-checked", String(b.dataset.id === id));
+}
+$("pedidos").append(...PEDIDOS.map((p) => h("button", { class: "pedido", type: "button", role: "radio",
+  "data-id": p.id, "aria-checked": "false", onclick: () => elegirPedido(p.id) },
+  h("div", { class: "cab" }, h("b", {}, p.id), h("span", { class: "apagado" }, p.resumen)),
+  h("div", { class: "cita" }, `«${p.texto}»`))));
+elegirPedido("req_01");
+
 $("ejemplos").append(
   ...EJEMPLOS.map(([nombre, texto]) => h("button", { class: "chip", type: "button", title: texto,
-    onclick: () => { $("texto").value = texto; contar(); $("texto").focus(); } }, nombre)),
+    onclick: () => {
+      $("texto").value = texto; contar(); $("texto").focus();
+      const m = texto.match(/req_0\d/); if (m) elegirPedido(m[0]);
+    } }, nombre)),
   h("button", { class: "chip secundario", type: "button", onclick: ejemploGrabado }, "Ver ejemplo grabado"));
 contar();
 salud();
