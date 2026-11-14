@@ -33,6 +33,15 @@ _NECESIDAD = ("programar", "programacion", "codigo", "docker", "maquina virtual"
               "dolares", "usd", "u$s", "pesos", "presupuesto", "tengo", "gastar", "necesito", "quiero", "busco")
 _RE_MONTO = re.compile(r"\d+\s*(?:mil\s*)?(?:usd|u\$s|dolares|dolar|pesos|verdes|lucas)|\b(?:usd|u\$s)\s*\d", re.IGNORECASE)
 ESCRITURA = ("SM1.registrar_pedido", "SM1.aclarar_pedido")
+# Señales literales de una intención (PG3-00, corrida con Ollama real): con varias preguntas en una consulta,
+# qwen2.5:3b suele planificar solo la primera. Si el texto pide algo con estas palabras y el plan no lo trae,
+# Python lo agrega. Son frases inequívocas: el CSV del router controla que ninguna agregue lo que no se pidió.
+_SENALES = (
+    ("SM4.costo_beneficio", re.compile(r"costo[\s-]*beneficio|por su precio|rinde mas")),
+    ("SM2.riesgo_ram", re.compile(r"\bde ram\b")),
+    ("SM3.buscar", re.compile(r"\bmovilidad\b|\b(?:de|mejor) grafica\b")),
+    ("GRUPO.traza_reglas", re.compile(r"\bque reglas\b|\breglas se activaron\b")),
+)
 
 
 def _sin_tildes(s: str) -> str:
@@ -173,6 +182,7 @@ def validar(plan: dict, texto: str, sesion: dict, catalogo: list[str], pedidos: 
         vistas.add(clave)
         consultas.append({"intencion": intencion, "parametros": parametros})
 
+    _completar_por_senales(consultas, texto, modelos_texto, obs)
     if len(consultas) > MAX_CONSULTAS:
         obs.append(f"se recortó el plan a {MAX_CONSULTAS} consultas")
         consultas = consultas[:MAX_CONSULTAS]
@@ -204,6 +214,33 @@ def validar(plan: dict, texto: str, sesion: dict, catalogo: list[str], pedidos: 
 
     return {"requerimiento_id": requerimiento_id, "consultas": consultas, "evidencia": evidencia,
             "observaciones": obs}
+
+
+def senales(texto: str) -> list[str]:
+    """Intenciones que el texto pide con una frase inequívoca (ver _SENALES)."""
+    t = _sin_tildes(texto)
+    return [i for i, patron in _SENALES if patron.search(t)]
+
+
+def _completar_por_senales(consultas: list[dict], texto: str, modelos_texto: list[str], obs: list[str]) -> None:
+    pedidas = {c["intencion"] for c in consultas}
+    t = _sin_tildes(texto)
+    for intencion in senales(texto):
+        if intencion in pedidas or len(consultas) >= MAX_CONSULTAS:
+            continue
+        if intencion == "SM3.buscar":
+            mov, graf = "movilidad" in t, "grafica" in t
+            parametros = {"orden": "mixta" if mov and graf else "movilidad" if mov else "grafica"}
+        elif intencion == "GRUPO.traza_reglas":
+            if len(modelos_texto) != 1:
+                continue
+            parametros = {"modelo": modelos_texto[0]}
+        elif intencion == "SM2.riesgo_ram" and modelos_texto:
+            parametros = {"modelos": modelos_texto[:3]}
+        else:
+            parametros = {}
+        consultas.append({"intencion": intencion, "parametros": parametros})
+        obs.append(f"{intencion} agregada: el texto la pide y el plan del LLM no la traía")
 
 
 def _validar_escritura(intencion: str, texto: str, escritos: list[str], sesion: dict, obs: list[str]) -> dict | None:
