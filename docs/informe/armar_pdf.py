@@ -325,7 +325,7 @@ def armar_resumen():
     page = doc[0]
     page.draw_rect(fitz.Rect(0, 0, A4.width, 14), fill=AZUL, color=None)
     page.insert_text((44, 32), CABECERA, fontsize=7.5, fontname="helv", color=GRIS)
-    pie_txt = "Resumen ejecutivo · Informe final PG3 · 13/11/2026"
+    pie_txt = "Resumen ejecutivo · Informe final PG3 · 14/11/2026"
     page.insert_text(((A4.width - fitz.get_text_length(pie_txt, "helv", 7.5)) / 2, 826), pie_txt, fontsize=7.5,
                      fontname="helv", color=GRIS)
     doc.set_metadata({"title": "Resumen ejecutivo · Asistente experto para la selección de notebooks",
