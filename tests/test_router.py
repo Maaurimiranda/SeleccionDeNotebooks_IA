@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 
 from asistente.contrato import Aclaracion, FueraDeAlcance
-from asistente.router import normalizar_modelo, normalizar_pedido, validar
+from asistente.router import ESCRITURA, normalizar_modelo, normalizar_pedido, senales, validar
 
 CATALOGO = [f"Notebook_{x}" for x in "ABCEGHKMX"]
 PEDIDOS = ["req_01", "req_02", "req_03"]
@@ -161,6 +161,40 @@ class TestCSV(unittest.TestCase):
         self.assertGreaterEqual(cuenta("consulta_libre"), 5)       # D-08: pedidos nuevos en lenguaje natural
 
 
+class TestSenales(unittest.TestCase):
+    def test_ninguna_senal_agrega_lo_que_no_se_pidio(self):
+        for f in leer_csv():
+            with self.subTest(f["id"]):
+                self.assertLessEqual(set(senales(f["consulta"])), set(f["intenciones_esperadas"].split("|")))
+
+    def test_completa_lo_que_el_llm_omitio(self):
+        """Casos de la corrida con Ollama real (R17, R26, R31): el LLM planificó solo la primera pregunta."""
+        casos = (
+            ("Compará la A y la H en req_01 y decime cuál sale mejor por su precio",
+             [{"intencion": "SM4.comparar", "parametros": {"modelos": ["Notebook_A", "Notebook_H"]}}],
+             {"SM4.comparar", "SM4.costo_beneficio"}),
+            ("Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?",
+             [{"intencion": "SM4.recomendar", "parametros": {}}],
+             {"SM4.recomendar", "SM2.riesgo_ram", "SM3.buscar"}),
+            ("Para req_01, ¿cuáles son las mejores en movilidad y cómo queda el costo-beneficio?",
+             [{"intencion": "SM4.costo_beneficio", "parametros": {}}],
+             {"SM3.buscar", "SM4.costo_beneficio"}),
+        )
+        for texto, consultas, esperadas in casos:
+            with self.subTest(texto):
+                v = validar({"consultas": consultas}, texto, {}, CATALOGO, PEDIDOS)
+                self.assertEqual({c["intencion"] for c in v["consultas"]}, esperadas)
+        v = validar({"consultas": [{"intencion": "SM4.costo_beneficio", "parametros": {}}]}, casos[2][0], {},
+                    CATALOGO, PEDIDOS)
+        self.assertIn({"intencion": "SM3.buscar", "parametros": {"orden": "movilidad"}}, v["consultas"])
+
+    def test_no_pasa_de_tres_consultas(self):
+        texto = "En req_01, ¿qué reglas se activaron para la A y qué riesgo de RAM tiene? ¿Y por su precio?"
+        plan = {"consultas": [{"intencion": "SM4.explicar_notebook", "parametros": {"modelo": "Notebook_A"}},
+                              {"intencion": "SM4.recomendar", "parametros": {}}]}
+        self.assertEqual(len(validar(plan, texto, {}, CATALOGO, PEDIDOS)["consultas"]), 3)
+
+
 @unittest.skipUnless(os.getenv("PG3_TEST_LLM") == "1", "prueba con LLM: exportar PG3_TEST_LLM=1 (lenta)")
 class TestRouterConLLM(unittest.TestCase):
     def test_acierto_sobre_el_csv(self):
@@ -169,29 +203,31 @@ class TestRouterConLLM(unittest.TestCase):
         llm = LLM()
         if not llm.salud()["ok"]:
             self.skipTest("Ollama o el modelo no disponible")
-        aciertos_int, aciertos_res, detalle = 0, 0, []
+        # Se mide el plan que se ejecuta: el del LLM después de validar() (descarta lo inventado y completa
+        # lo que el texto pide literalmente). El acierto del LLM solo se imprime, para seguir el prompt.
+        aciertos_llm, aciertos_int, aciertos_res, detalle = 0, 0, 0, []
         for f in leer_csv():
             sesion = {"requerimiento_id": f["pedido_sesion"]} if f["pedido_sesion"] else {}
             p = planificar(f["consulta"], sesion, llm, CATALOGO, PEDIDOS)
-            obtenidas = {c.get("intencion") for c in p.get("consultas") or []}
+            del_llm = {c.get("intencion") for c in p.get("consultas") or []}
             esperadas = {i for i in f["intenciones_esperadas"].split("|") if i}
-            ok_int = obtenidas == esperadas
             try:
-                validar(p, f["consulta"], sesion, CATALOGO, PEDIDOS)
+                obtenidas = {c["intencion"] for c in validar(p, f["consulta"], sesion, CATALOGO, PEDIDOS)["consultas"]}
                 resultado = "plan"
-            except Aclaracion:
-                resultado = "aclaracion"
+            except Aclaracion:   # no se ejecuta nada: cuenta lo que pidió el LLM, sin las escrituras que se descartan
+                obtenidas, resultado = del_llm - set(ESCRITURA), "aclaracion"
             except FueraDeAlcance:
-                resultado = "fuera_de_alcance"
-            ok_res = resultado == f["resultado_esperado"]
+                obtenidas, resultado = set(), "fuera_de_alcance"
+            ok_int, ok_res = obtenidas == esperadas, resultado == f["resultado_esperado"]
+            aciertos_llm += del_llm == esperadas
             aciertos_int += ok_int
             aciertos_res += ok_res
-            detalle.append(f"{f['id']}: intenciones {'OK' if ok_int else 'X'} {sorted(obtenidas)} · "
-                           f"resultado {'OK' if ok_res else 'X'} {resultado}")
+            detalle.append(f"{f['id']}: intenciones {'OK' if ok_int else 'X'} {sorted(obtenidas)} "
+                           f"(LLM {sorted(del_llm)}) · resultado {'OK' if ok_res else 'X'} {resultado}")
         n = len(detalle)
         print("\n" + "\n".join(detalle))
-        print(f"\nAcierto de intenciones: {aciertos_int}/{n} = {aciertos_int / n:.0%} · "
-              f"resultado final: {aciertos_res}/{n} = {aciertos_res / n:.0%}")
+        print(f"\nAcierto de intenciones: {aciertos_int}/{n} = {aciertos_int / n:.0%} (solo el LLM: "
+              f"{aciertos_llm}/{n} = {aciertos_llm / n:.0%}) · resultado final: {aciertos_res}/{n} = {aciertos_res / n:.0%}")
         self.assertGreaterEqual(aciertos_int / n, 0.85)
 
 

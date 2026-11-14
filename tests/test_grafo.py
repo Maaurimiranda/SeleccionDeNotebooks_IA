@@ -16,7 +16,10 @@ class TestGrafoSoloLectura(unittest.TestCase):
     def test_catalogo_y_pedidos(self):
         g = grafo_real()
         self.assertEqual(len(g.catalogo()), 9)
-        self.assertEqual(g.pedidos(), ["req_01", "req_02", "req_03"])
+        # los precargados; los pedidos creados desde consultas (req_101 en adelante, origen 'consulta') pueden
+        # quedar de usar la web o la consola y no son parte del grafo cargado (se borran con scripts.limpiar_pedidos)
+        nuevos = {f["id"] for f in g.leer("MATCH (c:Requerimiento {origen:'consulta'}) RETURN c.id AS id")}
+        self.assertEqual([p for p in g.pedidos() if p not in nuevos], ["req_01", "req_02", "req_03"])
 
 
 if __name__ == "__main__":
