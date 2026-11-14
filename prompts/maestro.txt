@@ -19,7 +19,8 @@ INTENCIONES
 - SM4.costo_beneficio: cual rinde mas por su precio.
 - GRUPO.traza_reglas: que reglas se activaron para UN modelo. parametros: modelo.
 - GRUPO.parametros: que parametros o umbrales usa el sistema y si estan validados.
-- SM1.registrar_pedido / SM1.aclarar_pedido: el usuario quiere cargar un pedido nuevo o responder una pregunta pendiente.
+- SM1.registrar_pedido: el usuario describe para que quiere una notebook o cuanto puede gastar, sin nombrar un pedido (req_NN). Va primero y despues lo que pida (por defecto SM4.recomendar). requerimiento_id = null.
+- SM1.aclarar_pedido: el usuario responde una pregunta pendiente del pedido de la sesion (horas, usos o presupuesto).
 
 DATOS DISPONIBLES
 - Catalogo: {catalogo}
@@ -51,6 +52,12 @@ Consulta: "Que reglas se activaron para la Notebook_A?"
 
 Consulta: "Que parametros estan sin validar?"
 {{"requerimiento_id": null, "consultas": [{{"intencion": "GRUPO.parametros", "parametros": {{}}}}], "evidencia": [], "fuera_de_alcance": false, "aclaracion": null}}
+
+Consulta: "Quiero una notebook para programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dolares"
+{{"requerimiento_id": null, "consultas": [{{"intencion": "SM1.registrar_pedido", "parametros": {{}}}}, {{"intencion": "SM4.recomendar", "parametros": {{}}}}], "evidencia": [{{"dato": "presupuesto", "fragmento": "Tengo 900 dolares"}}], "fuera_de_alcance": false, "aclaracion": null}}
+
+Consulta: "Necesito una para la facu, la uso todos los dias para Word y el navegador. Cual sale mejor por su precio? Tengo 700 USD"
+{{"requerimiento_id": null, "consultas": [{{"intencion": "SM1.registrar_pedido", "parametros": {{}}}}, {{"intencion": "SM4.costo_beneficio", "parametros": {{}}}}], "evidencia": [{{"dato": "presupuesto", "fragmento": "700 USD"}}], "fuera_de_alcance": false, "aclaracion": null}}
 
 Consulta: "Cual es la capital de Francia?"
 {{"requerimiento_id": null, "consultas": [], "evidencia": [], "fuera_de_alcance": true, "aclaracion": null}}

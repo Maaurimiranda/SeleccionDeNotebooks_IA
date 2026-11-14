@@ -85,6 +85,13 @@ sequenceDiagram
     L-->>R: plan JSON
     R->>R: validar (intención cerrada, modelos del catálogo, fragmento literal, pedido)
     R-->>O: plan válido | Aclaracion | fuera de alcance
+    opt pedido nuevo o aclaración (D-08)
+        O->>L: prompt de extracción + ESQUEMA_PEDIDO
+        L-->>O: JSON (usos, juegos, presupuesto, evidencia literal)
+        O->>S: SM1.registrar_pedido / aclarar_pedido
+        S->>S: validar (INT-R1, R7, R10, R11) · si falta algo, repregunta
+        S->>N: alta + inferencia de ese $req (una transacción, WRITE)
+    end
     loop cada consulta del plan
         O->>S: ejecutar(intencion, parametros, grafo)
         S->>N: Cypher fijo (READ)
@@ -100,6 +107,8 @@ sequenceDiagram
     O-->>A: {respuesta, requerimiento_id, submodulos_consultados, origen_respuesta, traza}
     A-->>U: respuesta
 ```
+
+**Consulta libre (pedido nuevo).** Si el texto describe una necesidad («quiero una notebook para programar y jugar, tengo 900 dólares») y no nombra un pedido, el router antepone `SM1.registrar_pedido` y, si no hay otra consulta, agrega `SM4.recomendar`. Ollama solo **extrae** un JSON (`asistente/extractor.py`, `prompts/extraccion.txt`); SM1 lo valida contra el texto y el vocabulario del grafo, lo escribe como `req_101`, `req_102`... y corre la inferencia de `cypher/10` a `40` filtrada por `$req` (`asistente/inferencia.py`). Desde ahí el pedido es uno más: SM2, SM3 y SM4 lo leen igual que `req_01`. La API guarda el pedido en la sesión (`sesion_id`) para las preguntas siguientes y para responder la repregunta si faltaba un dato.
 
 **Caminos cortos** (sin explicador): una entrada inválida devuelve `origen_respuesta = "validacion"`; `fuera_de_alcance` devuelve un mensaje fijo sin tocar el grafo; un plan con `aclaracion` devuelve la pregunta; si Neo4j u Ollama no responden, devuelve `"error"` con un mensaje fijo.
 
@@ -144,8 +153,8 @@ def ejecutar(intencion: str, parametros: dict, grafo: "Grafo") -> dict:
 | Intención | Parámetros (obligatorios · *opcionales*) | Consultas | Nivel |
 | --- | --- | --- | --- |
 | `SM1.interpretacion_pedido` | `requerimiento_id` | L1 | 1 |
-| `SM1.registrar_pedido` | `texto` | alta + `REGLAS_SM1` + L1 | 2 |
-| `SM1.aclarar_pedido` | `requerimiento_id`, `respuesta` | ídem | 2 |
+| `SM1.registrar_pedido` | `texto`, `pedido` (JSON del extractor, lo agrega el orquestador) | alta + inferencia `$req` + L1 | 2 |
+| `SM1.aclarar_pedido` | `requerimiento_id`, `respuesta`, `pedido` | actualización + inferencia `$req` + L1 | 2 |
 | `SM2.riesgo_ram` | `requerimiento_id` · *`modelos`, `etiqueta` (`bajo`/`medio`/`alto`), `tipo_ram`* | C2 sobre `ev.*` | 1 |
 | `SM2.virtualizacion` | `requerimiento_id` · *`modelos`* | C1 | 1 |
 | `SM3.buscar` | `requerimiento_id`, `orden` (`grafica`/`movilidad`/`mixta`) · *`filtros`: `dedicada`, `gama_min`, `peso_max`, `bateria_min`, `srgb_min`* | unificada | 1 |
@@ -250,6 +259,7 @@ Regla de diseño: el LLM conversa y explica; el conocimiento verificable sostien
 | `MAX_CARACTERES` | `1500` |
 | `MAX_REGENERACIONES` | `2` |
 | `DIR_TRAZAS` | `trazas` |
+| `COTIZACION_ARS_USD` | vacío (sin cotización, un presupuesto en pesos se repregunta; INT-R10) |
 
 Se leen con `os.getenv`, sin `python-dotenv` (D-05). La consola y la API se lanzan con las variables ya exportadas; el manual dice cómo.
 
@@ -334,13 +344,13 @@ Con la traza y el grafo se reconstruyen las 5 cosas de la consigna:
 
 ## 9. Fuera del nivel 1
 
-**Condicional (compuerta del miércoles, PLAN §2):** el pedido nuevo con escritura e inferencia por `$req` (D-08, PG3-21). El contrato ya lo prevé (las intenciones `SM1.registrar_pedido` y `SM1.aclarar_pedido` y `Grafo.escribir`), así que entrar o no entrar **no cambia esta arquitectura**: cambia qué archivos de `cypher/` se parametrizan por `$req` y que el router habilita esas dos intenciones. Sin él, las reglas y el difuso corren al cargar el grafo y el asistente solo lee sus resultados; el informe lo declara.
+**Implementado (14/11/2026, rama `cl-consultas-libres`, issues #12 a #24):** el pedido nuevo con escritura e inferencia por `$req` (D-08; reemplaza a PG3-21). Ver §3, «Consulta libre». Límite conocido: SM4 solo rankea perfiles con `SALIDA_PI2` (hoy VIRT); para otro perfil dominante el pedido queda registrado y SM4 lo avisa (D-03, D-11).
 
 Queda en el plan como nivel 2, solo si sobra tiempo y antes del congelamiento:
 - las reglas de D-04;
 - dos escenarios (D-09);
 - `requisitos_explicitos` (D-10);
 - `SALIDA_PI2` de los 7 perfiles y `req_04`/`req_05` (D-03, D-11);
-- E2E-4 y E2E-7 (el E2E-6 va con PG3-21).
+- E2E-4 y E2E-7 (el E2E-6 ya corre en `scripts/correr_e2e.py`).
 
 El informe lo declara como trabajo futuro, con su diseño ya documentado en los contextos.

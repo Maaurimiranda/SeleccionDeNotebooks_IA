@@ -116,7 +116,8 @@ class TestValidar(unittest.TestCase):
         with self.assertRaises(Aclaracion):
             v(plan([]), "notebook algo req_01")
 
-    def test_nivel_2_no_disponible(self):
+    def test_registrar_sin_usos_ni_presupuesto_pide_reformular(self):
+        """Un registrar_pedido del LLM sin usos ni presupuesto en el texto no se ejecuta (D-08)."""
         with self.assertRaises(Aclaracion):
             v(plan([{"intencion": "SM1.registrar_pedido", "parametros": {}}]), "quiero cargar un pedido nuevo")
 
@@ -157,6 +158,7 @@ class TestCSV(unittest.TestCase):
         self.assertGreaterEqual(cuenta("fuera_de_alcance"), 3)
         self.assertGreaterEqual(cuenta("sin_pedido"), 2)
         self.assertGreaterEqual(cuenta("modelo_inexistente"), 2)
+        self.assertGreaterEqual(cuenta("consulta_libre"), 5)       # D-08: pedidos nuevos en lenguaje natural
 
 
 @unittest.skipUnless(os.getenv("PG3_TEST_LLM") == "1", "prueba con LLM: exportar PG3_TEST_LLM=1 (lenta)")

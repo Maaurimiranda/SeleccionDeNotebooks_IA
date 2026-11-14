@@ -49,7 +49,10 @@ def comparar(a: dict, b: dict) -> tuple[str, bool]:
 
 
 def _normalizar(texto: str) -> str:
-    return " ".join(texto.split())
+    """Espacios normalizados y sin el filtro por $req de los archivos de inferencia (D-08): ese filtro
+    es la única diferencia buscada con el canónico y, con $req nulo, no cambia el resultado."""
+    from asistente.inferencia import sin_filtro_req
+    return " ".join(sin_filtro_req(texto).split())
 
 
 def diferencias_sentencias() -> tuple[int, int, list[str], list[str]]:

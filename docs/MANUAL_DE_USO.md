@@ -137,6 +137,7 @@ notepad .env
 | `MAX_CARACTERES` | Largo máximo de una consulta | `1500` |
 | `MAX_REGENERACIONES` | Veces que el explicador reintenta antes de usar la plantilla fija | `2` |
 | `DIR_TRAZAS` | Carpeta donde se guarda la traza | `trazas` |
+| `COTIZACION_ARS_USD` | Pesos por dólar, para pasar a USD un presupuesto en pesos (INT-R10). Vacía: el asistente pregunta el monto en dólares | (vacía) |
 
 Escribí los valores sin comillas. **El `.env` no se sube nunca a Git** (está en `.gitignore`: el repositorio es público) y no se comparte.
 
@@ -233,7 +234,7 @@ Pedido de la sesión: req_01
 [req_01] > ¿Qué me recomendás?
 ```
 
-Comandos del modo conversación: `/pedido req_01` fija el pedido y `/salir` termina (también `/exit`, `/q`, Ctrl+C o Ctrl+Z y Enter). Cualquier otra línea es una consulta. En la consola, el pedido de la sesión queda guardado mientras no salgas.
+Comandos del modo conversación: `/pedido req_01` fija el pedido, `/nuevo` empieza otra conversación sin pedido y `/salir` termina (también `/exit`, `/q`, Ctrl+C o Ctrl+Z y Enter). Cualquier otra línea es una consulta. En la consola, el pedido de la sesión queda guardado mientras no salgas.
 
 ### 4.3 La API
 
@@ -324,6 +325,21 @@ python -m asistente.cli "Para req_02, ¿qué notebook me conviene?"
 `req_02` tiene el perfil `indeterminado`: el sistema **no asume** ningún perfil, no evalúa ninguna notebook y repite la pregunta pendiente («¿Qué programas o actividades va a usar con la notebook?»).
 
 Los submódulos de la columna son los que tiene que consultar el router; la línea `[origen: … · submódulos: …]` de la consola muestra los que realmente se consultaron. `SM1` aparece siempre que hay un pedido, porque el sistema lo agrega para llevar el perfil y el presupuesto en la evidencia.
+
+### Una consulta libre (pedido nuevo)
+
+No hace falta nombrar `req_01`: se puede contar la necesidad con tus palabras.
+
+```powershell
+python -m asistente.cli --traza "Quiero una notebook para programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dólares."
+```
+
+Qué pasa: Ollama lee el texto y saca un JSON con los usos, los juegos y el presupuesto (se ve en la traza como «pedido entendido»). SM1 lo valida contra el texto y el grafo, lo guarda como `req_101` (o el siguiente libre) y Neo4j corre las reglas de SM1 a SM4 **solo para ese pedido**. La respuesta empieza con «Registré tu pedido como req_101» y trae la recomendación (caso E2E-6: perfil dominante VIRT, `Notebook_B` primera, todas dentro de 900 USD).
+
+- **Si falta un dato** (por ejemplo, el presupuesto), el asistente lo pregunta. En el modo conversación, la API o la web, la respuesta siguiente («unos 1000 dólares») completa el mismo pedido; no se crea otro.
+- **Las preguntas siguientes** de la misma conversación («¿y cómo andan de RAM?») usan ese pedido sin nombrarlo. En la API, mandá el `sesion_id` que devolvió la primera respuesta.
+- **Límite:** SM4 solo puede rankear perfiles con salida de PI2 (hoy, virtualización). Si tu uso principal es otro (por ejemplo, ofimática), el pedido queda registrado, SM1 a SM3 responden, y SM4 avisa que no tiene evaluaciones para ese perfil.
+- **Para dejar el grafo como estaba:** `python -m scripts.limpiar_pedidos` borra los pedidos creados desde consultas y deja `req_01` a `req_03`.
 
 ### Para controlar una respuesta contra el grafo
 

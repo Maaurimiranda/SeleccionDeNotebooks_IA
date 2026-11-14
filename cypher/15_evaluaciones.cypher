@@ -16,6 +16,7 @@
 // salidas crisp de PI2 se copian del par notebook-perfil; sin ellas la
 // notebook no se evalua para ese perfil (limitacion 5 del informe).
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (n:Notebook)-[s:SALIDA_PI2]->(pf)
 WHERE NOT EXISTS { MATCH (c)-[:CONSULTA_POR]->(:Notebook) }
    OR EXISTS { MATCH (c)-[:CONSULTA_POR]->(n) }

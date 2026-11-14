@@ -176,16 +176,18 @@
     <h2><span class="num">?</span>Consulta en lenguaje natural</h2>
     <form id="form" class="form">
       <div>
-        <textarea id="texto" placeholder="Por ejemplo: Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?"></textarea>
+        <textarea id="texto" placeholder="Contá para qué querés la notebook y cuánto querés gastar. Por ejemplo: Quiero programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dólares."></textarea>
         <div class="contador" id="contador"></div>
       </div>
       <div class="lateral">
         <div>
-          <label for="req">Pedido (opcional)</label>
-          <input id="req" list="pedidos" placeholder="req_01">
+          <label for="req">Pedido cargado (opcional)</label>
+          <input id="req" list="pedidos" placeholder="vacío = pedido nuevo">
           <datalist id="pedidos"><option value="req_01"><option value="req_02"><option value="req_03"></datalist>
         </div>
         <button type="submit" class="primario" id="enviar">Consultar</button>
+        <button type="button" class="chip secundario" id="nueva" title="Empieza otra conversación: olvida el pedido y la repregunta en curso">Nueva conversación</button>
+        <div class="apagado" id="conversacion"></div>
       </div>
     </form>
     <div class="chips" id="ejemplos"></div>
@@ -208,6 +210,8 @@
 
 const MAX_CARACTERES = 1500;
 const EJEMPLOS = [
+  ["Pedido nuevo", "Quiero una notebook para programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dólares."],
+  ["Pedido incompleto", "Necesito usar máquinas virtuales todos los días."],
   ["Recomendación", "Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?"],
   ["Incertidumbre", "En req_01, ¿por qué la M quedó condicionada y la G indeterminada? ¿Qué riesgo de RAM tiene la G?"],
   ["Excluyente", "En req_01, la E tiene casi el mismo puntaje que la B y la H, ¿por qué no la recomiendan? ¿Qué pasa con la virtualización?"],
@@ -340,6 +344,8 @@ function vistaRespuesta(r) {
       (r.submodulos_consultados || []).map((s) => etq(s, "gris")),
       r.intento ? h("span", { class: "apagado" }, `intento ${r.intento} del explicador`) : null,
       typeof t.segundos === "number" ? h("span", { class: "apagado" }, `· ${num(t.segundos, 1)} s`) : null),
+    r.repregunta ? h("div", { class: "aviso" }, "Falta un dato para registrar tu pedido. Respondé en el cuadro de "
+      + "arriba y tocá Consultar: se completa el mismo pedido.") : null,
     t.evidencia && t.evidencia.advertencia ? h("div", { class: "aviso" }, "⚠ ", t.evidencia.advertencia) : null,
     t.error ? h("div", { class: "error", style: "margin-top:12px" }, fmt(t.error)) : null);
 }
@@ -508,12 +514,36 @@ function vistaTraza(t, n) {
     h("ol", { class: "pasos" }, pasos), h("div", { class: "chips" }, descargar));
 }
 
+function vistaPedidoNuevo(r) {
+  const p = r.pedido;
+  if (!p) return null;
+  const filas = (p.actividades || []).map((a) => ({
+    actividad: a.descripcion, perfil: a.perfil, "dice el texto": `«${a.cita}»`,
+    frecuencia: a.horas_semana != null ? `${fmt(a.horas_semana)} h/semana` : (a.frecuencia || "desconocida"),
+    juegos: (a.juegos || []).join(", ") || "—",
+  }));
+  return tarjeta("+", r.pedido_nuevo ? `Pedido nuevo registrado: ${r.requerimiento_id}` : `Pedido actualizado: ${r.requerimiento_id}`,
+    h("div", { class: "apagado" }, "Esto extrajo Ollama de tu texto y validó Python. Los grados, el perfil dominante y "
+      + "el ranking los calculó Neo4j para este pedido."),
+    h("dl", { class: "datos", style: "grid-template-columns:max-content 1fr; max-width:520px" },
+      h("dt", {}, "Presupuesto"), h("dd", { style: "text-align:left" },
+        p.presupuesto_usd != null ? `${fmt(p.presupuesto_usd)} USD` : "sin cambios"),
+      h("dt", {}, "Prioridad"), h("dd", { style: "text-align:left" }, fmt(p.prioridad)),
+      p.notebook_consultada ? [h("dt", {}, "Consulta por"), h("dd", { style: "text-align:left" }, p.notebook_consultada)] : null,
+      p.horas_semana_completadas != null ? [h("dt", {}, "Horas completadas"),
+        h("dd", { style: "text-align:left" }, `${fmt(p.horas_semana_completadas)} h/semana`)] : null),
+    filas.length ? tabla(filas) : null,
+    (p.preguntas_pendientes || []).length ? h("div", { class: "aviso" }, "Pendiente: ", p.preguntas_pendientes.join(" ")) : null);
+}
+
 function mostrar(r, nota) {
   const cont = $("resultado");
   cont.replaceChildren();
   const t = r.traza || {};
   if (nota) cont.append(h("div", { class: "aviso", style: "margin-bottom:18px" }, nota));
   cont.append(vistaRespuesta(r));
+  const nuevo = vistaPedidoNuevo(r);
+  if (nuevo) cont.append(nuevo);
   const ev = t.evidencia || {};
   const pedido = vistaPedido(ev.pedido);
   if (pedido) cont.append(pedido);
@@ -541,12 +571,20 @@ function mostrarError(msg) {
   e.classList.remove("oculto");
 }
 
+// La conversación: el servidor recuerda el pedido creado y la repregunta en curso con este id.
+let sesionId = null;
+function mostrarConversacion(r) {
+  $("conversacion").textContent = r && r.requerimiento_id ? `Conversación sobre ${r.requerimiento_id}`
+    : (r && r.repregunta ? "Pedido a medio cargar: respondé la repregunta" : "");
+}
+
 async function consultar(texto, req) {
   $("error").classList.add("oculto");
   cargando(true);
   try {
     const cuerpo = { texto };
     if (req) cuerpo.requerimiento_id = req;
+    if (sesionId) cuerpo.sesion_id = sesionId;
     const resp = await fetch("/consultar", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpo),
     });
@@ -554,7 +592,12 @@ async function consultar(texto, req) {
       const detalle = await resp.text();
       throw new Error(`La API respondió ${resp.status}. ${detalle.slice(0, 400)}`);
     }
-    mostrar(await resp.json());
+    const r = await resp.json();
+    sesionId = r.sesion_id || sesionId;
+    mostrarConversacion(r);
+    if (r.repregunta || r.pedido_nuevo) $("texto").value = "";
+    contar();
+    mostrar(r);
   } catch (err) {
     mostrarError(`No se pudo completar la consulta: ${err.message}. Revisá que Neo4j y Ollama estén levantados (indicadores arriba) o probá con el ejemplo grabado.`);
   } finally {
@@ -601,6 +644,15 @@ $("form").addEventListener("submit", (e) => {
   const texto = $("texto").value.trim();
   if (!texto) { $("texto").focus(); return; }
   consultar(texto, $("req").value.trim());
+});
+$("nueva").addEventListener("click", () => {
+  sesionId = null;
+  $("req").value = "";
+  $("texto").value = "";
+  mostrarConversacion(null);
+  $("resultado").replaceChildren();
+  contar();
+  $("texto").focus();
 });
 $("ejemplos").append(
   ...EJEMPLOS.map(([nombre, texto]) => h("button", { class: "chip", type: "button", title: texto,

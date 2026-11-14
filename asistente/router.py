@@ -2,6 +2,10 @@
 
 El LLM solo propone el plan (intenciones del enum). Python lo valida antes de tocar
 el grafo (A10: «desconfiar del cumplimiento del LLM»). Nunca se asume req_01.
+
+Consultas libres (D-08, issue #21): si la consulta describe una necesidad (usos, presupuesto) y no hay
+pedido escrito ni de sesión, el plan empieza con `SM1.registrar_pedido` y, si no pide otra cosa, sigue con
+`SM4.recomendar` sobre el pedido nuevo. Así responde a cualquier persona, no solo a req_01..req_03.
 """
 import re
 import unicodedata
@@ -19,7 +23,16 @@ _RE_MODELO_CORTO = re.compile(r"\b(?:la|el|de la|y la|y)\s+([A-Z])\b")
 # Palabras que muestran que la consulta es del dominio (guarda contra un fuera_de_alcance falso)
 _DOMINIO = ("notebook", "req", "pedido", "ram", "gpu", "grafica", "bateria", "autonomia", "peso", "liviana",
             "recomend", "compar", "precio", "costo", "virtualiz", "regla", "parametro", "perfil", "comprador",
-            "pantalla", "ficha", "modelo", "presupuesto", "conviene", "descart", "indetermin", "movilidad")
+            "pantalla", "ficha", "modelo", "presupuesto", "conviene", "descart", "indetermin", "movilidad",
+            "computadora", "compu", "laptop", "portatil")
+# Palabras que muestran que la consulta describe una necesidad: con ellas, sin pedido, se registra uno nuevo.
+_NECESIDAD = ("programar", "programacion", "codigo", "docker", "maquina virtual", "maquinas virtuales", "virtualiz",
+              "jugar", "juego", "gamer", "gaming", "office", "word", "excel", "navegar", "navegador", "facu",
+              "estudiar", "universidad", "disen", "photoshop", "figma", "editar", "edicion", "video",
+              "render", "3d", "blender", "datos", "machine learning", "trabajar", "trabajo", "usar", "uso",
+              "dolares", "usd", "u$s", "pesos", "presupuesto", "tengo", "gastar", "necesito", "quiero", "busco")
+_RE_MONTO = re.compile(r"\d+\s*(?:mil\s*)?(?:usd|u\$s|dolares|dolar|pesos|verdes|lucas)|\b(?:usd|u\$s)\s*\d", re.IGNORECASE)
+ESCRITURA = ("SM1.registrar_pedido", "SM1.aclarar_pedido")
 
 
 def _sin_tildes(s: str) -> str:
@@ -72,7 +85,15 @@ def modelos_en_texto(texto: str) -> list[str]:
 
 def es_del_dominio(texto: str) -> bool:
     t = _sin_tildes(texto)
-    return any(p in t for p in _DOMINIO) or bool(_RE_PEDIDO.search(texto))
+    return any(p in t for p in _DOMINIO) or bool(_RE_PEDIDO.search(texto)) or parece_pedido(texto)
+
+
+def parece_pedido(texto: str) -> bool:
+    """La consulta describe una necesidad (un uso o un presupuesto), no una pregunta sobre un pedido cargado."""
+    t = _sin_tildes(texto)
+    if pedidos_en_texto(texto):
+        return False
+    return bool(_RE_MONTO.search(t)) or sum(p in t for p in _NECESIDAD) >= 2
 
 
 def _fragmento_literal(fragmento: str, texto: str) -> bool:
@@ -132,7 +153,7 @@ def validar(plan: dict, texto: str, sesion: dict, catalogo: list[str], pedidos: 
                          f"{', '.join(catalogo)}.")
     modelos_texto = [m for m in modelos_en_texto(texto) if m in catalogo]
     consultas, vistas = [], set()
-    pendientes_nivel_2 = False
+    escritura: dict | None = None
     for c in plan.get("consultas") or []:
         if not isinstance(c, dict):
             continue
@@ -142,9 +163,8 @@ def validar(plan: dict, texto: str, sesion: dict, catalogo: list[str], pedidos: 
         if intencion not in INTENCIONES:
             obs.append(f"intención inválida descartada: {intencion!r}")
             continue
-        if INTENCIONES[intencion]["nivel"] != 1:
-            pendientes_nivel_2 = True
-            obs.append(f"{intencion} es de nivel 2 y todavía no está disponible")
+        if intencion in ESCRITURA:
+            escritura = escritura or _validar_escritura(intencion, texto, escritos, sesion, obs)
             continue
         parametros = _validar_parametros(intencion, c.get("parametros") or {}, catalogo, modelos_texto, obs, texto)
         clave = (intencion, repr(sorted(parametros.items())))
@@ -157,15 +177,26 @@ def validar(plan: dict, texto: str, sesion: dict, catalogo: list[str], pedidos: 
         obs.append(f"se recortó el plan a {MAX_CONSULTAS} consultas")
         consultas = consultas[:MAX_CONSULTAS]
 
+    # 5. Pedido nuevo: sin pedido escrito ni de sesión, una consulta que describe una necesidad se registra
+    necesita_pedido = not consultas or any("requerimiento_id" in INTENCIONES[c["intencion"]]["obligatorios"]
+                                           for c in consultas)
+    if escritura is None and requerimiento_id is None and necesita_pedido and parece_pedido(texto):
+        escritura = {"intencion": "SM1.registrar_pedido", "parametros": {"texto": texto}}
+        obs.append("la consulta describe una necesidad y no hay pedido: se registra uno nuevo (D-08)")
+    if escritura is not None:
+        if escritura["intencion"] == "SM1.aclarar_pedido":
+            requerimiento_id = escritura["parametros"].pop("requerimiento_id")
+        if not consultas:
+            consultas = [{"intencion": "SM4.recomendar", "parametros": {}}]
+        return {"requerimiento_id": requerimiento_id if escritura["intencion"] == "SM1.aclarar_pedido" else None,
+                "consultas": [escritura] + consultas, "evidencia": evidencia, "observaciones": obs}
+
     if not consultas:
-        if pendientes_nivel_2:
-            raise Aclaracion("Cargar o aclarar un pedido nuevo todavía no está disponible. Podés consultar los "
-                             f"pedidos cargados ({', '.join(pedidos)}).")
         if not es_del_dominio(texto):
             raise FueraDeAlcance()
         raise Aclaracion("No entendí qué querés consultar. " + EJEMPLO_REFORMULACION)
 
-    # 5. Pedido obligatorio
+    # 6. Pedido obligatorio
     if requerimiento_id is None and any("requerimiento_id" in INTENCIONES[c["intencion"]]["obligatorios"]
                                         for c in consultas):
         raise Aclaracion("¿Sobre qué pedido? Indicá el requerimiento (por ejemplo req_01) o fijalo con "
@@ -173,6 +204,24 @@ def validar(plan: dict, texto: str, sesion: dict, catalogo: list[str], pedidos: 
 
     return {"requerimiento_id": requerimiento_id, "consultas": consultas, "evidencia": evidencia,
             "observaciones": obs}
+
+
+def _validar_escritura(intencion: str, texto: str, escritos: list[str], sesion: dict, obs: list[str]) -> dict | None:
+    """Las dos intenciones que escriben (D-08). Los parámetros los arma Python con el texto del usuario:
+    el LLM no elige qué se guarda."""
+    if intencion == "SM1.registrar_pedido":
+        if escritos:
+            obs.append(f"SM1.registrar_pedido descartado: el usuario nombró {escritos[0]}")
+            return None
+        if not parece_pedido(texto):
+            obs.append("SM1.registrar_pedido descartado: la consulta no describe usos ni presupuesto")
+            return None
+        return {"intencion": intencion, "parametros": {"texto": texto}}
+    req = escritos[0] if escritos else sesion.get("requerimiento_id")
+    if not req:
+        obs.append("SM1.aclarar_pedido descartado: no hay pedido que aclarar")
+        return None
+    return {"intencion": intencion, "parametros": {"requerimiento_id": req, "respuesta": texto}}
 
 
 _PALABRAS_NUMERO = {n: w for n, w in enumerate(

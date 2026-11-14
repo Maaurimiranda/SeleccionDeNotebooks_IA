@@ -124,8 +124,9 @@ python -m asistente.cli "Para req_01, ¿qué notebook me recomendás? ¿Cómo an
 uvicorn asistente.api:app
 ```
 
-- **Consola** (`asistente/cli.py`): sin texto abre el modo conversación (`/pedido req_01` fija el pedido y `/salir` termina); `--traza` muestra la traza de cada respuesta.
-- **API** (`asistente/api.py`): `POST /consultar` recibe `texto` y, opcionalmente, `requerimiento_id`, y devuelve `respuesta`, `requerimiento_id`, `submodulos_consultados`, `origen_respuesta`, `intento` y `traza`. `GET /salud` informa si Neo4j y Ollama responden. La documentación interactiva (OpenAPI) está en `http://localhost:8000/docs`. No hay endpoints por submódulo.
+- **Consulta libre:** no hace falta nombrar un pedido. «Quiero una notebook para programar y usar Docker, tengo 900 dólares» pasa primero por Ollama, que extrae un JSON con usos, juegos y presupuesto; SM1 lo valida y lo guarda en Neo4j como `req_101`, y Neo4j corre las reglas solo para ese pedido. El LLM interpreta y explica; Neo4j decide. `python -m scripts.limpiar_pedidos` borra esos pedidos.
+- **Consola** (`asistente/cli.py`): sin texto abre el modo conversación (`/pedido req_01` fija el pedido, `/nuevo` empieza otra conversación y `/salir` termina); `--traza` muestra la traza de cada respuesta.
+- **API** (`asistente/api.py`): `POST /consultar` recibe `texto` y, opcionalmente, `requerimiento_id` y `sesion_id` (para seguir una conversación), y devuelve `respuesta`, `requerimiento_id`, `sesion_id`, `pedido_nuevo`, `repregunta`, `pedido`, `submodulos_consultados`, `origen_respuesta`, `intento` y `traza`. `GET /salud` informa si Neo4j y Ollama responden. La documentación interactiva (OpenAPI) está en `http://localhost:8000/docs`. No hay endpoints por submódulo.
 - **Interfaz web** (`asistente/web/index.html`): en `http://localhost:8000/ui`, con la misma API levantada. Usa el mismo `POST /consultar` que Swagger y muestra la respuesta, el pedido interpretado, las recomendaciones con sus grados (los rangos se ven como tramo rayado), el riesgo de RAM y la traza paso a paso con cada Cypher y sus filas. El botón «Ver ejemplo grabado» muestra la traza de `datos/traza_ejemplo.jsonl` sin necesitar Neo4j ni Ollama.
 
 Cómo se llama a la API desde PowerShell, cómo leer una respuesta (estados, rangos, advertencia y `origen_respuesta`) y qué hacer ante un error: [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md) §4 a §8.
@@ -142,6 +143,7 @@ Son los casos de las pruebas E2E (PG3-11). Lo que se controla es lo que dice el 
 | «En req_01, ¿qué reglas se activaron para la A, de dónde sale cada dato y qué riesgo de RAM tiene?» (E2E-9) | GRUPO, SM2 y SM4 | Las 18 reglas de la A con su fuerza y su origen (14 con origen; el resto, «no registrada») y el riesgo de RAM del grafo |
 | «Para req_01, ¿cuáles son las mejores en movilidad y cómo queda el costo-beneficio?» (E2E-10) | SM3 y SM4 | Orden por movilidad; el dato faltante se informa como faltante; costo-beneficio del grafo |
 | «¿Cuál es la capital de Francia?» (E2E-8, control) | Ninguno | `fuera_de_alcance`, mensaje fijo, sin consultas a los submódulos |
+| «Quiero una notebook para programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dólares.» (E2E-6, pedido nuevo) | SM1, SM2, SM3 y SM4 | Se registra `req_101` con perfil dominante VIRT; `Notebook_B` primera y todas dentro de 900 USD |
 
 ## 8. Pruebas
 

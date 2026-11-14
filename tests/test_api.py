@@ -8,7 +8,8 @@ from asistente.api import crear_app
 from asistente.orquestador import Orquestador
 from tests.comun import GrafoFalso, LLMFalso, fixture
 
-CLAVES = {"respuesta", "requerimiento_id", "submodulos_consultados", "origen_respuesta", "intento", "traza"}
+CLAVES = {"respuesta", "requerimiento_id", "submodulos_consultados", "origen_respuesta", "intento", "traza",
+          "sesion_id", "pedido_nuevo", "repregunta", "pedido"}
 
 
 class TestAPI(unittest.TestCase):
@@ -25,6 +26,16 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(set(r.json()), CLAVES)
         self.assertEqual(r.json()["origen_respuesta"], "plantilla_fija")
+
+    def test_sesion_id_conserva_la_conversacion(self):
+        """CL-11 (#22): la segunda consulta con el mismo sesion_id sigue con el pedido de la primera."""
+        r1 = self.cliente.post("/consultar", json={"texto": "¿Qué riesgo de RAM tiene la G en req_01?"}).json()
+        self.assertTrue(r1["sesion_id"])
+        r2 = self.cliente.post("/consultar", json={"texto": "¿Y la G?", "sesion_id": r1["sesion_id"]}).json()
+        self.assertEqual(r2["sesion_id"], r1["sesion_id"])
+        self.assertEqual(r2["requerimiento_id"], "req_01")      # no lo escribió: viene de la sesión
+        r3 = self.cliente.post("/consultar", json={"texto": "¿Y la G?"}).json()
+        self.assertNotEqual(r3["sesion_id"], r1["sesion_id"])   # sin sesion_id, conversación nueva
 
     def test_1501_caracteres_es_validacion_no_422(self):
         r = self.cliente.post("/consultar", json={"texto": "x" * 1501})

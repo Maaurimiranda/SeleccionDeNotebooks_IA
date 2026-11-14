@@ -10,8 +10,8 @@ R08,Compará la Notebook_A y la Notebook_H para req_01,,SM4.comparar,req_01,plan
 R09,¿Cuál rinde más por su precio en req_01?,,SM4.costo_beneficio,req_01,plan,SM4.costo_beneficio
 R10,¿Qué reglas se activaron para la Notebook_A en req_01?,,GRUPO.traza_reglas,req_01,plan,GRUPO.traza_reglas
 R11,¿Qué parámetros del sistema están sin validar?,,GRUPO.parametros,,plan,GRUPO.parametros
-R12,Quiero cargar un pedido nuevo: soy diseñadora y tengo 1200 USD,,SM1.registrar_pedido,,aclaracion,SM1.registrar_pedido
-R13,Respondo la pregunta pendiente de req_02: la uso para programar,,SM1.aclarar_pedido,req_02,aclaracion,SM1.aclarar_pedido
+R12,Quiero cargar un pedido nuevo: soy diseñadora y tengo 1200 USD,,SM1.registrar_pedido|SM4.recomendar,,plan,SM1.registrar_pedido
+R13,Respondo la pregunta pendiente de req_02: la uso para programar,,SM1.aclarar_pedido,req_02,plan,SM1.aclarar_pedido
 R14,¿Por qué la G quedó indeterminada y qué riesgo de RAM tiene en req_01?,,SM4.explicar_notebook|SM2.riesgo_ram,req_01,plan,multisubmodulo
 R15,Recomendame algo para req_01 y buscá cuáles tienen mejor gráfica,,SM4.recomendar|SM3.buscar,req_01,plan,multisubmodulo
 R16,¿Qué riesgo de RAM tiene la Notebook_M y qué reglas se activaron para ella en req_01?,,SM2.riesgo_ram|GRUPO.traza_reglas,req_01,plan,multisubmodulo
@@ -30,3 +30,9 @@ R28,"Para req_02, ¿qué notebook me conviene?",,SM4.recomendar,req_02,plan,E2E-
 R29,"En req_01, la E tiene casi el mismo puntaje que la B y la H, ¿por qué no la recomiendan? ¿Qué pasa con la virtualización?",,SM4.comparar|SM2.virtualizacion,req_01,plan,E2E-5
 R30,"En req_01, ¿qué reglas se activaron para la A, de dónde sale cada dato y qué riesgo de RAM tiene?",,GRUPO.traza_reglas|SM2.riesgo_ram|SM4.explicar_notebook,req_01,plan,E2E-9
 R31,"Para req_01, ¿cuáles son las mejores en movilidad y cómo queda el costo-beneficio?",,SM3.buscar|SM4.costo_beneficio,req_01,plan,E2E-10
+R32,"Quiero una notebook para programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dólares.",,SM1.registrar_pedido|SM4.recomendar,,plan,consulta_libre
+R33,"Necesito una para la facu, la uso todos los días para Word y el navegador. Tengo 600 USD",,SM1.registrar_pedido|SM4.recomendar,,plan,consulta_libre
+R34,"Edito video y modelo en 3D casi todo el día, tengo 1500 dólares. ¿Cuál rinde más por su precio?",,SM1.registrar_pedido|SM4.costo_beneficio,,plan,consulta_libre
+R35,"Busco una notebook liviana para llevar a la oficina, uso Excel todos los días, tengo 800 USD",,SM1.registrar_pedido|SM4.recomendar,,plan,consulta_libre
+R36,Quiero jugar al Cyberpunk 2077 los fines de semana y tengo 1200 USD,,SM1.registrar_pedido|SM4.recomendar,,plan,consulta_libre
+R37,"¿Qué me recomendás para req_01? Tengo 900 USD",,SM4.recomendar,req_01,plan,consulta_libre

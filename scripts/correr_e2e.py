@@ -7,6 +7,7 @@ Escribe docs/pruebas/E2E-n.md, docs/pruebas/resultados_e2e.md, docs/pruebas/caso
 docs/pruebas/trazas/. El aprobado de cada E2E lo decide lo que dice el grafo (la evidencia), no el texto del LLM.
 """
 import json
+import re
 import shutil
 import sys
 from datetime import date
@@ -205,6 +206,33 @@ def _e10():
             _chk("SM4: costo-beneficio de Q7 (B 1,161; A 0,907)", cb)]
 
 
+def _e6():
+    """Consulta libre (D-08): sin pedido cargado, Ollama extrae el pedido, SM1 lo guarda y Neo4j lo infiere."""
+    def alta(t):
+        e = t.get("escritura") or {}
+        return (e.get("intencion") == "SM1.registrar_pedido"
+                and bool(re.fullmatch(r"req_1\d\d", e.get("requerimiento_id") or ""))), e
+
+    def perfiles(t):
+        act = (((_ev(t).get("SM1") or {}).get("registrar_pedido") or {}).get("entendido") or {}).get("actividades", [])
+        obt = sorted({a["perfil"] for a in act})
+        return "VIRT" in obt, obt
+
+    def dominante(t):
+        p = _ev(t).get("pedido") or {}
+        return p.get("perfil_dominante") == "VIRT", p.get("perfil_dominante")
+
+    def ranking(t):
+        r = ((_ev(t).get("SM4") or {}).get("recomendar") or {}).get("ranking", [])
+        obt = [(x["puesto"], x["notebook"], x["precio_usd"]) for x in r]
+        return bool(obt) and obt[0][1] == "Notebook_B" and all(x[2] <= 900 for x in obt), obt
+
+    return [_chk("Se registró un pedido nuevo (req_1NN) con SM1.registrar_pedido, en una sola escritura", alta),
+            _chk("Lo extraído y validado incluye una actividad de perfil VIRT (Docker)", perfiles),
+            _chk("Neo4j infiere el perfil dominante VIRT para el pedido nuevo (L1)", dominante),
+            _chk("SM4 recomienda dentro de 900 USD, con la Notebook_B primera", ranking)]
+
+
 CASOS = [
     {"id": "E2E-1", "tipo": "integral", "texto": "Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?",
      "esperado": _e1,
@@ -222,6 +250,11 @@ CASOS = [
      "esperado": _e5,
      "situacion": "El asesor ve que la E puntúa igual que la B y la H y se pregunta por qué no entra en la recomendación.",
      "razonamiento": "El puntaje no alcanza: la virtualización es un requisito excluyente del perfil (REC-R3) y la CPU de la E no la soporta, así que queda descartada aunque su adecuación global sea ≈ 0,81. SM2 confirma la virtualización por hardware."},
+    {"id": "E2E-6", "tipo": "integral", "limpiar": True,
+     "texto": "Quiero una notebook para programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dólares.",
+     "esperado": _e6,
+     "situacion": "Una persona que no tiene un pedido cargado describe con sus palabras para qué quiere la notebook y cuánto puede gastar.",
+     "razonamiento": "El router ve una necesidad sin pedido y planifica SM1.registrar_pedido. Ollama extrae del texto las actividades, la frecuencia, el juego y el presupuesto; Python los valida (INT-R1, INT-R7, INT-R11) y SM1 los guarda como un Requerimiento nuevo. En la misma transacción corre la inferencia de cypher/10 a 40 solo para ese pedido ($req): fuzificación, Mamdani, evaluaciones, riesgo de RAM y ranking. SM4 recomienda sobre el pedido nuevo."},
     {"id": "E2E-8", "tipo": "control", "texto": "¿Cuál es la capital de Francia?",
      "esperado": _e8,
      "situacion": "Una pregunta que no tiene que ver con notebooks.",
@@ -246,6 +279,10 @@ def _json(x, n=None):
 def _correr(caso: dict, orq: Orquestador) -> dict:
     r = orq.consultar(caso["texto"])
     t = r["traza"]
+    if caso.get("limpiar") and (t.get("escritura") or {}).get("requerimiento_id"):
+        # el pedido creado por la prueba no queda en la base (no cambia req_01..req_03)
+        from asistente.submodulos.sm1 import repositorio
+        repositorio.borrar_pedidos_consulta(orq.grafo, t["escritura"]["requerimiento_id"])
     resultados = []
     for descripcion, f in caso["esperado"]():
         try:

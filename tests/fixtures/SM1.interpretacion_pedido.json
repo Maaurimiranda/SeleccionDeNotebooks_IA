@@ -6,7 +6,7 @@
  "consultas": [
   {
    "nombre": "SM1.L1",
-   "cypher": "MATCH (c:Requerimiento {id:$requerimiento_id})\nOPTIONAL MATCH (c)-[r:PERTENECE]->(p:Perfil)\nOPTIONAL MATCH (c)-[:REQUIERE_ACLARACION]->(q:Pregunta)\nRETURN c.id AS requerimiento, c.presupuesto_usd AS presupuesto, c.prioridad AS prioridad,\n       c.perfil_dominante AS perfil_dominante,\n       [x IN collect(DISTINCT {perfil:p.codigo, grado:r.grado, grado_min:r.grado_min, grado_max:r.grado_max,\n                impone_requisitos:r.impone_requisitos, en_frontera:r.en_frontera}) WHERE x.perfil IS NOT NULL] AS perfiles,\n       c.intensidad_grafica AS intensidad, c.intensidad_valor AS intensidad_valor,\n       collect(DISTINCT q.texto) AS preguntas_pendientes",
+   "cypher": "MATCH (c:Requerimiento {id:$requerimiento_id})\nOPTIONAL MATCH (c)-[r:PERTENECE]->(p:Perfil)\nOPTIONAL MATCH (c)-[:REQUIERE_ACLARACION]->(q:Pregunta) WHERE coalesce(q.estado, 'pendiente') = 'pendiente'\nRETURN c.id AS requerimiento, c.presupuesto_usd AS presupuesto, c.prioridad AS prioridad,\n       c.perfil_dominante AS perfil_dominante,\n       [x IN collect(DISTINCT {perfil:p.codigo, grado:r.grado, grado_min:r.grado_min, grado_max:r.grado_max,\n                impone_requisitos:r.impone_requisitos, en_frontera:r.en_frontera}) WHERE x.perfil IS NOT NULL] AS perfiles,\n       c.intensidad_grafica AS intensidad, c.intensidad_valor AS intensidad_valor,\n       collect(DISTINCT q.texto) AS preguntas_pendientes",
    "parametros": {
     "requerimiento_id": "req_01"
    },

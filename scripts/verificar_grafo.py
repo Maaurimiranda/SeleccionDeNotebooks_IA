@@ -1,4 +1,5 @@
-"""Regresión CP1–CP11 sobre el grafo cargado (PG3-02).
+"""Regresión CP1–CP11 sobre el grafo cargado (PG3-02). Mira solo req_01..req_03: los pedidos creados desde
+consultas (req_101 en adelante) no cambian el resultado.
 
 Compara lo que devuelve el grafo con los esperados de PG1/PG2 §9.4
 (docs/contexto/Contexto_PG1_PG2_Grupo_para_PG3.md) e imprime una tabla
@@ -15,7 +16,7 @@ from asistente import config
 # Cada CP: (id, descripcion, cypher, funcion(filas) -> obtenido, esperado)
 EV_REQ01 = """
 MATCH (:Requerimiento {id:'req_01'})-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook {modelo:$m})
-OPTIONAL MATCH (:Recomendacion)-[p:PROPONE|PROPONE_FUERA_DE_PRESUPUESTO]->(n)
+OPTIONAL MATCH (:Requerimiento {id:'req_01'})-[:RECIBE]->(:Recomendacion)-[p:PROPONE|PROPONE_FUERA_DE_PRESUPUESTO]->(n)
 OPTIONAL MATCH (al:Alerta) WHERE EXISTS { MATCH (ev)-[:GENERA]->(al) } OR EXISTS { MATCH (n)-[:GENERA]->(al) }
 RETURN ev.estado AS estado, ev.etiqueta_recomendacion AS etiqueta,
        ev.grado_recomendacion AS grado, ev.grado_recomendacion_min AS gmin, ev.grado_recomendacion_max AS gmax,
@@ -54,7 +55,8 @@ CPS = [
     cp("CP6", "C con 2,3 kg y 5 h: movilidad 0,231", EV_REQ01, {"m": "Notebook_C"},
        lambda f: (_uno(f).get("mov"),), (0.231,)),
     cp("CP7", "Desempate por ampliabilidad: A 1, H 2, B 3",
-       "MATCH (:Recomendacion)-[p:PROPONE]->(n:Notebook) RETURN n.modelo AS m, p.orden AS o ORDER BY o", {},
+       "MATCH (:Requerimiento {id:'req_01'})-[:RECIBE]->(:Recomendacion)-[p:PROPONE]->(n:Notebook) "
+       "RETURN n.modelo AS m, p.orden AS o ORDER BY o", {},
        lambda f: tuple(r["m"] for r in f), ("Notebook_A", "Notebook_H", "Notebook_B")),
     # 47 etiquetas en 15 variables; el tecnico confirmo 7 variables (21 etiquetas) el 14/11
     # (cypher/50_validacion_tecnico.cypher), asi que quedan 26 sin validar en 8 variables.
@@ -72,7 +74,7 @@ CPS = [
        lambda f: (_uno(f).get("p"), _uno(f).get("n"), _uno(f).get("preg")), ("indeterminado", 0, True)),
     cp("CP11", "K: Media 0,469 para req_03 y Descartada (a secas) para req_01",
        "MATCH (c:Requerimiento)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(:Notebook {modelo:'Notebook_K'}) "
-       "RETURN c.id AS req, ev.estado AS estado, ev.grado_recomendacion AS grado ORDER BY req", {},
+       "WHERE c.id IN ['req_01', 'req_02', 'req_03'] RETURN c.id AS req, ev.estado AS estado, ev.grado_recomendacion AS grado ORDER BY req", {},
        lambda f: tuple((r["req"], r["estado"], r["grado"] if r["req"] == "req_03" else None) for r in f),
        (("req_01", "Descartada", None), ("req_03", "Recomendada (Media)", 0.469))),
 ]

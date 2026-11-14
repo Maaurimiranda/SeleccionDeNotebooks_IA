@@ -10,6 +10,7 @@
 // margen hasta el maximo sobre la RAM recomendada (vacio si se desconoce)
 MATCH (wr:Parametro {nombre:'P_PESO_RANURAS_AMPLIABILIDAD'}), (rr:Parametro {nombre:'P_RANURAS_REFERENCIA'})
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(r:RAM)
 SET ev.suficiencia_rho = CASE WHEN r.ram_gb / toFloat(pf.ram_min) > 3.0 THEN 3.0
                               ELSE r.ram_gb / toFloat(pf.ram_min) END,
@@ -217,6 +218,7 @@ MERGE (n)-[:GENERA]->(:Alerta {tipo:'Ampliabilidad no verificada', submodulo_ori
 // (no se descarta por la RAM; el costo del modulo sale del catalogo)
 MATCH (cm:Parametro {nombre:'P_COSTO_MODULO_RAM_USD'})
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(r:RAM)
 WHERE r.ram_gb < pf.ram_min AND r.ampliabilidad = 'ampliable'
 MERGE (ev)-[:GENERA]->(:Alerta {tipo:'Condicionado a ampliacion', submodulo_origen:'SM2',
