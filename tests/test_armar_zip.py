@@ -49,7 +49,7 @@ class TestCodigoFuenteEjecutable(unittest.TestCase):
                 z.extractall(destino)
             e = destino / "e_codigo_fuente"
             esperados = sorted(p.name for p in (armar_zip.RAIZ / "cypher").glob("*.cypher"))
-            self.assertEqual(len(esperados), 9)
+            self.assertEqual(len(esperados), 10)   # 00 a 50 y 90_verificacion
             self.assertEqual(sorted(p.name for p in (e / "cypher").glob("*.cypher")), esperados)
             self.assertTrue((e / "docs" / "cypher" / "Grupo_2_PG2_U1_corregido.cypher").is_file())
             self.assertTrue((e / "tests" / "__init__.py").is_file())

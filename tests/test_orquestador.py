@@ -33,7 +33,7 @@ class TestOrquestador(unittest.TestCase):
         self.assertEqual(ev["SM4"]["explicar_notebook"]["notebooks"][0]["estado"],
                          "Indeterminada: completar informacion")           # SM4 real, con filas del grafo
         self.assertEqual(ev["advertencia"], ADVERTENCIA)
-        self.assertIn("Los 9 parametros de recomendacion de SM4", r["respuesta"])   # devolución docente de PI4
+        self.assertIn("3 de los 9 parametros de recomendacion de SM4", r["respuesta"])   # devolución docente de PI4; 6 validados el 14/11
         # la traza quedó escrita, con submódulo y duración por consulta
         lineas = list(Path(self.dir).glob("*.jsonl"))[0].read_text(encoding="utf-8").splitlines()
         t = json.loads(lineas[-1])

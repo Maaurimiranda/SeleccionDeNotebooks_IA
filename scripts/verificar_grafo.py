@@ -56,10 +56,12 @@ CPS = [
     cp("CP7", "Desempate por ampliabilidad: A 1, H 2, B 3",
        "MATCH (:Recomendacion)-[p:PROPONE]->(n:Notebook) RETURN n.modelo AS m, p.orden AS o ORDER BY o", {},
        lambda f: tuple(r["m"] for r in f), ("Notebook_A", "Notebook_H", "Notebook_B")),
-    cp("CP8", "47 etiquetas sin validar en 15 variables",
+    # 47 etiquetas en 15 variables; el tecnico confirmo 7 variables (21 etiquetas) el 14/11
+    # (cypher/50_validacion_tecnico.cypher), asi que quedan 26 sin validar en 8 variables.
+    cp("CP8", "26 de 47 etiquetas sin validar en 8 variables (7 validadas por el tecnico)",
        "MATCH (e:EtiquetaDifusa) WHERE e.estado_validacion = 'sin validar' "
        "RETURN count(e) AS n, count(DISTINCT e.variable) AS v", {},
-       lambda f: (_uno(f).get("n"), _uno(f).get("v")), (47, 15)),
+       lambda f: (_uno(f).get("n"), _uno(f).get("v")), (26, 8)),
     cp("CP9", "M sin autonomia: condicionada, grado [0,504 ; 0,826]", EV_REQ01, {"m": "Notebook_M"},
        lambda f: (_uno(f).get("estado"), _uno(f).get("gmin"), _uno(f).get("gmax")),
        ("Recomendada condicionada por falta de informacion", 0.504, 0.826)),

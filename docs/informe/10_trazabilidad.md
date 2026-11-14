@@ -65,8 +65,8 @@ Desde la regla se llega a su origen por el parámetro que la respalda (consulta 
 | Regla | `FZ-R4`, consecuente `riesgo_obsolescencia` |
 | Parámetro | `centros_y_sigmas_riesgo_obsolescencia` |
 | Origen | «Decision de diseno del grupo (PI3)» |
-| Estado de validación | `sin validar` |
-| Consulta al técnico | `CE-riesgo_obsolescencia`, estado `pendiente` |
+| Estado de validación | `sin validar` (al correr el E2E-9; desde el 14/11, `validado por el tecnico`) |
+| Consulta al técnico | `CE-riesgo_obsolescencia`, estado `pendiente` (desde el 14/11, `respondida`: el técnico confirma) |
 
 Los datos de la notebook, en cambio, sí tienen fuente externa (`GRUPO.origen_notebook`): el precio sale de «Mercado Libre Argentina y tiendas oficiales, 01/10/2026» y la autonomía, de «Notebookcheck / RTINGS».
 
@@ -104,6 +104,6 @@ Lo que el sistema **no** permite reconstruir hoy, dicho sin vueltas:
 
 - **14 de las 18 reglas de la traza de la A tienen origen y 4 salen «no registrada»** (GM-R3, INT-R11, REC-R4 y REC-R9). El grafo canónico no guarda `fuente` en los nodos `Regla` y no tiene nodos de fuente.
 - **El origen que se muestra es el de los parámetros, no el de la regla.** Se llega a él por el nombre del parámetro (`centros_y_sigmas_<variable>`) o porque el origen del parámetro menciona la regla. Es una cadena indirecta.
-- **Ese origen es una decisión del grupo, no una cita.** Las seis entradas de origen de este ejemplo son «Decision de diseno del grupo (PI3)» o «Decision del grupo (REC-R5)», todas `sin validar`. El sistema puede decir que un parámetro lo decidió el grupo y que su validación está pendiente; **no puede** llevar de la regla a una ficha, a un manual o a la entrevista con el técnico. Los datos de catálogo (precio, autonomía) sí tienen fuente externa.
+- **Ese origen es una decisión del grupo, no una cita.** Las seis entradas de origen de este ejemplo son «Decision de diseno del grupo (PI3)» o «Decision del grupo (REC-R5)», todas `sin validar`. El sistema puede decir que un parámetro lo decidió el grupo y si el técnico lo validó (desde el 14/11, `ConsultaExperto.respuesta` guarda su respuesta textual); **no puede** llevar de la regla a una ficha o a un manual. Los datos de catálogo (precio, autonomía) sí tienen fuente externa.
 - **El texto de la respuesta no es evidencia.** Puede resumir mal o callar cosas, como en este ejemplo. La prueba es la traza.
 - **Se reconstruyó un ejemplo, no todos.** La traza se guarda para cada consulta, pero la reconstrucción manual la hicimos para este caso. El E2E-9 se corrió una vez; el texto puede variar entre corridas, la evidencia no.

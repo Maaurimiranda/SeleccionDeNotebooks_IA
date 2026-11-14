@@ -34,7 +34,7 @@ En cada llamada recibe el catálogo, los pedidos cargados y el pedido de la sesi
 | b | Cada `Notebook_X` y cada regla citada existen |
 | c | Cada alerta está en la notebook que la tiene, también si se nombra en palabras («alerta de falta de información») y no por su código |
 | d | Hasta 180 palabras y no vacía |
-| e | Están la advertencia de parámetros sin validar y cada aviso de validación (en SM4, el de los 9 parámetros de recomendación), literales. Si el modelo no los copia, los agrega el código |
+| e | Están la advertencia de parámetros sin validar y cada aviso de validación (en SM4, el de los parámetros de recomendación sin validar), literales. Si el modelo no los copia, los agrega el código |
 | f | Un rango no se da como un valor intermedio ni con un solo extremo |
 | g | Si el pedido es `indeterminado`, no se nombra un perfil |
 | h | El estado que se afirma de cada notebook es el suyo, comparado sin tildes, también cuando se dice como verbo («se descartó»), antes del nombre o en una enumeración |

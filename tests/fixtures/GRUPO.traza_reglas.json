@@ -82,7 +82,7 @@
      "consecuente": "peso_perfil = determinante",
      "sobre": "Actividad",
      "escenario": null,
-     "fuerza": 1.0,
+     "fuerza": 0.011,
      "validacion": "sin validar",
      "fuente": null
     },
@@ -94,7 +94,7 @@
      "consecuente": "peso_perfil = determinante",
      "sobre": "Actividad",
      "escenario": null,
-     "fuerza": 0.011,
+     "fuerza": 1.0,
      "validacion": "sin validar",
      "fuente": null
     },
@@ -298,9 +298,9 @@
      "regla": "FZ-R2",
      "parametro": "centros_y_sigmas_riesgo_obsolescencia",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-riesgo_obsolescencia",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "FZ-R2",
@@ -308,23 +308,23 @@
      "origen": null,
      "validacion": null,
      "consulta_experto": "CE-FZ-R2-R3",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "FZ-R4",
      "parametro": "centros_y_sigmas_riesgo_obsolescencia",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-riesgo_obsolescencia",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "FZ-R5",
      "parametro": "centros_y_sigmas_riesgo_obsolescencia",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-riesgo_obsolescencia",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "GM-R3",
@@ -338,17 +338,17 @@
      "regla": "GM-RD1",
      "parametro": "centros_y_sigmas_adecuacion_movilidad",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-adecuacion_movilidad",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "GM-RD2",
      "parametro": "centros_y_sigmas_adecuacion_movilidad",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-adecuacion_movilidad",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "INT-R11",
@@ -362,25 +362,25 @@
      "regla": "INT-RD1",
      "parametro": "centros_y_sigmas_peso_perfil",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-peso_perfil",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "INT-RD2",
      "parametro": "centros_y_sigmas_peso_perfil",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-peso_perfil",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "INT-RD3",
      "parametro": "centros_y_sigmas_peso_perfil",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-peso_perfil",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "INT-RD7",
@@ -388,7 +388,7 @@
      "origen": "Decision de diseno del grupo (PI3)",
      "validacion": "sin validar",
      "consulta_experto": "CE-intensidad_grafica",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "REC-R4",
@@ -418,33 +418,33 @@
      "regla": "REC-RD1",
      "parametro": "centros_y_sigmas_grado_recomendacion",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-grado_recomendacion",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "REC-RD2",
      "parametro": "centros_y_sigmas_grado_recomendacion",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-grado_recomendacion",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "REC-RD3",
      "parametro": "centros_y_sigmas_grado_recomendacion",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-grado_recomendacion",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     },
     {
      "regla": "REC-RD4",
      "parametro": "centros_y_sigmas_grado_recomendacion",
      "origen": "Decision de diseno del grupo (PI3)",
-     "validacion": "sin validar",
+     "validacion": "validado por el tecnico",
      "consulta_experto": "CE-grado_recomendacion",
-     "estado_consulta": "pendiente"
+     "estado_consulta": "respondida"
     }
    ]
   },
@@ -512,7 +512,7 @@
     "antecedente": "D.principal",
     "consecuente": "peso_perfil = determinante",
     "sobre": "Actividad",
-    "fuerza": 1.0,
+    "fuerza": 0.011,
     "validacion": "sin validar"
    },
    {
@@ -522,7 +522,7 @@
     "antecedente": "D.principal",
     "consecuente": "peso_perfil = determinante",
     "sobre": "Actividad",
-    "fuerza": 0.011,
+    "fuerza": 1.0,
     "validacion": "sin validar"
    },
    {
@@ -674,76 +674,76 @@
      {
       "parametro": "centros_y_sigmas_riesgo_obsolescencia",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-riesgo_obsolescencia",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      },
      {
       "consulta_experto": "CE-FZ-R2-R3",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "FZ-R4": [
      {
       "parametro": "centros_y_sigmas_riesgo_obsolescencia",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-riesgo_obsolescencia",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "FZ-R5": [
      {
       "parametro": "centros_y_sigmas_riesgo_obsolescencia",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-riesgo_obsolescencia",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "GM-RD1": [
      {
       "parametro": "centros_y_sigmas_adecuacion_movilidad",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-adecuacion_movilidad",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "GM-RD2": [
      {
       "parametro": "centros_y_sigmas_adecuacion_movilidad",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-adecuacion_movilidad",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "INT-RD1": [
      {
       "parametro": "centros_y_sigmas_peso_perfil",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-peso_perfil",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "INT-RD2": [
      {
       "parametro": "centros_y_sigmas_peso_perfil",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-peso_perfil",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "INT-RD3": [
      {
       "parametro": "centros_y_sigmas_peso_perfil",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-peso_perfil",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "INT-RD7": [
@@ -752,7 +752,7 @@
       "origen": "Decision de diseno del grupo (PI3)",
       "validacion": "sin validar",
       "consulta_experto": "CE-intensidad_grafica",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "REC-R5": [
@@ -766,36 +766,36 @@
      {
       "parametro": "centros_y_sigmas_grado_recomendacion",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-grado_recomendacion",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "REC-RD2": [
      {
       "parametro": "centros_y_sigmas_grado_recomendacion",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-grado_recomendacion",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "REC-RD3": [
      {
       "parametro": "centros_y_sigmas_grado_recomendacion",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-grado_recomendacion",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ],
     "REC-RD4": [
      {
       "parametro": "centros_y_sigmas_grado_recomendacion",
       "origen": "Decision de diseno del grupo (PI3)",
-      "validacion": "sin validar",
+      "validacion": "validado por el tecnico",
       "consulta_experto": "CE-grado_recomendacion",
-      "estado_consulta": "pendiente"
+      "estado_consulta": "respondida"
      }
     ]
    },

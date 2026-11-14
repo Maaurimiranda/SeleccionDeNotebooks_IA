@@ -68,17 +68,17 @@
    "filas": [
     {
      "parametros": 9,
-     "sin_validar": 9,
+     "sin_validar": 3,
      "nombres": [
       "adecuacion_global.baja",
       "adecuacion_global.media",
       "adecuacion_global.alta",
-      "excedente_presupuesto.dentro",
       "excedente_presupuesto.levemente",
+      "excedente_presupuesto.dentro",
       "excedente_presupuesto.muy",
-      "grado_recomendacion.descartar",
+      "grado_recomendacion.recomendar",
       "grado_recomendacion.considerar",
-      "grado_recomendacion.recomendar"
+      "grado_recomendacion.descartar"
      ]
     }
    ]
@@ -112,7 +112,7 @@
   },
   "validacion_parametros": {
    "parametros": 9,
-   "sin_validar": 9,
+   "sin_validar": 3,
    "nombres": [
     "adecuacion_global.alta",
     "adecuacion_global.baja",
@@ -124,7 +124,7 @@
     "grado_recomendacion.descartar",
     "grado_recomendacion.recomendar"
    ],
-   "aviso_validacion": "Los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico."
+   "aviso_validacion": "3 de los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico."
   }
  }
 }

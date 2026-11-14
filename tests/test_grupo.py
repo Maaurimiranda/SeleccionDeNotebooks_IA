@@ -24,12 +24,15 @@ class TestGrupoOffline(unittest.TestCase):
         self.assertTrue(con_fuerza)
         self.assertTrue(all({"id", "submodulo", "validacion"} <= set(r) for r in e["reglas"]))
 
-    def test_parametros_todos_sin_validar(self):
+    def test_parametros_sin_validar_y_validados_por_el_tecnico(self):
+        """77 = 47 etiquetas + 30 Parametro. El tecnico confirmo 7 variables el 14/11 (cypher/50_validacion_tecnico):
+        21 etiquetas y sus 7 `centros_y_sigmas_*` quedan validados; el resto sigue sin validar."""
         f = fixture("GRUPO.parametros")
         e = grupo.ejecutar("GRUPO.parametros", {}, GrafoFalso(f))["evidencia"]
-        self.assertGreater(e["total"], 0)
-        self.assertEqual(e["sin_validar"], e["total"])
-        self.assertTrue(all(p["estado_validacion"] == SIN_VALIDAR for p in e["parametros"]))
+        self.assertEqual(e["total"], 77)
+        self.assertEqual(e["sin_validar"], 49)
+        estados = {p["estado_validacion"] for p in e["parametros"]}
+        self.assertEqual(estados, {SIN_VALIDAR, "validado por el tecnico"})
 
     def test_origen_de_reglas_y_notebook(self):
         f = fixture("GRUPO.traza_reglas")
@@ -103,7 +106,7 @@ class ConGrafo(unittest.TestCase):
 
     def test_parametros(self):
         e = grupo.ejecutar("GRUPO.parametros", {}, grafo_real())["evidencia"]
-        self.assertEqual(e["sin_validar"], e["total"])
+        self.assertEqual((e["total"], e["sin_validar"]), (77, 49))   # 7 variables validadas por el tecnico
         self.assertEqual(e["sin_origen"], 0)
 
     def test_origen_de_la_traza_de_a(self):
