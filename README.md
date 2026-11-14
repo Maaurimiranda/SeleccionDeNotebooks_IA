@@ -92,7 +92,7 @@ Se agregan con las tareas que siguen: `docs/diagramas/` (PG3-10), `scripts/corre
 | LLM | Ollama local, `qwen2.5:3b` (`qwen2.5:7b` opcional por `OLLAMA_MODEL`) | Temperatura 0 en las dos llamadas; LangChain (`ChatOllama`) como cliente, sin agentes ni Cypher generado (D-05) |
 | Memoria | ~4 GB libres para `qwen2.5:3b` (~8 GB con `7b`) | Más lo que use Neo4j |
 
-Cómo instalar cada uno, paso a paso: [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md) §1 y §2.
+Cómo instalar cada uno, paso a paso: [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md) §1 y §2. Cómo ver los cambios que subió el grupo (`git pull`, recargar el grafo, reiniciar y Ctrl+F5): §4.1.1.
 
 ## 6. Puesta en marcha
 

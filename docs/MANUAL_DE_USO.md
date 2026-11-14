@@ -9,7 +9,7 @@
 1. [Requisitos](#1-requisitos)
 2. [Instalación](#2-instalación)
 3. [Cargar y verificar el grafo](#3-cargar-y-verificar-el-grafo)
-4. [Usar el asistente](#4-usar-el-asistente)
+4. [Usar el asistente](#4-usar-el-asistente) (y [ver los cambios que subió el grupo](#411-ver-los-cambios-que-subió-el-grupo))
 5. [Consultas de ejemplo](#5-consultas-de-ejemplo)
 6. [Cómo leer una respuesta](#6-cómo-leer-una-respuesta)
 7. [Ver la traza](#7-ver-la-traza)
@@ -202,6 +202,31 @@ Get-Content .env | Where-Object { $_ -match '^\s*[^#\s][^=]*=' } | ForEach-Objec
 ```
 
 Con eso quedan activos el entorno de Python y las variables del `.env`. Ollama y Neo4j tienen que estar corriendo.
+
+### 4.1.1 Ver los cambios que subió el grupo
+
+Cada vez que alguien sube cambios a la rama, hacé estos pasos en la terminal preparada (§4.1), desde la carpeta raíz del proyecto:
+
+```powershell
+git checkout <rama>                         # por ejemplo, main o cl-consultas-libres
+git pull                                    # trae los cambios
+python -m pip install -r requirements.txt   # solo si cambió requirements.txt
+python -m scripts.cargar_grafo              # solo si cambió algo en cypher/ (BORRA y recarga la base)
+python -m scripts.verificar_grafo           # tiene que dar 11/11 OK
+uvicorn asistente.api:app                   # si ya estaba corriendo, cortalo antes con Ctrl+C
+```
+
+Después abrí `http://localhost:8000/ui` y apretá **Ctrl+F5**, para que el navegador no muestre la página vieja que tenía guardada.
+
+| Qué cambió | Qué hay que hacer |
+| --- | --- |
+| Solo `asistente/web/index.html` (la web) | Ctrl+F5 en el navegador. No hace falta reiniciar `uvicorn` |
+| Código Python (`asistente/`, `prompts/`) | Reiniciar `uvicorn` o la consola |
+| `cypher/` | `cargar_grafo`, `verificar_grafo` y reiniciar `uvicorn` |
+| `requirements.txt` | `pip install -r requirements.txt` y reiniciar |
+| `.env.example` | Revisar si hay una variable nueva y copiarla a tu `.env` |
+
+Para ver qué archivos cambiaron con el último `git pull`: `git diff --stat HEAD@{1} HEAD`.
 
 ### 4.2 La consola
 
