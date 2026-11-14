@@ -134,6 +134,19 @@ class TestVerificador(unittest.TestCase):
     def test_b_modelo_inexistente(self):
         self.assertDispara("b", con("Notebook_Z tiene riesgo alto."), self.ram)
 
+    def test_modelo_escrito_con_espacio_tambien_se_controla(self):
+        """«la Notebook X» (con espacio) es un modelo: antes escapaba a los controles (b) y (h)."""
+        self.assertDispara("b", con("Te recomiendo la Notebook X por su rendimiento."), self.indeterminado)
+        self.assertDispara("b", con("Te recomiendo la notebook-Z."), self.ram)
+        self.assertEqual(verificar(con("Una notebook sirve para trabajar."), self.ram), [])
+
+    def test_plural_del_llm_no_cuenta_como_otro_modelo(self):
+        """qwen2.5 escribió «Notebooks_G» en E2E-9: es Notebook_G. Un modelo inexistente sigue rechazado."""
+        r = con("Para req_01, el riesgo de RAM de Notebooks_G va de 49.58 a 81.46: es alto.")
+        self.assertFalse(any(p.startswith("(b)") for p in verificar(r, self.ram)), verificar(r, self.ram))
+        self.assertDispara("b", con("Notebooks_Z tiene riesgo alto."), self.ram)
+        self.assertEqual(explicador.normalizar_modelos("Notebooks_G y la Notebook A"), "Notebook_G y la Notebook_A")
+
     def test_b_regla_inexistente(self):
         self.assertDispara("b", con("Se activó la regla FZ-R99."), self.ram)
 
