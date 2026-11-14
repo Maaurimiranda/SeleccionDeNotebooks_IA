@@ -295,7 +295,13 @@ _VERBO_RECOMENDAR = re.compile(r"recomiend|recomend(?!acion)|conviene|aconsej|me
 _NEGACION = re.compile(r"\b(?:no|nunca|ni)\b")
 
 
-_MODELO_SUELTO = re.compile(r"\b[Nn]otebook[\s-]+([A-Z])\b")
+_MODELO_SUELTO = re.compile(r"\b[Nn]otebooks?(?:[\s-]+|_)([A-Z])\b")
+
+
+def normalizar_modelos(respuesta: str) -> str:
+    """«la Notebook X», «notebook-X» o «Notebooks_X» (el LLM a veces pone plural) se escriben Notebook_X. Solo cambia
+    la forma: un modelo que no está en la evidencia (Notebook_Z) sigue rechazado por el control (b)."""
+    return _MODELO_SUELTO.sub(lambda m: f"Notebook_{m.group(1)}", respuesta)
 
 
 def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS) -> list[str]:
@@ -303,7 +309,7 @@ def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS)
     Lo que se dice de cada notebook se atribuye por tramos: cada tramo es de la notebook nombrada antes."""
     problemas: list[str] = []
     # «la Notebook X» es Notebook_X: sin esto, un modelo escrito con espacio escapaba a los controles (b) y (h)
-    respuesta = _MODELO_SUELTO.sub(lambda m: f"Notebook_{m.group(1)}", respuesta)
+    respuesta = normalizar_modelos(respuesta)
     volcado = json.dumps(evidencia, ensure_ascii=False)
     oraciones = _oraciones(respuesta)
     tramos = [t for o in oraciones for t in _segmentos(o)]
@@ -574,8 +580,8 @@ def explicar(texto: str, evidencia: dict, llm) -> dict:
     visible = json.dumps(_compactar(evidencia), ensure_ascii=False, separators=(",", ":"))
     intentos, correcciones = [], ""
     for _ in range(1 + MAX_REGENERACIONES):
-        respuesta = _con_advertencia(
-            llm.texto(sistema, texto, {"evidencia": visible, "correcciones": correcciones}), evidencia)
+        respuesta = _con_advertencia(normalizar_modelos(
+            llm.texto(sistema, texto, {"evidencia": visible, "correcciones": correcciones})), evidencia)
         problemas = verificar(respuesta, evidencia)
         intentos.append({"texto": respuesta, "problemas": problemas})
         if not problemas:

@@ -11,6 +11,9 @@ Fam pidió «Soy programadora y necesito una notebook para abrir IDEs y bases de
 | [`asistente/submodulos/sm4/servicio.py`](../../asistente/submodulos/sm4/servicio.py) | `_sin_evaluaciones` arma el mensaje con esos datos: «su perfil dominante es DEV (programación), y la base de conocimiento solo tiene los datos de rendimiento de las notebooks (SALIDA_PI2) para OFI (oficina), VIRT (virtualización). No recomiendo ninguna notebook hasta que se carguen esos datos.» Si el perfil quedó indeterminado, pide responder la pregunta pendiente. |
 | `tests/test_explicador.py`, `tests/test_sm4.py` | Un test del modelo con espacio y uno del mensaje nuevo. `Q0_COBERTURA` no lleva `ORDER BY` (devuelve una fila); los perfiles se ordenan en Python. |
 
+### Segunda vuelta: el plural de E2E-9
+Fam corrió los tests con Ollama real. En E2E-9, `qwen2.5:3b` escribió «Notebooks_G» y «Notebooks_A», en plural. El control (b) los rechazó tres veces y la respuesta cayó en la plantilla fija. Ahora `normalizar_modelos` (en `explicador.py`) escribe `Notebook_X` cuando el LLM pone «Notebooks_X», «Notebook X» o «notebook-X», y se aplica a la respuesta antes de verificarla, así que el usuario también ve el nombre bien escrito. El control (b) no se afloja: «Notebooks_Z» sigue rechazada, porque Notebook_Z no está en la evidencia.
+
 ## Por qué no hay ranking (para alguien que no estuvo)
 SM4 rankea las `(:Evaluacion)` que crea [`cypher/15_evaluaciones.cypher`](../../cypher/15_evaluaciones.cypher). Ese archivo crea una evaluación solo si existe `(:Notebook)-[:SALIDA_PI2]->(:Perfil)` para el perfil dominante del pedido. `SALIDA_PI2` es la salida de PI2 (adecuación de rendimiento y grado de pantalla de cada notebook para cada perfil). Hoy está cargada para VIRT (9 notebooks) y para OFI (solo `Notebook_K`, supuesto del grupo para CP11). Un pedido DEV, GAM o DIS queda registrado, pero sin evaluaciones (D-03, D-11).
 
@@ -20,7 +23,7 @@ SM4 rankea las `(:Evaluacion)` que crea [`cypher/15_evaluaciones.cypher`](../../
 
 ## Cómo probarlo
 ```powershell
-python -m unittest      # 239 OK, 5 salteadas
+python -m unittest      # 240 OK, 5 salteadas
 python -m asistente.cli --traza "Soy programadora y necesito una notebook para abrir IDEs y bases de datos al mismo tiempo, y jugar al Valorant los fines de semana. Tengo 1000 dólares."
 ```
 Tiene que registrar el pedido con perfil DEV y responder que no hay notebooks evaluadas, sin nombrar ninguna notebook.
