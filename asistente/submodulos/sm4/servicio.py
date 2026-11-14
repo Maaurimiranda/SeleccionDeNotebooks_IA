@@ -13,11 +13,24 @@ from asistente.submodulos.sm4.esquemas import (EvidenciaComparar, EvidenciaCosto
                                                EvidenciaRecomendar)
 
 
-def _sin_evaluaciones(requerimiento_id: str) -> Aclaracion:
-    return Aclaracion(f"El pedido {requerimiento_id} no tiene notebooks evaluadas que recomendar. "
-                      "Si el perfil quedó indeterminado, primero hay que responder la pregunta pendiente. Si no, "
-                      "la base de conocimiento todavía no tiene los datos de rendimiento de las notebooks "
-                      "(SALIDA_PI2) para el perfil dominante del pedido.")
+NOMBRE_PERFIL = {"VIRT": "virtualización", "DEV": "programación", "GAM": "juegos", "DIS": "diseño",
+                 "VID3D": "video y 3D", "DATOS": "datos", "OFI": "oficina"}
+
+
+def _sin_evaluaciones(grafo, requerimiento_id: str) -> Aclaracion:
+    """Mensaje fijo cuando el pedido no tiene evaluaciones: dice cuál es su perfil dominante y para qué
+    perfiles hay datos de rendimiento de las notebooks (SALIDA_PI2), para que el asesor sepa qué falta."""
+    filas = repositorio.cobertura(grafo, requerimiento_id)["filas"]
+    f = filas[0] if filas else {}
+    dom, con = f.get("perfil_dominante"), sorted(x for x in f.get("perfiles_con_datos") or [] if x)
+    nombre = lambda c: f"{c} ({NOMBRE_PERFIL[c]})" if c in NOMBRE_PERFIL else c  # noqa: E731
+    if not dom or dom == "indeterminado":
+        return Aclaracion(f"El pedido {requerimiento_id} no tiene notebooks evaluadas que recomendar: el perfil "
+                          "quedó indeterminado. Primero hay que responder la pregunta pendiente.")
+    return Aclaracion(f"El pedido {requerimiento_id} no tiene notebooks evaluadas que recomendar: su perfil "
+                      f"dominante es {nombre(dom)}, y la base de conocimiento solo tiene los datos de rendimiento "
+                      f"de las notebooks (SALIDA_PI2) para {', '.join(nombre(c) for c in con) or 'ningún perfil'}. "
+                      "No recomiendo ninguna notebook hasta que se carguen esos datos.")
 
 
 def _notebook(f: dict) -> dict:
@@ -90,7 +103,7 @@ def recomendar(grafo, p: dict) -> tuple[list, EvidenciaRecomendar]:
     req = p["requerimiento_id"]
     c1, c2 = repositorio.ranking(grafo, req), repositorio.no_propuestas(grafo, req)
     if not c1["filas"] and not c2["filas"]:
-        raise _sin_evaluaciones(req)
+        raise _sin_evaluaciones(grafo, req)
     c3, c6b = repositorio.sin_alternativa(grafo, req), repositorio.criterio_desempate(grafo)
     dentro = [f for f in c1["filas"] if not f["fuera_de_presupuesto"]]
     fuera = [f for f in c1["filas"] if f["fuera_de_presupuesto"]]
@@ -139,7 +152,7 @@ def costo_beneficio(grafo, p: dict) -> tuple[list, EvidenciaCostoBeneficio]:
         # Q7 solo trae las recomendadas: sin ninguna, el pedido puede estar evaluado igual (REC-R10)
         c2, c3 = repositorio.no_propuestas(grafo, req), repositorio.sin_alternativa(grafo, req)
         if not c2["filas"]:
-            raise _sin_evaluaciones(req)
+            raise _sin_evaluaciones(grafo, req)
         motivo = c3["filas"][0]["motivo"] if c3["filas"] else "Ninguna notebook evaluada quedó recomendada"
         return _con_validacion(grafo, [c, c2, c3],
                                {"requerimiento_id": req, "regla": None, "notebooks": [], "sin_alternativa": motivo})

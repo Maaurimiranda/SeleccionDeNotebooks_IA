@@ -134,6 +134,12 @@ class TestVerificador(unittest.TestCase):
     def test_b_modelo_inexistente(self):
         self.assertDispara("b", con("Notebook_Z tiene riesgo alto."), self.ram)
 
+    def test_modelo_escrito_con_espacio_tambien_se_controla(self):
+        """«la Notebook X» (con espacio) es un modelo: antes escapaba a los controles (b) y (h)."""
+        self.assertDispara("b", con("Te recomiendo la Notebook X por su rendimiento."), self.indeterminado)
+        self.assertDispara("b", con("Te recomiendo la notebook-Z."), self.ram)
+        self.assertEqual(verificar(con("Una notebook sirve para trabajar."), self.ram), [])
+
     def test_b_regla_inexistente(self):
         self.assertDispara("b", con("Se activó la regla FZ-R99."), self.ram)
 

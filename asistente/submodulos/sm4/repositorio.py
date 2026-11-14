@@ -83,6 +83,13 @@ _COLUMNAS = """n.modelo AS notebook, n.precio_usd AS precio_usd, ev.estado AS es
        alertas"""
 
 CONSULTAS: dict[str, str] = {
+    # Por qué un pedido no tiene evaluaciones: su perfil dominante y los perfiles con datos de PI2.
+    "Q0_COBERTURA": """
+MATCH (c:Requerimiento {id:$requerimiento_id})
+OPTIONAL MATCH (c)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+OPTIONAL MATCH (:Notebook)-[:SALIDA_PI2]->(p:Perfil)
+RETURN pf.codigo AS perfil_dominante, collect(DISTINCT p.codigo) AS perfiles_con_datos
+""",
     # Q1 · ranking de la recomendación (REC-R8) y alternativa fuera de presupuesto. `franja_empate` es la
     # franja de ancho P_MARGEN_EMPATE: dos notebooks de la misma franja empatan y desempata la ampliabilidad.
     "Q1_RECOMENDACION": """
@@ -180,6 +187,10 @@ RETURN count(e) AS parametros,
        collect(v.nombre + '.' + e.nombre) AS nombres
 """,
 }
+
+
+def cobertura(grafo, requerimiento_id: str):
+    return leer_consulta(grafo, SM, "Q0_COBERTURA", CONSULTAS["Q0_COBERTURA"], {"requerimiento_id": requerimiento_id})
 
 
 def ranking(grafo, requerimiento_id: str):

@@ -295,10 +295,15 @@ _VERBO_RECOMENDAR = re.compile(r"recomiend|recomend(?!acion)|conviene|aconsej|me
 _NEGACION = re.compile(r"\b(?:no|nunca|ni)\b")
 
 
+_MODELO_SUELTO = re.compile(r"\b[Nn]otebook[\s-]+([A-Z])\b")
+
+
 def verificar(respuesta: str, evidencia: dict, max_palabras: int = MAX_PALABRAS) -> list[str]:
     """Problemas de la respuesta contra la evidencia (lista vacía = pasa). Controles (a) a (h) de D-07 §6.
     Lo que se dice de cada notebook se atribuye por tramos: cada tramo es de la notebook nombrada antes."""
     problemas: list[str] = []
+    # «la Notebook X» es Notebook_X: sin esto, un modelo escrito con espacio escapaba a los controles (b) y (h)
+    respuesta = _MODELO_SUELTO.sub(lambda m: f"Notebook_{m.group(1)}", respuesta)
     volcado = json.dumps(evidencia, ensure_ascii=False)
     oraciones = _oraciones(respuesta)
     tramos = [t for o in oraciones for t in _segmentos(o)]

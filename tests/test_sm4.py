@@ -181,6 +181,22 @@ class TestSM4Offline(unittest.TestCase):
             with self.subTest(intencion=intencion), self.assertRaises(Aclaracion):
                 sm4.ejecutar(intencion, p, vacio)
 
+    def test_sin_evaluaciones_dice_el_perfil_y_los_perfiles_con_datos(self):
+        g = GrafoFalso()
+        g.respuestas[CONSULTAS["Q0_COBERTURA"].strip()] = [
+            {"perfil_dominante": "DEV", "perfiles_con_datos": ["VIRT", "OFI", None]}]
+        with self.assertRaises(Aclaracion) as cm:
+            sm4.ejecutar("SM4.recomendar", {"requerimiento_id": "req_101"}, g)
+        m = cm.exception.mensaje
+        self.assertIn("DEV (programación)", m)
+        self.assertIn("OFI (oficina), VIRT (virtualización)", m)
+        self.assertIn("No recomiendo ninguna notebook", m)
+        g.respuestas[CONSULTAS["Q0_COBERTURA"].strip()] = [
+            {"perfil_dominante": "indeterminado", "perfiles_con_datos": ["VIRT"]}]
+        with self.assertRaises(Aclaracion) as cm:
+            sm4.ejecutar("SM4.recomendar", {"requerimiento_id": "req_02"}, g)
+        self.assertIn("pregunta pendiente", cm.exception.mensaje)
+
     def test_comparar_un_modelo_no_evaluado_lanza_aclaracion(self):
         f = fixture("SM4.comparar")
         with self.assertRaises(Aclaracion) as cm:
@@ -273,7 +289,7 @@ class TestSM4Offline(unittest.TestCase):
     def test_todo_order_by_termina_en_un_desempate(self):
         """Dos corridas dan el mismo orden: la última clave de cada ORDER BY es única (modelo, motivo o regla)."""
         self.assertEqual({n for n, c in CONSULTAS.items() if "ORDER BY" not in c},
-                         {"Q6B_CRITERIO_DESEMPATE", "Q8_PARAMETROS_SM4"})
+                         {"Q0_COBERTURA", "Q6B_CRITERIO_DESEMPATE", "Q8_PARAMETROS_SM4"})
         for nombre, c in CONSULTAS.items():
             for o in re.findall(r"ORDER BY ([^\n]+)", c):
                 ultima = re.sub(r"\s+(LIMIT \d+|DESC|ASC)\b", "", o.strip()).split(",")[-1].strip()
