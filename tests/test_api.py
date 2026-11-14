@@ -43,6 +43,19 @@ class TestAPI(unittest.TestCase):
         self.assertTrue(entrada.get("examples"))
         self.assertEqual(self.cliente.get("/docs").status_code, 200)
 
+    def test_interfaz_web_en_ui_sin_tocar_swagger(self):
+        r = self.cliente.get("/ui")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("text/html", r.headers["content-type"])
+        self.assertIn("/consultar", r.text)          # usa el mismo endpoint que Swagger
+        self.assertNotIn("/ui", self.cliente.get("/openapi.json").json()["paths"])
+
+    def test_ejemplo_grabado_tiene_la_forma_de_consultar(self):
+        r = self.cliente.get("/ui/ejemplo")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(set(r.json()), CLAVES)
+        self.assertTrue(r.json()["traza"]["consultas"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -126,6 +126,7 @@ uvicorn asistente.api:app
 
 - **Consola** (`asistente/cli.py`): sin texto abre el modo conversación (`/pedido req_01` fija el pedido y `/salir` termina); `--traza` muestra la traza de cada respuesta.
 - **API** (`asistente/api.py`): `POST /consultar` recibe `texto` y, opcionalmente, `requerimiento_id`, y devuelve `respuesta`, `requerimiento_id`, `submodulos_consultados`, `origen_respuesta`, `intento` y `traza`. `GET /salud` informa si Neo4j y Ollama responden. La documentación interactiva (OpenAPI) está en `http://localhost:8000/docs`. No hay endpoints por submódulo.
+- **Interfaz web** (`asistente/web/index.html`): en `http://localhost:8000/ui`, con la misma API levantada. Usa el mismo `POST /consultar` que Swagger y muestra la respuesta, el pedido interpretado, las recomendaciones con sus grados (los rangos se ven como tramo rayado), el riesgo de RAM y la traza paso a paso con cada Cypher y sus filas. El botón «Ver ejemplo grabado» muestra la traza de `datos/traza_ejemplo.jsonl` sin necesitar Neo4j ni Ollama.
 
 Cómo se llama a la API desde PowerShell, cómo leer una respuesta (estados, rangos, advertencia y `origen_respuesta`) y qué hacer ante un error: [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md) §4 a §8.
 

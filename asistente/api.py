@@ -1,17 +1,27 @@
 """API única (D-07 §11): POST /consultar y GET /salud. Capa de controlador del sistema.
 
 Documentación OpenAPI en /docs. Lanzar con:  uvicorn asistente.api:app
+Interfaz web en /ui: un HTML estático (asistente/web/index.html) que llama a los mismos POST /consultar y
+GET /salud. No agrega endpoints a la API: sus rutas no aparecen en Swagger.
 """
+import json
+from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from asistente import config
 
 DESCRIPCION = (
     "Asistente experto para elegir notebooks (Grupo 2, UTN FRM, PG3). El LLM interpreta la consulta y "
-    "redacta; las cifras, reglas y estados salen de Neo4j. Cada respuesta trae su traza completa.")
+    "redacta; las cifras, reglas y estados salen de Neo4j. Cada respuesta trae su traza completa. "
+    "Hay una interfaz web en [/ui](/ui) que usa este mismo endpoint.")
+
+RAIZ = Path(__file__).resolve().parent.parent
+PAGINA_UI = Path(__file__).resolve().parent / "web" / "index.html"
+TRAZA_EJEMPLO = RAIZ / "datos" / "traza_ejemplo.jsonl"
 
 
 class ConsultaEntrada(BaseModel):
@@ -59,6 +69,23 @@ def crear_app(orquestador=None) -> FastAPI:
     @app.get("/salud", response_model=SaludSalida, summary="Estado de Neo4j, de Ollama y del modelo")
     def salud() -> SaludSalida:
         return SaludSalida(**orq().salud())
+
+    # Interfaz web: fuera del esquema OpenAPI, así Swagger (/docs) queda igual.
+    @app.get("/ui", include_in_schema=False)
+    def ui() -> FileResponse:
+        return FileResponse(PAGINA_UI, media_type="text/html")
+
+    @app.get("/ui/ejemplo", include_in_schema=False)
+    def ui_ejemplo() -> dict:
+        """Última traza grabada en datos/traza_ejemplo.jsonl, con la forma de POST /consultar (respaldo para la defensa)."""
+        if not TRAZA_EJEMPLO.exists():
+            raise HTTPException(404, "No está datos/traza_ejemplo.jsonl")
+        lineas = [l for l in TRAZA_EJEMPLO.read_text(encoding="utf-8").splitlines() if l.strip()]
+        t = json.loads(lineas[-1])
+        submodulos = list(dict.fromkeys(c["sm"] for c in t.get("consultas", []) if c.get("sm")))
+        return {"respuesta": t.get("respuesta") or "", "requerimiento_id": (t.get("plan") or {}).get("requerimiento_id"),
+                "submodulos_consultados": submodulos, "origen_respuesta": t.get("origen_respuesta") or "error",
+                "intento": len(t.get("intentos") or []), "traza": t}
 
     return app
 
