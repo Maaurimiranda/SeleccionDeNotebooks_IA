@@ -412,6 +412,23 @@ class TestPedidoNuevoConGrafo(unittest.TestCase):
         n = self.grafo.leer("MATCH (:Requerimiento {id:$r})-[:EVALUA]->(e) RETURN count(e) AS n", {"r": req})[0]["n"]
         self.assertEqual(n, 9)                     # una Evaluacion por notebook con SALIDA_PI2 de VIRT
 
+    def test_pedido_dev_tiene_ranking_con_la_salida_pi2_provisional(self):
+        """El pedido de Fam (D-03): perfil dominante DEV. Con 03_salida_pi2_provisional.cypher evalúa el catálogo."""
+        texto = ("Soy programadora y necesito una notebook para abrir IDEs y bases de datos al mismo tiempo, "
+                 "y jugar al Valorant los fines de semana. Tengo 1000 dólares.")
+        e = ext(1000, "USD", [act("programar", "programar", "necesito una notebook para abrir IDEs y bases de datos "
+                                  "al mismo tiempo", "la necesito para"),
+                              act("jugar", "jugar", "jugar al Valorant los fines de semana", "los fines de semana")])
+        req = self.sm1.ejecutar("SM1.registrar_pedido", {"texto": texto, "pedido": e},
+                                self.grafo)["evidencia"]["requerimiento_id"]
+        l1 = self.sm1.ejecutar("SM1.interpretacion_pedido", {"requerimiento_id": req}, self.grafo)["evidencia"]
+        self.assertEqual(l1["perfil_dominante"], "DEV")
+        rec = self.sm4.ejecutar("SM4.recomendar", {"requerimiento_id": req}, self.grafo)["evidencia"]
+        self.assertTrue(rec["ranking"])
+        self.assertTrue(all(x["precio_usd"] <= 1000 for x in rec["ranking"]))
+        n = self.grafo.leer("MATCH (:Requerimiento {id:$r})-[:EVALUA]->(e) RETURN count(e) AS n", {"r": req})[0]["n"]
+        self.assertEqual(n, 9)
+
     def test_aclarar_actualiza_el_mismo_pedido(self):
         texto = "Quiero usar Docker todos los días y editar video, tengo 950 USD"
         e = ext(950, "USD", [act("usar Docker", "virtualizar", "usar Docker todos los días", "todos los dias"),
