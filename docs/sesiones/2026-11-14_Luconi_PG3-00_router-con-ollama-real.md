@@ -27,5 +27,5 @@ python -m scripts.limpiar_pedidos                         # borra req_101 en ade
 ```
 
 ## Qué queda y dudas
-- Con las señales, las omisiones de R17, R26, R31 y R34 se completan. R30 («de dónde sale cada dato», `SM4.explicar_notebook`) y el `SM3.buscar` de más en R35 dependen del LLM. Falta que alguien con Ollama confirme el porcentaje.
+- **Confirmado con Ollama real** (Fam, 14/11): `tests.test_router` y `tests.test_e2e` dan 29 OK. El acierto de intenciones es 34/37 = 92 % (el LLM solo, 76 %) y el resultado final, 37/37. Quedan en X R13 (agrega `SM4.recomendar` después de aclarar), R30 (falta `SM4.explicar_notebook`) y R35 (`SM3.buscar` de más). Dependen del LLM.
 - `router.py` y el prompt son de Olea: pido que revise las señales.
