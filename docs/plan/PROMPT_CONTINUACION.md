@@ -1,29 +1,25 @@
-# Estado al 10/11/2026 (noche) y prompt para seguir
+# Estado al 14/11/2026 y prompt para seguir
 
 Quién lo lea no necesita saber a quién estaba asignada cada tarea: se sigue por dependencias.
 
-## Estado de todas las tareas (11/11, noche)
-| Tarea | Estado | Code review |
-| --- | --- | --- |
-| Validación del plan contra la consigna, arquitectura B | Hecho | — |
-| PG3-01 a 04, 06 a 09 (esqueleto, grafo, SM1 a SM3, GRUPO, router; PR #4 de otra persona) | Hecho | **Por hacer:** revisión retroactiva del PR #4 (aprobar `contrato.py`, la excepción de `langchain-ollama`) |
-| PG3-05 Cierre de trazabilidad y conteos | Hecho, validado con Neo4j | Corrido y corregido |
-| PG3-12 SM4 | Hecho | Corrido; 7 de 10 hallazgos corregidos (quedan prioridad `precio`, motivo armado en el Cypher) |
-| PG3-13 Explicador | Hecho | Corrido; corregidos los de corrección. Corregido el parseo de miles (`1.200`). Quedan: redondeo permisivo de enteros, afirmaciones sin cifra ni notebook |
-| PG3-11 E2E, casos de uso y pruebas | Hecho: 7 de 7 E2E aprueban | Corrido; 10 de 10 atendidos (filtros en letras y con punto de miles, aviso del video en el LEEME del ZIP, test de E2E con una corrida por caso). Falta el re-review de esas correcciones |
-| PG3-15 Registro de correcciones | Hecho (`docs/CORRECCIONES.md`) | Solo documentación: no revisada. Actualizada el 11/11 (SM4 y el explicador ya no son stub) |
-| PG3-16 Manual y README | Hecho | Sin revisar; **falta que una persona lo siga desde cero** |
-| PG3-10 Diagramas | Hecho (`.drawio` y `.png`) | Sin revisar; Draw.io de escritorio no probado |
-| PG3-14 Informe PDF (59 páginas) | Hecho | Sin revisar; **nadie leyó el PDF completo**; usa `mistune` y PyMuPDF (fuera de `RESTRICCIONES.md`) |
-| PG3-17 Exportación y ZIP | Hecho: 11 de 12 ítems | Corrido; parcialmente corregido. **Falta** descomprimir en carpeta limpia y probar |
-| PG3-18 Infografía | Cubierta con `docs/presentacion/resumen_ejecutivo.pdf` (una página) | — |
-| PG3-19 Video | **Por hacer** (persona) | — |
-| PG3-20 Lectura cruzada | **Por hacer** (personas) | — |
-| Devolución docente del PI4 de SM4: validación por entidad y estado, y los 9 parámetros de recomendación sin validar (PR #5) | Hecho, offline (193 tests) | **Por hacer:** revisión de otro integrante; regenerar los fixtures de SM4 con Neo4j (Q8) |
-| PG3-21 a 27 (nivel 2) | No se hacen: el informe lo dice como limitación | — |
+## Hecho
+PG3 entregado en `Grupo_2_PG3_ProyectoFinal.zip`: informe final (`Grupo_2_PG3_Informe_Final.pdf`, 24 páginas), resumen ejecutivo de una página, presentación de la defensa (`.pptx`, ítem k), exportación de Neo4j, datos de ejemplo y el código con `docs/` (diagramas, pruebas, manual). El 14/11 se agregaron consultas libres con pedido nuevo, la web en `/ui`, las respuestas del técnico y `SALIDA_PI2` provisional. Pruebas: 249 `unittest` (con Neo4j, 244 OK y 5 salteadas que piden Ollama), CP1 a CP11 en 11 de 11 y router 34 de 37 (92 %).
 
-**Por hacer del review:** volver a correr `/code-review` sobre los commits `fix(...)` (`81417ff`, `539ccae`, `fd535ef`, `8cad4eb`) y revisar el PR #4.
-**Por hacer de verificación:** tiempos de los E2E en otra máquina; seguir el manual desde cero; descomprimir el ZIP y correr E2E-1 (el 11/11 se descomprimió y pasan los 182 tests offline; falta E2E-1 con Neo4j y Ollama); al volver a correr con Neo4j, actualizar `docs/pruebas/funcionales.md` (dice 171; hoy son 193) y la corrida con Neo4j de `docs/informe/08_pruebas.md`, `02_resumen.md` y `09_evaluacion.md`, y rehacer el PDF; leer el PDF y confirmar nombres (README: «Olea, Facundo», comisión 5K09, «Luconi Furque»).
+## Pendiente
+1. **Videos individuales PI6** (`Apellido_Nombre_PI6_VideoFinal.mp4`, 3 a 5 minutos, con rostro).
+2. **Revisiones de dueño** de lo que se unió el 14/11 tocando archivos ajenos (ver las notas de Luconi del 14/11 en `docs/sesiones/`), y confirmar o reemplazar los 53 pares provisionales de `SALIDA_PI2` (SM2 y SM3).
+3. **Commitear con PR** el README, el manual, `funcionales.md`, `02_resumen.md` y el resumen ejecutivo corregidos el 14/11.
+
+## Opcional, fuera del alcance de la entrega
+Nada de esto bloquea la entrega. Se hace solo si sobra tiempo.
+- **Revisiones:** revisión retroactiva del PR #4 (`contrato.py`, excepción de `langchain-ollama`); revisión de los PR #5 y #7 por otro integrante.
+- **Verificaciones:** seguir el manual desde cero; tiempos de los E2E en otra máquina; abrir los `.drawio` en draw.io de escritorio; medir `qwen2.5:3b` con los controles nuevos (`PG3_TEST_LLM=1 python -m unittest tests.test_explicador`); regenerar los fixtures de SM4 con Neo4j (`python -m scripts.generar_fixtures`); lectura cruzada del sistema (PG3-20); confirmar que `mistune` y PyMuPDF (solo para armar el PDF) están bien fuera de `RESTRICCIONES.md`.
+- **Defectos conocidos:**
+  - Verificador del explicador: el `?` del control (g) exime a toda la oración; el redondeo de enteros es permisivo; no corta afirmaciones sin cifra ni notebook; no reconoce una falta de información dicha con otras palabras.
+  - Orquestador: fusiona mal dos `SM3.buscar` con filtros distintos.
+  - SM4: falta `franja_con_peor_caso` en notebooks de grado exacto que empatan con una de rango; la prioridad `precio` (REC-R9) no explica el orden; el motivo está armado en el Cypher.
+  - Orden inestable de filas en `SM2.riesgo_ram`, `GRUPO.parametros` y `GRUPO.traza_reglas`.
+- **Limpieza:** borrar `docs/contexto/CONTEXTO_SM3_PG3.md` (copia vieja con errores); `tests/test_armar_zip.py` corre el `main()` real y puede fallar por la contraseña del `.env` de quien lo corre.
 
 ## Prompt para otra persona (o para otra sesión de IA)
 
