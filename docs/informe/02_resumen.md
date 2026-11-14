@@ -19,7 +19,7 @@
 | Respuestas con explicación que salieron de la plantilla fija | 0 de 5 |
 
 **Lo que falta, dicho sin vueltas.**
-- Los parámetros difusos (centros, sigmas, mínimos de RAM) **no están validados por el técnico**: toda respuesta lo advierte.
+- El técnico respondió las 16 consultas el 14/11/2026: **confirmó 7 de las 15 variables difusas** (21 de 47 etiquetas) y propuso otros valores para 6 y cambios de regla para 3, que **no se aplicaron** para no mover los resultados. El resto de los parámetros (26 etiquetas, 23 parámetros, mínimos de RAM) sigue sin validar, y toda respuesta lo advierte.
 - El asistente lee los resultados que el grafo ya calculó para 3 pedidos cargados: **no registra pedidos nuevos ni infiere en vivo**, y el nivel 2 (PG3-21 a 27) no está hecho.
 - `qwen2.5:3b` redacta con torpezas que el verificador no siempre corta: en una respuesta (E2E-2) dio como riesgo de RAM de la G un número que era su adecuación global.
 - Los tiempos de punta a punta se midieron en una sola máquina (en otra, el plan solo tardó de 10 a 50 s); el catálogo de prueba tiene 9 modelos.

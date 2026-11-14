@@ -17,9 +17,9 @@
      "perfil": "VIRT",
      "presupuesto_usd": 1000.0,
      "pesos": {
+      "movilidad": 0.167,
       "rendimiento": 0.75,
-      "grafica": 0.083,
-      "movilidad": 0.167
+      "grafica": 0.083
      },
      "dato_faltante": null,
      "en_la_recomendacion": "no figura en la recomendacion",
@@ -51,16 +51,16 @@
      "ampliabilidad_ram": "desconocida",
      "alertas": [
       {
-       "codigo": "FZ-R7",
-       "texto": "Riesgo alto de que la RAM quede corta para el perfil: [49.58 ; 81.46] sobre 100"
+       "texto": "La RAM (8 GB) no llega al minimo del perfil (16 GB)",
+       "codigo": "REC-R13"
       },
       {
-       "codigo": "REN-R10",
-       "texto": "La ficha no informa si la RAM es ampliable: el riesgo se informa como rango"
+       "texto": "Riesgo alto de que la RAM quede corta para el perfil: [49.58 ; 81.46] sobre 100",
+       "codigo": "FZ-R7"
       },
       {
-       "codigo": "REC-R13",
-       "texto": "La RAM (8 GB) no llega al minimo del perfil (16 GB)"
+       "texto": "La ficha no informa si la RAM es ampliable: el riesgo se informa como rango",
+       "codigo": "REN-R10"
       }
      ]
     }
@@ -73,17 +73,17 @@
    "filas": [
     {
      "parametros": 9,
-     "sin_validar": 9,
+     "sin_validar": 3,
      "nombres": [
       "adecuacion_global.baja",
       "adecuacion_global.media",
       "adecuacion_global.alta",
-      "excedente_presupuesto.dentro",
       "excedente_presupuesto.levemente",
+      "excedente_presupuesto.dentro",
       "excedente_presupuesto.muy",
-      "grado_recomendacion.descartar",
+      "grado_recomendacion.recomendar",
       "grado_recomendacion.considerar",
-      "grado_recomendacion.recomendar"
+      "grado_recomendacion.descartar"
      ]
     }
    ]
@@ -124,9 +124,9 @@
     "regla": "REC-R3",
     "en_la_recomendacion": "no figura en la recomendacion",
     "pesos": {
+     "movilidad": 0.167,
      "rendimiento": 0.75,
-     "grafica": 0.083,
-     "movilidad": 0.167
+     "grafica": 0.083
     },
     "cumple": [
      "El precio esta dentro del presupuesto"
@@ -144,7 +144,7 @@
   ],
   "validacion_parametros": {
    "parametros": 9,
-   "sin_validar": 9,
+   "sin_validar": 3,
    "nombres": [
     "adecuacion_global.alta",
     "adecuacion_global.baja",
@@ -156,7 +156,7 @@
     "grado_recomendacion.descartar",
     "grado_recomendacion.recomendar"
    ],
-   "aviso_validacion": "Los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico."
+   "aviso_validacion": "3 de los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico."
   }
  }
 }

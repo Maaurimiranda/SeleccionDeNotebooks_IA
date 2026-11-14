@@ -297,9 +297,10 @@ class TestValidacionPorEntidadYEstado(unittest.TestCase):
         self.assertDispara("c", con("Notebook_A no informa si la RAM es ampliable.", ev=self.ram), self.ram)
 
     # --- los nueve parámetros de recomendación, visibles en toda respuesta de SM4
-    def test_sm4_exige_el_aviso_de_los_9_parametros(self):
+    def test_sm4_exige_el_aviso_de_los_parametros_sin_validar(self):
+        """El tecnico valido adecuacion_global y grado_recomendacion (14/11): quedan 3 de 9 (excedente_presupuesto)."""
         aviso = self.rec["SM4"]["recomendar"]["validacion_parametros"]["aviso_validacion"]
-        self.assertEqual(aviso, "Los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico.")
+        self.assertEqual(aviso, "3 de los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico.")
         problemas = verificar(con("Notebook_A queda primera."), self.rec)
         self.assertTrue(any(p.startswith("(e) falta el aviso") for p in problemas), problemas)
         self.assertPasa("Notebook_A queda primera.", self.rec)

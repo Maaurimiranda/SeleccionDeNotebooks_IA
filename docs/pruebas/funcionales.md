@@ -15,7 +15,7 @@ Generado el 2026-11-11 sobre Neo4j 5.26 con el grafo cargado desde `cypher/`. Co
 | Regla | La traza de A trae reglas de los 4 submódulos, con su origen cuando el grafo lo tiene | tests/test_grupo.py · `test_traza_a`, `test_origen_de_la_traza_de_a` | 18 reglas, 14 con origen, 4 «no registrada» | pasa | sí |
 | Difuso | G indeterminada: riesgo de RAM como rango [49,58 ; 81,46] y alertas REN-R10 y FZ-R7 | scripts/verificar_grafo.py · CP4; tests/test_sm2.py | Rango sin promediar | OK | sí |
 | Difuso | M sin autonomía: condicionada, grado [0,504 ; 0,826] | scripts/verificar_grafo.py · CP9; tests/test_sm4.py · `test_e2e_2_m_rango_y_falta_la_autonomia` | Rango, no un número | OK | sí |
-| Difuso | 47 etiquetas difusas sin validar en 15 variables | scripts/verificar_grafo.py · CP8 | 47 y 15 | OK | sí |
+| Difuso | 26 de 47 etiquetas difusas sin validar en 8 variables (el técnico validó 7 variables el 14/11) | scripts/verificar_grafo.py · CP8 | 26 y 8 | OK (14/11, con Neo4j) | sí |
 | Respuesta | Los literales de estado y validación son los de D-06 en todo lo que devuelve SM4 | tests/test_sm4.py · `test_literales_d06_en_todo_lo_que_devuelve` | Sin tildes, `sin validar` | pasa | sí |
 | Respuesta | El verificador rechaza cifras, modelos, reglas y alertas sin respaldo | tests/test_explicador.py (≈50 casos, uno por control a–h) | Cada control se dispara | pasa | sí |
 | Respuesta | Si el LLM falla dos veces, sale la plantilla fija, que pasa su propio verificador | tests/test_explicador.py · `TestExplicar`, `TestPlantillaFija` | `origen_respuesta = plantilla_fija` | pasa | sí |

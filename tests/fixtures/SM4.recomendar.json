@@ -83,8 +83,8 @@
      "ampliabilidad_ram": "alta",
      "alertas": [
       {
-       "codigo": "GM-R8",
-       "texto": "El TGP configurado (60 W de 115 W) reduce el rendimiento de la GPU respecto de su gama"
+       "texto": "El TGP configurado (60 W de 115 W) reduce el rendimiento de la GPU respecto de su gama",
+       "codigo": "GM-R8"
       }
      ]
     }
@@ -133,8 +133,8 @@
      "ampliabilidad_ram": "alta",
      "alertas": [
       {
-       "codigo": "REC-R15",
-       "texto": "La ficha no informa la autonomia: la adecuacion global se informa como rango"
+       "texto": "La ficha no informa la autonomia: la adecuacion global se informa como rango",
+       "codigo": "REC-R15"
       }
      ]
     },
@@ -156,12 +156,12 @@
      "ampliabilidad_ram": "alta",
      "alertas": [
       {
-       "codigo": "REN-R7",
-       "texto": "La RAM no llega al minimo del perfil, pero se puede ampliar con un modulo de unos 30 USD"
+       "texto": "La RAM (8 GB) no llega al minimo del perfil (16 GB)",
+       "codigo": "REC-R13"
       },
       {
-       "codigo": "REC-R13",
-       "texto": "La RAM (8 GB) no llega al minimo del perfil (16 GB)"
+       "texto": "La RAM no llega al minimo del perfil, pero se puede ampliar con un modulo de unos 30 USD",
+       "codigo": "REN-R7"
       }
      ]
     },
@@ -183,16 +183,16 @@
      "ampliabilidad_ram": "desconocida",
      "alertas": [
       {
-       "codigo": "FZ-R7",
-       "texto": "Riesgo alto de que la RAM quede corta para el perfil: [49.58 ; 81.46] sobre 100"
+       "texto": "La RAM (8 GB) no llega al minimo del perfil (16 GB)",
+       "codigo": "REC-R13"
       },
       {
-       "codigo": "REN-R10",
-       "texto": "La ficha no informa si la RAM es ampliable: el riesgo se informa como rango"
+       "texto": "Riesgo alto de que la RAM quede corta para el perfil: [49.58 ; 81.46] sobre 100",
+       "codigo": "FZ-R7"
       },
       {
-       "codigo": "REC-R13",
-       "texto": "La RAM (8 GB) no llega al minimo del perfil (16 GB)"
+       "texto": "La ficha no informa si la RAM es ampliable: el riesgo se informa como rango",
+       "codigo": "REN-R10"
       }
      ]
     },
@@ -245,17 +245,17 @@
    "filas": [
     {
      "parametros": 9,
-     "sin_validar": 9,
+     "sin_validar": 3,
      "nombres": [
       "adecuacion_global.baja",
       "adecuacion_global.media",
       "adecuacion_global.alta",
-      "excedente_presupuesto.dentro",
       "excedente_presupuesto.levemente",
+      "excedente_presupuesto.dentro",
       "excedente_presupuesto.muy",
-      "grado_recomendacion.descartar",
+      "grado_recomendacion.recomendar",
       "grado_recomendacion.considerar",
-      "grado_recomendacion.recomendar"
+      "grado_recomendacion.descartar"
      ]
     }
    ]
@@ -443,7 +443,7 @@
   },
   "validacion_parametros": {
    "parametros": 9,
-   "sin_validar": 9,
+   "sin_validar": 3,
    "nombres": [
     "adecuacion_global.alta",
     "adecuacion_global.baja",
@@ -455,7 +455,7 @@
     "grado_recomendacion.descartar",
     "grado_recomendacion.recomendar"
    ],
-   "aviso_validacion": "Los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico."
+   "aviso_validacion": "3 de los 9 parametros de recomendacion de SM4 todavia requieren validacion con el tecnico."
   }
  }
 }

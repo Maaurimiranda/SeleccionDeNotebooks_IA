@@ -29,9 +29,11 @@ class TestCompararConteos(unittest.TestCase):
 class TestCorteDelCanonico(unittest.TestCase):
     def test_cypher_es_el_canonico_salvo_los_arreglos_de_d06(self):
         """PG3-02: cortar el canónico no cambió el contenido. D-06 cambió 3 sentencias ('provisional' a
-        'sin validar') y una más (REC-R5, que ahora suma la prioridad `grafica`)."""
+        'sin validar') y una más (REC-R5, que ahora suma la prioridad `grafica`). Además, cypher/ suma
+        50_validacion_tecnico.cypher (2 sentencias, respuestas del técnico del 14/11), que no está en el canónico."""
         total_c, total_d, solo_c, solo_d = diferencias_sentencias()
-        self.assertEqual(total_c, total_d)
+        self.assertEqual(total_c + 2, total_d)
+        self.assertEqual(sum("ConsultaExperto" in t or "validado por el tecnico" in t for t in solo_d), 2)
         resto = [t for t in solo_c if t.replace("'provisional'", "'sin validar'") not in solo_d]
         self.assertEqual(len(resto), 1, "solo debe quedar la sentencia de REC-R5")
         self.assertIn("P_INCREMENTO_PRIORIDAD", resto[0])
