@@ -1,6 +1,6 @@
 # Pruebas funcionales (consigna §3.5)
 
-Generado el 2026-11-11 sobre Neo4j 5.26 con el grafo cargado desde `cypher/`. Corrida completa: `python -m unittest` (171 tests, 2 salteados que piden Ollama) y `python -m scripts.verificar_grafo` (CP1 a CP11, 11/11).
+Generado el 2026-11-11 sobre Neo4j 5.26 con el grafo cargado desde `cypher/`. Corrida completa: `python -m unittest` (249 tests; con Neo4j, 244 OK y 5 salteados que piden Ollama, corrida del 14/11) y `python -m scripts.verificar_grafo` (CP1 a CP11, 11/11).
 
 | Tipo | Qué verifica | Prueba | Esperado | Obtenido (corrida) | OK |
 | --- | --- | --- | --- | --- | --- |

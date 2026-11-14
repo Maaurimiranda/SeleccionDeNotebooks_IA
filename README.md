@@ -25,7 +25,7 @@ Está formado por cuatro submódulos que comparten una única base de conocimien
 1. **Neo4j maneja la verdad.** Toda cifra, regla, estado o alerta sale del grafo. El LLM no calcula ni decide.
 2. **El LLM es la interfaz de interacción y explicación.** Interpreta la consulta y redacta la respuesta; el razonamiento está en las reglas y en la lógica difusa.
 
-### Propuestos desde SM2 (PI4), a acordar con el grupo
+### Acordados por el grupo (propuestos desde SM2 en PI4)
 
 3. **El LLM interpreta y explica en dos llamadas.** Una extrae la intención en JSON y otra redacta la respuesta a partir de una *evidencia* ya recuperada.
 4. **El LLM no escribe Cypher.** Las consultas son plantillas fijas y parametrizadas, y la conexión es de **solo lectura** (`READ_ACCESS`).
@@ -45,7 +45,7 @@ El camino de una consulta:
 4. **Explicador** (`asistente/explicador.py`, `prompts/explicacion.txt`): el LLM redacta usando únicamente la evidencia que devolvió el grafo. Un verificador controla cifras, notebooks, reglas, alertas y estados y, si la redacción no pasa tras los reintentos, se responde con una plantilla fija.
 5. **Traza** (`asistente/traza.py`): un registro por consulta.
 
-El orquestador (`asistente/orquestador.py`) coordina los pasos 2 a 5. Los diagramas finales de componentes, secuencia y grafo se arman en PG3-10 (`docs/diagramas/`); hasta entonces están en Mermaid en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §2 y §3.
+El orquestador (`asistente/orquestador.py`) coordina los pasos 2 a 5. Si la consulta describe un pedido nuevo, antes del paso 3 el extractor (`asistente/extractor.py`, `prompts/extraccion.txt`) saca sus datos y SM1 lo registra. Los diagramas de arquitectura, secuencia y grafo están en [`docs/diagramas/`](docs/diagramas/) (PNG y Draw.io editable).
 
 ## 4. Estructura del repositorio
 
@@ -54,16 +54,16 @@ La estructura completa y quién es dueño de cada archivo están en [`docs/ARQUI
 ```
 SeleccionDeNotebooks_IA/
 ├── README.md
-├── CLAUDE.md                       # reglas para agentes y personas; nota de sesión obligatoria
 ├── requirements.txt  .env.example  # dependencias y plantilla de configuración (ítems e y g)
 ├── asistente/                      # código fuente (ítem e)
-│   ├── api.py  cli.py              # interfaz única: POST /consultar, GET /salud y consola
-│   ├── orquestador.py  router.py  explicador.py  traza.py
+│   ├── api.py  cli.py  web/        # interfaz única: POST /consultar, GET /salud, web en /ui y consola
+│   ├── orquestador.py  router.py  extractor.py  explicador.py  traza.py
 │   ├── contrato.py  config.py  grafo.py  llm.py
 │   └── submodulos/                 # sm1, sm2, sm3, sm4 y grupo: entrada → servicio → repositorio (+ esquemas)
-├── prompts/                        # maestro.txt (router) y explicacion.txt (explicador)
+├── prompts/                        # maestro.txt (router), extraccion.txt (pedido nuevo) y explicacion.txt
 ├── cypher/                         # el grafo en scripts por dueño, 00_ a 90_ (ítem f)
-├── scripts/                        # cargar_grafo, verificar_grafo, contar_grafo, generar_fixtures
+├── datos/                          # exportación de Neo4j y datos de ejemplo (ítems i y j)
+├── scripts/                        # cargar_grafo, verificar_grafo, correr_e2e, exportar_grafo, limpiar_pedidos…
 ├── tests/                          # unittest; fixtures/ con filas reales del grafo
 └── docs/
     ├── MANUAL_DE_USO.md            # manual de uso (ítem d)
@@ -71,17 +71,15 @@ SeleccionDeNotebooks_IA/
     ├── RESTRICCIONES.md            # qué técnicas y tecnologías se pueden usar
     ├── INCONSISTENCIAS_CONTEXTOS.md # inconsistencias entre contextos y decisiones (D-01 a D-13)
     ├── CORRECCIONES.md             # registro de correcciones (consigna §3.1)
-    ├── plan/                       # PLAN_PG3.md + issues/ (una tarea por archivo)
-    ├── informe/                    # secciones del informe, una por archivo (ítem a)
-    ├── pruebas/                    # casos de prueba y resultados (ítem c)
-    ├── sesiones/                   # explicación de cada sesión de trabajo, para el grupo
-    ├── consigna/                   # ConsignaPG3.md: consigna de la cátedra y ejemplo de referencia
-    ├── contexto/                   # contexto para PG3: PG1/PG2 grupal y SM1–SM4 (Contexto_SMX_{Apellido}_para_PG3.md)
+    ├── diagramas/                  # arquitectura, secuencia y grafo, en PNG y Draw.io (ítem b)
+    ├── pruebas/                    # casos de uso, E2E, funcionales y validación del técnico (ítem c)
+    ├── consigna/                   # ConsignaPG3.md: consigna de la cátedra
+    ├── contexto/                   # contexto para PG3: PG1/PG2 grupal y SM1–SM4
     ├── cypher/                     # scripts de PG2; canónico: Grupo_2_PG2_U1_corregido.cypher (D-01)
     └── fuentes/                    # PI4 de cada submódulo (SM1–SM4): código y prompts
 ```
 
-Se agregan con las tareas que siguen: `docs/diagramas/` (PG3-10), `scripts/correr_e2e.py` y los `docs/pruebas/E2E-n.md` (PG3-11), y `datos/` con `scripts/exportar_grafo.py` y `scripts/armar_zip.py` (PG3-17). La carpeta `trazas/` se crea sola al consultar y no se versiona.
+Solo en el repositorio, no en el ZIP: `CLAUDE.md`, `docs/plan/` (tareas), `docs/sesiones/` (notas de trabajo) y `docs/informe/` (fuentes del PDF). La carpeta `trazas/` se crea sola al consultar y no se versiona.
 
 ## 5. Requisitos
 
@@ -96,22 +94,52 @@ Cómo instalar cada uno, paso a paso: [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_U
 
 ## 6. Puesta en marcha
 
-Resumen para Windows (PowerShell). El paso a paso, con la instalación de Ollama y de Neo4j, el bloque que se corre en cada terminal y los errores comunes, está en [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md).
+Resumen para Windows (PowerShell), desde la carpeta raíz del proyecto. El detalle y los errores comunes están en [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md).
+
+**Una sola vez:**
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 ollama pull qwen2.5:3b
-Copy-Item .env.example .env        # y completar NEO4J_PASSWORD
+Copy-Item .env.example .env        # y completar NEO4J_PASSWORD con la de tu base local
 ```
 
-El código **no lee el `.env` solo** (sin `python-dotenv`, D-05): las variables se cargan en la terminal antes de lanzar cualquier comando (manual §4.1). Con Neo4j iniciado y las variables cargadas:
+**Cada vez que lo levantás:**
 
-```powershell
-python -m scripts.cargar_grafo      # BORRA la base y carga cypher/ (101 sentencias)
-python -m scripts.verificar_grafo   # regresión CP1–CP11: tiene que dar 11/11 OK
-```
+1. **Neo4j:** abrir Neo4j Desktop e iniciar (*Start*) la base local 5.x. Tiene que responder en `bolt://localhost:7687`.
+2. **Ollama:** si no está el ícono en la bandeja, correr `ollama serve` en una terminal aparte y dejarla abierta.
+3. **Terminal del proyecto:** activar el entorno y cargar el `.env`. El código **no lee el `.env` solo** (sin `python-dotenv`, D-05), así que hay que repetirlo en cada ventana nueva:
+
+   ```powershell
+   .venv\Scripts\Activate.ps1
+   Get-Content .env | Where-Object { $_ -match '^\s*[^#\s][^=]*=' } | ForEach-Object {
+       $nombre, $valor = $_ -split '=', 2
+       Set-Item -Path "Env:$($nombre.Trim())" -Value $valor.Trim()
+   }
+   ```
+
+4. **Grafo** (la primera vez, o si cambió algo en `cypher/`):
+
+   ```powershell
+   python -m scripts.cargar_grafo      # BORRA la base y carga cypher/
+   python -m scripts.verificar_grafo   # regresión CP1–CP11: tiene que dar 11/11 OK
+   ```
+
+5. **Asistente:** `uvicorn asistente.api:app` y abrir `http://localhost:8000/ui` (web) o `http://localhost:8000/docs` (Swagger). `GET /salud` tiene que decir que Neo4j y Ollama responden.
+
+**Para probarlo, en este orden** (cada paso necesita el anterior):
+
+| Paso | Comando | Qué tiene que dar |
+| --- | --- | --- |
+| Sin servicios | `python -m unittest` | `OK`, con pruebas salteadas (`s`) porque faltan Neo4j u Ollama. Al 14/11: 249 pruebas, 34 salteadas |
+| Con Neo4j | `python -m scripts.verificar_grafo` y otra vez `python -m unittest` | 11/11 OK, y menos salteadas |
+| Con Ollama | `$env:PG3_TEST_LLM = "1"; python -m unittest tests.test_router tests.test_e2e` | OK (lento, varios minutos) |
+| Un caso a mano | `python -m asistente.cli --traza "Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?"` | `Notebook_A` primera, después `Notebook_H` y `Notebook_B` (E2E-1) |
+| En la web | En `/ui`, escribir «Quiero una notebook para programar y usar Docker, tengo 900 dólares» | Registra un `req_1NN` nuevo y muestra el ranking con la traza. `python -m scripts.limpiar_pedidos` borra esos pedidos |
+
+Sin Neo4j ni Ollama, el botón «Ver ejemplo grabado» de `/ui` muestra una traza real guardada.
 
 La configuración (`NEO4J_*`, `OLLAMA_*`, `MAX_CARACTERES`, `MAX_REGENERACIONES`, `DIR_TRAZAS`) está en `.env.example` y se describe en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §4.6. **El `.env` no se sube nunca: el repositorio es público.**
 
@@ -186,69 +214,58 @@ El contenido mínimo del ZIP (ítems a–l) está en [`docs/consigna/ConsignaPG3
 
 | Ítem | Dónde |
 | --- | --- |
-| a) Informe ejecutivo (PDF) | `docs/informe/` (una sección por archivo; el PDF se arma con PG3-14) |
-| b) Diagramas | `docs/diagramas/` (PG3-10) |
-| c) Casos de prueba | `docs/pruebas/` |
-| d) Manual de uso | [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md) |
-| e) Código fuente | `asistente/`, `prompts/`, `scripts/` y `requirements.txt` |
+| a) Informe ejecutivo (PDF) | ZIP: `1_Documentacion/Grupo_2_PG3_Informe_Final.pdf` |
+| b) Diagramas | ZIP: `1_Documentacion/Diagramas/` · repo: `docs/diagramas/` |
+| c) Casos de prueba | ZIP: `1_Documentacion/Casos_de_prueba/` · repo: `docs/pruebas/` |
+| d) Manual de uso | ZIP: `1_Documentacion/Manual_de_uso.md` · repo: [`docs/MANUAL_DE_USO.md`](docs/MANUAL_DE_USO.md) |
+| e) Código fuente | `asistente/`, `prompts/`, `scripts/` y `requirements.txt` (ZIP: `2_Implementacion/`) |
 | f) Scripts Cypher | `cypher/` |
 | g) Archivos de configuración | `.env.example` |
 | h) Recursos complementarios | `prompts/`, `docs/contexto/` y `docs/fuentes/` |
-| i) Exportación de Neo4j y j) Datos de ejemplo | `datos/` (PG3-17) |
-| k) Video e l) Infografía | Se agregan al ZIP (PG3-19 y PG3-18) |
+| i) Exportación de Neo4j | ZIP: `3_Base_de_conocimiento/Exportacion_neo4j/` · repo: `datos/export/` |
+| j) Datos de ejemplo | ZIP: `3_Base_de_conocimiento/Datos_de_ejemplo/` · repo: `datos/` |
+| k) Presentación multimedia | ZIP: `4_Presentacion/Grupo_2_Defensa_Proyecto.pptx` |
+| l) Resumen ejecutivo | ZIP: `4_Presentacion/resumen_ejecutivo.pdf` · repo: `docs/presentacion/` |
 
 **Criterios de evaluación de PG3:** prompt maestro que enrute y respete que Neo4j maneja la verdad; API o interfaz única sin errores críticos; al menos tres pruebas E2E que crucen submódulos; informe coherente y profesional; ZIP que permita revisar y reproducir.
 
 ## 11. Estado del proyecto
 
-- [x] Base de conocimiento en Neo4j (PG2)
-- [x] SM2 integrado con LLM: flujo, prompts, verificador, plantilla fija y tests offline (PI4)
-- [ ] SM2: verificación semántica (rangos, perfil indeterminado, afirmaciones sin respaldo) — **prioridad**
-- [ ] SM2: confirmar la versión final del script de PI4 (ver `docs/contexto/`)
-- [x] Consigna de PG3 en el repo (`docs/consigna/`)
-- [x] Entender el contexto de SM1, SM3 y SM4 (unificados, D-01 a D-13)
-- [x] Definir la arquitectura y la estructura del repositorio (`docs/ARQUITECTURA.md`)
-- [x] Plan de PG3 con tareas, responsables y dependencias (`docs/plan/`)
-- [x] Integrar SM1, SM3 y SM4 (con GRUPO, bajo el contrato común)
-- [x] Prompt maestro con enrutamiento (router)
-- [x] API única con enrutamiento a varios submódulos, y consola
-- [x] Explicador común con verificador y plantilla fija (falta ajustarlos con los E2E reales)
-- [x] Manual de uso (`docs/MANUAL_DE_USO.md`)
-- [ ] Pruebas E2E (≥ 3) con esperado vs obtenido (PG3-11)
-- [ ] Informe, diagramas, video e infografía
-- [ ] Exportación de Neo4j y ZIP final
+Al 14/11/2026, entregado (`Grupo_2_PG3_ProyectoFinal.zip`):
+
+- [x] Base de conocimiento en Neo4j (PG2), con las respuestas del técnico del 14/11 cargadas
+- [x] SM1 a SM4 y GRUPO integrados bajo el contrato común
+- [x] Prompt maestro con enrutamiento (router) y validación en Python
+- [x] Entrada única: API, web en `/ui` y consola
+- [x] Pedidos nuevos en lenguaje libre, con inferencia en vivo para cada uno
+- [x] Explicador común con verificador y plantilla fija
+- [x] Pruebas: 249 `unittest`, CP1 a CP11 y 7 E2E con esperado contra obtenido
+- [x] Informe final, resumen ejecutivo, diagramas, manual, presentación, exportación de Neo4j y ZIP
 
 ## 12. Limitaciones conocidas
 
-### De la base de conocimiento
-
-- **Los parámetros del modelo difuso de SM2 no están validados por un técnico.** Los resultados son una referencia, no una certeza.
-- Las notebooks se nombran hoy con una sola letra (`Notebook_A` a `Notebook_Z`); el catálogo real prevé 30 modelos.
-
-### Del flujo de SM2 en PI4 (pueden cambiar con la arquitectura)
-
-- Una intención por mensaje y un pedido activo por sesión.
-- El verificador controla cifras, notebooks, reglas y atribución, pero todavía no el sentido de la frase.
-- El extractor es un modelo local de 8 B: puede clasificar mal una consulta ambigua.
+- **Validación con el técnico, parcial.** Confirmó 7 de las 15 variables difusas; sus 9 propuestas de cambio están registradas pero no aplicadas. El resto de los parámetros sigue `'sin validar'` y cada respuesta lo advierte.
+- **Datos de rendimiento provisionales** para seis de los siete perfiles (todos menos virtualización), marcados `'sin validar'`.
+- **El verificador controla cifras, notebooks, reglas, alertas y estados, pero no el sentido de la frase:** una cifra real puede salir con el nombre de otro concepto (E2E-2).
+- **`qwen2.5:3b` es un modelo chico:** puede omitir una intención en una pregunta compuesta o perder un uso al extraer un pedido. Python completa y valida lo que puede, y la web ofrece un formulario para corregir el pedido.
+- Catálogo de prueba de 9 notebooks, con precios al 01/10/2026.
 
 ## 13. Cómo trabajamos
 
-> **Propuesta, a acordar con el grupo.**
-
-- **Ramas:** `main` estable y una rama por tarea (por ejemplo, `sm2/verificador-semantico`). Si hace falta una rama `dev` de integración se decide con la arquitectura.
-- **Commits:** mensajes en imperativo con tipo y área, como los que ya hay en el historial (`docs(README): ...`).
+- **Ramas:** `main` estable y una rama por tarea (`pg3-NN-descripcion`).
+- **Commits:** mensajes en imperativo con tipo y área (`feat(sm2): ...`, `docs(README): ...`).
 - **Pull requests:** revisión de al menos otro integrante antes de unir a `main`.
 - **Responsables:** cada submódulo tiene un dueño (sección 1); los cambios en el grafo compartido y en el prompt maestro se acuerdan entre todos.
-- **Registro de correcciones:** la consigna pide documentarlas (sección 3.1); dónde se registran se define con la estructura del repositorio.
+- **Registro de correcciones:** [`docs/CORRECCIONES.md`](docs/CORRECCIONES.md) (consigna §3.1).
 
 ## 14. Referencias
 
 - Cátedra de Inteligencia Artificial, UTN FRM (2026). Unidad 4, apuntes U1a, U1b y U1e, y actividades PI1 a PI4 y PG0 a PG3.
 - Neo4j, Inc. Cypher Manual y Neo4j Python Driver Manual. https://neo4j.com/docs
-- Ollama. Documentación de la API y de salidas estructuradas. https://ollama.com *(usado por SM2 en PI4; se mantiene si se elige ese LLM)*
+- Ollama. Documentación de la API y de salidas estructuradas. https://ollama.com
 - Lewis, P. et al. (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks*. NeurIPS 33.
 - Zadeh, L. A. (1965). Fuzzy sets. *Information and Control*, 8(3). Mamdani, E. H. y Assilian, S. (1975). *International Journal of Man-Machine Studies*, 7(1).
-- Fuentes de conocimiento de cada submódulo: `[completar]` a partir de los informes de PG2 y de los PI de cada integrante.
+- Fuentes de conocimiento del dominio (requisitos oficiales de software, fichas de fabricantes, Notebookcheck, RTINGS, precios al 01/10/2026 y el técnico): detalladas en los informes de PG1 y PG2 y en la sección 11 del informe final.
 
 ## 15. Licencia y uso
 

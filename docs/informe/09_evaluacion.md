@@ -12,7 +12,7 @@ Esta sección analiza con espíritu crítico lo que el asistente hace bien, lo q
 | **Un requisito excluyente no se compensa con puntaje.** | E queda `Descartada (excluyente incumplido)` aunque puntúa ≈ 0,81, casi igual que B (0,813) y H (0,811) |
 | **El router se equivoca sin hacer daño.** La validación en Python descarta intenciones, modelos y pedidos inválidos antes de tocar el grafo, y nunca asume `req_01` | Una consulta fuera de dominio termina en un mensaje fijo, sin consultar el grafo (E2E-8: 0,69 s). Los modelos inexistentes terminan en una aclaración |
 | **Cada respuesta es auditable.** La traza guarda plan, Cypher con parámetros, filas, evidencia, intentos y tiempos | Sección 10: reconstrucción completa del E2E-9 |
-| **Es reproducible.** El grafo dividido por dueño equivale al canónico, y la regresión corre sola | 343 nodos y 683 relaciones iguales (57 de 57 filas); CP1 a CP11 en 11 de 11; 193 tests (corrida offline del 12/11: OK, con 29 salteados porque piden Neo4j u Ollama; la última corrida con Neo4j, del 11/11 con 171 tests, dio OK con 2 salteados) |
+| **Es reproducible.** El grafo dividido por dueño equivale al canónico, y la regresión corre sola | 343 nodos y 683 relaciones iguales (57 de 57 filas); CP1 a CP11 en 11 de 11; 249 tests (corrida con Neo4j del 14/11: 244 OK y 5 salteados porque piden Ollama) |
 | **Corre local y sin costo de API**, en una notebook común | `qwen2.5:3b` ocupa unos 4 GB de RAM |
 
 ## 9.2 Limitaciones
