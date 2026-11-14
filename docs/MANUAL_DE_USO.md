@@ -168,6 +168,12 @@ Cargando el grafo en bolt://localhost:7687 ... (BORRA todo lo que haya en la bas
 Listo: 101 sentencias.
 ```
 
+**¿Hace falta correr los scripts en Neo4j Browser y después pasar los cambios a Python?** No. `cargar_grafo` hace lo mismo que pegar los `.cypher` en el Browser, en el orden correcto. El asistente no tiene una copia de los datos: cada consulta lee Neo4j en vivo, y lo mismo pasa con el catálogo, las expresiones de frecuencia y los juegos que usa Ollama. Para evitar inconsistencias:
+- **Los archivos de `cypher/` son la fuente de verdad.** Si cambiás una regla probándola en el Browser, copiá el cambio al `.cypher` y volvé a correr `cargar_grafo`.
+- **En el Browser, `10_sm1` a `40_sm4` necesitan un parámetro.** Antes de pegarlos, corré `:param req => null`. Si no, Neo4j da el error «Expected parameter(s): req».
+- **Después de recargar el grafo, reiniciá `uvicorn`** (o la consola), porque el vocabulario queda guardado mientras el proceso está abierto.
+- **Lo único escrito en Python** son los tipos de uso y su perfil (`PERFIL_POR_TIPO` en `asistente/submodulos/sm1/servicio.py`). Si se agrega un perfil nuevo al grafo, hay que sumarlo ahí.
+
 Después, la verificación:
 
 ```powershell

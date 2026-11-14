@@ -1,5 +1,8 @@
 // =====================================================================
 // cypher/15_evaluaciones.cypher
+// Inferencia filtrada por el parametro req (D-08). Se carga con: python -m scripts.cargar_grafo
+// En Neo4j Browser, antes de pegar este archivo, correr  :param req => null  (todos los pedidos)
+// o  :param req => 'req_101'  (uno solo). Sin ese parametro Neo4j da el error "Expected parameter(s): req".
 // Bloques del canonico: 10.c (encabezado) · 10.c.0
 // Duenio: Miranda
 // Origen: docs/cypher/Grupo_2_PG2_U1_corregido.cypher, cortado sin cambiar el contenido (PG3-02).

@@ -58,6 +58,15 @@ Con eso el pedido queda DIS (todos los días) + GAM (cada tanto). **Igual no hay
 
 Los campos vacíos quedan marcados. Al enviar, la web arma un texto («Diseño gráfico: todos los dias. Presupuesto: 1000 USD.») y manda el pedido en `POST /consultar` con el campo nuevo `pedido`. El orquestador **no llama a Ollama** y registra el pedido. SM1 lo valida igual que siempre: cada frase del texto es la cita de su uso. Las opciones del formulario salen de `GET /ui/vocabulario`, que está fuera de Swagger como `/ui`.
 
+### Tercera vuelta: la web no se sale de sus casilleros
+- **Textos largos.** Los textos largos (JSON de parámetros, citas, ids) cortan línea dentro de su caja: se usa `overflow-wrap` y `min-width: 0` en los hijos de grid y flex.
+- **Tablas.** Las tablas anchas se desplazan dentro de un marco, con sombra al costado; las celdas tienen un ancho máximo, para que las filas no queden altísimas.
+- **Etiquetas.** Una etiqueta de estado larga («Recomendada condicionada por falta de informacion») corta línea dentro de la tarjeta de la notebook.
+- **Rangos.** Un grado con rango se muestra como «0,492 – 0,826», con la nota «Rango: falta un dato en la ficha».
+- **Porcentaje fuera de presupuesto.** Se muestra con un decimal: 5,6 %.
+- **Diseño.** Hay sombras suaves, filas alternadas en las tablas y bordes de foco. En pantallas de menos de 760 px, el formulario y las tarjetas se apilan.
+- **Neo4j Browser.** Los `.cypher` de inferencia y el manual (§3) explican que en el Browser hay que correr `:param req => null` antes de pegarlos. También explican que no hace falta pasar nada del Browser a Python, porque el asistente lee Neo4j en vivo.
+
 ## Decisiones y por qué
 - **El JSON lo valida Python y no el LLM.** Así se cumple «el LLM interpreta y explica, Neo4j decide»: un modelo de 3 B puede inventar un monto, y la validación contra el texto lo frena. Se descartó dejar que el LLM escriba Cypher, porque CLAUDE.md lo prohíbe.
 - **Filtro `$req` en vez de copiar los archivos de reglas.** Hay una sola versión de cada regla para la carga y para el pedido nuevo. Se verificó que con `req = NULL` el grafo queda igual que antes; la única diferencia es la marca de tiempo `generada`.

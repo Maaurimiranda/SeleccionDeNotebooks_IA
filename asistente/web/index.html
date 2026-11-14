@@ -34,11 +34,16 @@
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--fondo); color: var(--texto);
-    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
+  /* Nada se sale de su casillero: los textos largos (JSON, citas, ids) cortan línea en vez de empujar la caja. */
+  main, main * { overflow-wrap: break-word; }
+  main * { min-width: 0; }
+  ::selection { background: var(--frambuesa-suave); }
   header {
-    background: var(--berenjena); color: var(--blanco);
-    padding: 18px 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    background: linear-gradient(120deg, var(--berenjena) 0%, var(--berenjena-2) 100%); color: var(--blanco);
+    padding: 18px 28px; box-shadow: 0 2px 12px rgba(36, 21, 48, .18); display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   }
   header h1 { font-size: 20px; margin: 0; font-weight: 650; letter-spacing: .2px; }
   header .sub { color: #CBBFDD; font-size: 13px; }
@@ -54,8 +59,9 @@
 
   main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 60px; }
   .tarjeta { background: var(--blanco); border: 1px solid var(--linea); border-radius: var(--radio);
-             padding: 20px 22px; margin-bottom: 18px; }
-  h2 { font-size: 16px; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+             padding: 20px 22px; margin-bottom: 18px; box-shadow: 0 1px 2px rgba(36, 21, 48, .04), 0 4px 16px rgba(36, 21, 48, .04);
+             overflow: hidden; }
+  h2 { font-size: 16.5px; margin: 0 0 14px; letter-spacing: .1px; display: flex; align-items: center; gap: 10px; }
   h2 .num { background: var(--berenjena); color: var(--blanco); width: 26px; height: 26px; border-radius: 50%;
             display: inline-flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
   h3 { font-size: 14px; margin: 16px 0 8px; color: var(--berenjena-2); }
@@ -65,17 +71,20 @@
   .form { display: grid; grid-template-columns: 1fr 170px; gap: 12px; }
   textarea { width: 100%; min-height: 84px; resize: vertical; border: 1.5px solid var(--linea-2);
              border-radius: 10px; padding: 12px; font: inherit; color: inherit; }
-  textarea:focus, input:focus { outline: none; border-color: var(--violeta); }
+  textarea:focus, input:focus, select:focus { outline: none; border-color: var(--violeta); box-shadow: 0 0 0 3px #ECE5F7; }
   .lateral { display: flex; flex-direction: column; gap: 10px; }
   label { font-size: 12px; color: var(--apagado); display: block; margin-bottom: 4px; }
   input { width: 100%; border: 1.5px solid var(--linea-2); border-radius: 10px; padding: 9px 10px; font: inherit; }
   button { font: inherit; cursor: pointer; border-radius: 10px; border: none; }
-  .primario { background: var(--frambuesa); color: var(--blanco); padding: 11px 14px; font-weight: 600; }
+  .primario { background: var(--frambuesa); color: var(--blanco); padding: 11px 16px; font-weight: 600;
+              box-shadow: 0 2px 8px rgba(214, 51, 108, .25); transition: background .15s, transform .05s; }
+  .primario:active { transform: translateY(1px); }
   .primario:hover { background: #BF2A5E; }
   .primario:disabled { background: #E7A3BC; cursor: wait; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
   .chip { background: var(--fondo); color: var(--berenjena-2); border: 1px solid var(--linea-2);
-          padding: 5px 11px; border-radius: 999px; font-size: 13px; }
+          padding: 5px 12px; border-radius: 999px; font-size: 13px; transition: border-color .15s, background .15s; }
+  button.chip:hover { background: #ECE5F7; }
   button.chip:hover { border-color: var(--violeta); }
   .chip.secundario { background: var(--blanco); border-style: dashed; }
   .contador { text-align: right; font-size: 12px; color: var(--apagado); }
@@ -94,7 +103,7 @@
 
   /* Respuesta */
   .respuesta { font-size: 16px; white-space: pre-wrap; border-left: 4px solid var(--frambuesa);
-               padding: 4px 0 4px 16px; margin: 6px 0 14px; }
+               background: #FDF8FB; border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 8px 0 14px; }
   .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .aviso { background: var(--ambar-suave); color: #6E4C00; border-radius: 10px; padding: 10px 14px;
            font-size: 13px; margin-top: 12px; }
@@ -102,16 +111,20 @@
 
   /* Ranking */
   .ranking { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-  .nb { border: 1.5px solid var(--linea); border-radius: 12px; padding: 14px 16px; position: relative; }
+  .nb { border: 1.5px solid var(--linea); border-radius: 12px; padding: 14px 16px; position: relative;
+        transition: box-shadow .15s; }
+  .nb:hover { box-shadow: 0 4px 14px rgba(36, 21, 48, .08); }
   .nb.primera { border-color: var(--menta); box-shadow: 0 0 0 3px var(--menta-suave); }
   .nb.fuera { border-style: dashed; border-color: var(--ambar); }
   .nb .puesto { position: absolute; top: 12px; right: 14px; font-size: 28px; font-weight: 750; color: var(--linea-2); }
   .nb .nombre { font-size: 17px; font-weight: 700; margin: 0 0 6px; }
   .datos { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 13px; margin-top: 10px; }
   .datos dt { color: var(--apagado); }
-  .datos dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+  .datos dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; min-width: 0; }
   .alertas { list-style: none; padding: 0; margin: 10px 0 0; font-size: 13px; }
   .alertas li { margin: 4px 0; display: flex; gap: 8px; align-items: baseline; }
+  .alertas li > * { flex: none; }
+  .alertas li > :last-child { flex: 1 1 auto; }
 
   /* Barras de grado (0 a 1) y de riesgo (0 a 100) */
   .barra { margin-top: 10px; }
@@ -121,13 +134,31 @@
   .barra .valor.alto { background: var(--frambuesa); }
   .barra .valor.medio { background: #E2A93B; }
   .barra .leyenda { display: flex; justify-content: space-between; font-size: 12px; color: var(--apagado); margin-top: 3px; }
-  .barra .leyenda b { color: var(--texto); font-variant-numeric: tabular-nums; }
+  .barra .leyenda { gap: 8px; }
+  .barra .leyenda b { color: var(--texto); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .nota-rango { font-size: 11.5px; color: var(--violeta); margin-top: 2px; }
+  /* Una etiqueta larga («Recomendada condicionada por falta de informacion») corta línea dentro de la tarjeta. */
+  .nb .etq, .tabla-cont .etq { white-space: normal; max-width: 100%; }
+  .nb .meta { padding-right: 46px; }
+  .nb .nombre { padding-right: 46px; }
 
   /* Tablas */
-  .tabla-cont { overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; font-size: 13px; }
-  th { text-align: left; color: var(--apagado); font-weight: 600; border-bottom: 1.5px solid var(--linea-2); padding: 6px 8px; }
-  td { border-bottom: 1px solid var(--linea); padding: 6px 8px; vertical-align: top; }
+  /* Las tablas anchas se desplazan dentro de su caja (con sombra al costado), nunca empujan la tarjeta. */
+  .tabla-cont { overflow-x: auto; max-width: 100%; border: 1px solid var(--linea); border-radius: 10px; margin: 8px 0;
+                background:
+                  linear-gradient(to right, #fff 30%, rgba(255,255,255,0)) left / 24px 100% no-repeat local,
+                  linear-gradient(to left, #fff 30%, rgba(255,255,255,0)) right / 24px 100% no-repeat local,
+                  radial-gradient(farthest-side at 0 50%, rgba(36,21,48,.14), transparent) left / 10px 100% no-repeat scroll,
+                  radial-gradient(farthest-side at 100% 50%, rgba(36,21,48,.14), transparent) right / 10px 100% no-repeat scroll; }
+  table { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 13px; }
+  th { text-align: left; color: var(--apagado); font-weight: 600; border-bottom: 1.5px solid var(--linea-2); padding: 8px 10px;
+       background: #FAF8FD; white-space: nowrap; position: sticky; top: 0; }
+  td { border-bottom: 1px solid var(--linea); padding: 7px 10px; vertical-align: top; max-width: 360px; }
+  td:has(.json-celda) { max-width: 520px; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:nth-child(even) td { background: #FCFBFE; }
+  tbody tr:hover td { background: #F6F1FC; }
+  td code, .json-celda { font-family: var(--mono); font-size: 11.5px; color: var(--berenjena-2); overflow-wrap: anywhere; }
   td.n { text-align: right; font-variant-numeric: tabular-nums; }
 
   /* Traza */
@@ -140,22 +171,38 @@
                   align-items: center; justify-content: center; font-weight: 700; }
   .pasos .titulo { font-weight: 650; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .pasos .ms { font-size: 12px; color: var(--apagado); font-variant-numeric: tabular-nums; }
-  details { border: 1px solid var(--linea); border-radius: 10px; padding: 8px 12px; margin: 8px 0; background: #FCFBFE; }
+  details { border: 1px solid var(--linea); border-radius: 10px; padding: 8px 12px; margin: 8px 0; background: #FCFBFE;
+            max-width: 100%; }
+  details[open] { background: var(--blanco); box-shadow: 0 2px 10px rgba(36, 21, 48, .05); }
   details > summary { cursor: pointer; font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   details > summary::marker { color: var(--violeta); }
   pre { font-family: var(--mono); font-size: 12px; background: var(--berenjena); color: #EDE6F7;
-        padding: 12px 14px; border-radius: 10px; overflow-x: auto; white-space: pre; margin: 8px 0; }
+        padding: 12px 14px; border-radius: 10px; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+        margin: 8px 0; max-width: 100%; max-height: 420px; overflow-y: auto; }
   .json { background: #FCFBFE; color: var(--texto); border: 1px solid var(--linea); }
 
   .oculto { display: none !important; }
   select { border: 1.5px solid var(--linea-2); border-radius: 10px; padding: 8px 10px; font: inherit; background: var(--blanco); }
   .armado-fila { display: grid; grid-template-columns: 1.3fr 1.3fr 140px auto; gap: 10px; align-items: end;
                  padding: 10px 0; border-bottom: 1px dashed var(--linea); }
+  .armado-fila > button { justify-self: end; align-self: end; width: auto; }
   .armado-fila .juegos { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; }
   .armado-fila .juegos label { display: inline-flex; gap: 4px; align-items: center; margin: 0; color: var(--texto); font-size: 13px; }
   .armado-fila .juegos input { width: auto; }
   .armado-cabecera { display: grid; grid-template-columns: 160px 1fr; gap: 12px; max-width: 520px; }
   .falta { border-color: var(--frambuesa) !important; background: #FFF5F8; }
+  .armado-fila select, .armado-cabecera select { width: 100%; }
+
+  /* Pantallas angostas: el formulario y las filas del pedido se apilan */
+  @media (max-width: 760px) {
+    header { padding: 14px 16px; }
+    main { padding: 16px 12px 40px; }
+    .tarjeta { padding: 16px 14px; }
+    .form { grid-template-columns: 1fr; }
+    .armado-fila { grid-template-columns: 1fr 1fr; }
+    .armado-cabecera { grid-template-columns: 1fr 1fr; }
+    .ranking { grid-template-columns: 1fr; }
+  }
   .cargando { display: flex; align-items: center; gap: 12px; color: var(--apagado); }
   .rueda { width: 18px; height: 18px; border: 3px solid var(--linea-2); border-top-color: var(--frambuesa);
            border-radius: 50%; animation: gira 0.8s linear infinite; }
@@ -316,8 +363,9 @@ function barra(v, { escala = 1, etiqueta = "Grado", clase = "" } = {}) {
     h("div", { class: "riel" },
       h("div", { class: `valor ${rango ? "rango" : clase}`, style: `left:${izq}%;width:${ancho}%` })),
     h("div", { class: "leyenda" },
-      h("span", {}, rango ? `${etiqueta} (rango: falta información)` : etiqueta),
-      h("b", {}, fmt(v, escala === 1 ? 3 : 2))));
+      h("span", {}, etiqueta),
+      h("b", {}, rango ? `${num(v.min, escala === 1 ? 3 : 2)} – ${num(v.max, escala === 1 ? 3 : 2)}` : fmt(v, escala === 1 ? 3 : 2))),
+    rango ? h("div", { class: "nota-rango" }, "Rango: falta un dato en la ficha") : null);
 }
 
 function listaAlertas(alertas) {
@@ -347,7 +395,7 @@ function tabla(filas, max = 50) {
     h("tbody", {}, filas.slice(0, max).map((f) => h("tr", {}, cols.map((c) => {
       const x = f[c];
       return h("td", { class: typeof x === "number" ? "n" : "" },
-        x && typeof x === "object" && !esRango(x) ? JSON.stringify(x) : fmt(x));
+        x && typeof x === "object" && !esRango(x) ? h("span", { class: "json-celda" }, JSON.stringify(x)) : fmt(x));
     }))))),
     filas.length > max ? h("div", { class: "apagado" }, `… y ${filas.length - max} filas más (ver JSON completo).`) : null);
 }
@@ -402,7 +450,7 @@ function tarjetaNotebook(nb, { primera = false, fuera = false } = {}) {
     nb.puesto ? h("div", { class: "puesto" }, `#${nb.puesto}`) : null,
     h("div", { class: "nombre" }, nb.notebook),
     h("div", { class: "meta" }, etq(nb.estado, colorEstado(nb.estado)),
-      fuera ? etq(`fuera de presupuesto +${fmt(nb.excedente_presupuesto_pct)} %`, "ambar") : null),
+      fuera ? etq(`fuera de presupuesto +${fmt(nb.excedente_presupuesto_pct, 1)} %`, "ambar") : null),
     barra(nb.grado, { etiqueta: "Grado de recomendación" }),
     h("dl", { class: "datos" },
       h("dt", {}, "Precio"), h("dd", {}, usd(nb.precio_usd)),
@@ -515,7 +563,7 @@ function vistaTraza(t, n) {
         h("summary", {}, etq(c.sm || "?", "violeta"), h("b", {}, c.nombre || c.intencion),
           h("span", { class: "apagado" }, `${(c.filas || []).length} filas`), ms(c.ms)),
         c.cypher ? h("pre", {}, c.cypher) : null,
-        c.parametros ? h("div", { class: "apagado" }, "Parámetros: ", JSON.stringify(c.parametros)) : null,
+        c.parametros ? h("div", { class: "apagado" }, "Parámetros: ", h("span", { class: "json-celda" }, JSON.stringify(c.parametros))) : null,
         c.filas ? tabla(c.filas) : null))),
     paso(4, `Explicación (${intentos.length} intento${intentos.length === 1 ? "" : "s"} del LLM, verificados contra la evidencia)`, ms(d.explicacion),
       intentos.map((it, i) => h("details", { open: i === intentos.length - 1 && (it.problemas || []).length > 0 },

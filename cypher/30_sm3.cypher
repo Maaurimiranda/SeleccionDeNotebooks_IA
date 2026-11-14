@@ -1,5 +1,8 @@
 // =====================================================================
 // cypher/30_sm3.cypher
+// Inferencia filtrada por el parametro req (D-08). Se carga con: python -m scripts.cargar_grafo
+// En Neo4j Browser, antes de pegar este archivo, correr  :param req => null  (todos los pedidos)
+// o  :param req => 'req_101'  (uno solo). Sin ese parametro Neo4j da el error "Expected parameter(s): req".
 // Bloques del canonico: 9.c · 9.d · 9.e · 10.d · 10.e
 // Duenio: de Coninck
 // Origen: docs/cypher/Grupo_2_PG2_U1_corregido.cypher, cortado sin cambiar el contenido (PG3-02).
