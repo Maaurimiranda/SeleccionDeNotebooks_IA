@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asistente de selección de notebooks · Grupo 2</title>
+<!--
+  Interfaz web del asistente (Grupo 2, UTN FRM, PG3).
+  Un solo archivo, sin build ni dependencias: HTML, CSS y JavaScript del navegador.
+  Usa los mismos endpoints que Swagger (/docs): POST /consultar y GET /salud.
+  No calcula nada: muestra lo que devuelve la API (respuesta, evidencia y traza).
+-->
+<style>
+  :root {
+    --berenjena: #241530;
+    --berenjena-2: #3B2A55;
+    --violeta: #7452B0;
+    --frambuesa: #D6336C;
+    --frambuesa-suave: #FBE3EC;
+    --menta: #2FB397;
+    --menta-osc: #1E7F69;
+    --menta-suave: #DDF4EE;
+    --ambar: #9A6B00;
+    --ambar-suave: #FDF3D7;
+    --fondo: #F4F0F9;
+    --linea: #E6E0EE;
+    --linea-2: #D9CFE8;
+    --texto: #241530;
+    --apagado: #6B5B7B;
+    --blanco: #FFFFFF;
+    --radio: 14px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fondo); color: var(--texto);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  header {
+    background: var(--berenjena); color: var(--blanco);
+    padding: 18px 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 20px; margin: 0; font-weight: 650; letter-spacing: .2px; }
+  header .sub { color: #CBBFDD; font-size: 13px; }
+  header .der { margin-left: auto; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  header a { color: var(--blanco); font-size: 13px; text-decoration: none; border: 1px solid #5A4A75;
+             border-radius: 999px; padding: 4px 12px; }
+  header a:hover { background: var(--berenjena-2); }
+  .salud { display: flex; gap: 10px; font-size: 13px; color: #E6E0EE; }
+  .salud span { display: inline-flex; align-items: center; gap: 6px; }
+  .punto { width: 9px; height: 9px; border-radius: 50%; background: #6B5B7B; display: inline-block; }
+  .punto.ok { background: var(--menta); }
+  .punto.mal { background: var(--frambuesa); }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 60px; }
+  .tarjeta { background: var(--blanco); border: 1px solid var(--linea); border-radius: var(--radio);
+             padding: 20px 22px; margin-bottom: 18px; }
+  h2 { font-size: 16px; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+  h2 .num { background: var(--berenjena); color: var(--blanco); width: 26px; height: 26px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
+  h3 { font-size: 14px; margin: 16px 0 8px; color: var(--berenjena-2); }
+  .apagado { color: var(--apagado); font-size: 13px; }
+
+  /* Formulario */
+  .form { display: grid; grid-template-columns: 1fr 170px; gap: 12px; }
+  textarea { width: 100%; min-height: 84px; resize: vertical; border: 1.5px solid var(--linea-2);
+             border-radius: 10px; padding: 12px; font: inherit; color: inherit; }
+  textarea:focus, input:focus { outline: none; border-color: var(--violeta); }
+  .lateral { display: flex; flex-direction: column; gap: 10px; }
+  label { font-size: 12px; color: var(--apagado); display: block; margin-bottom: 4px; }
+  input { width: 100%; border: 1.5px solid var(--linea-2); border-radius: 10px; padding: 9px 10px; font: inherit; }
+  button { font: inherit; cursor: pointer; border-radius: 10px; border: none; }
+  .primario { background: var(--frambuesa); color: var(--blanco); padding: 11px 14px; font-weight: 600; }
+  .primario:hover { background: #BF2A5E; }
+  .primario:disabled { background: #E7A3BC; cursor: wait; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip { background: var(--fondo); color: var(--berenjena-2); border: 1px solid var(--linea-2);
+          padding: 5px 11px; border-radius: 999px; font-size: 13px; }
+  button.chip:hover { border-color: var(--violeta); }
+  .chip.secundario { background: var(--blanco); border-style: dashed; }
+  .contador { text-align: right; font-size: 12px; color: var(--apagado); }
+  .contador.pasado { color: var(--frambuesa); font-weight: 600; }
+
+  /* Etiquetas */
+  .etq { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600;
+         white-space: nowrap; }
+  .etq.menta { background: var(--menta-suave); color: var(--menta-osc); }
+  .etq.frambuesa { background: var(--frambuesa-suave); color: #A8224F; }
+  .etq.ambar { background: var(--ambar-suave); color: var(--ambar); }
+  .etq.violeta { background: #ECE5F7; color: var(--violeta); }
+  .etq.gris { background: var(--fondo); color: var(--apagado); }
+  .codigo { font-family: var(--mono); font-size: 12px; background: #ECE5F7; color: var(--berenjena-2); white-space: nowrap;
+            padding: 1px 7px; border-radius: 6px; }
+
+  /* Respuesta */
+  .respuesta { font-size: 16px; white-space: pre-wrap; border-left: 4px solid var(--frambuesa);
+               padding: 4px 0 4px 16px; margin: 6px 0 14px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .aviso { background: var(--ambar-suave); color: #6E4C00; border-radius: 10px; padding: 10px 14px;
+           font-size: 13px; margin-top: 12px; }
+  .error { background: var(--frambuesa-suave); color: #8E1C43; border-radius: 10px; padding: 12px 14px; }
+
+  /* Ranking */
+  .ranking { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .nb { border: 1.5px solid var(--linea); border-radius: 12px; padding: 14px 16px; position: relative; }
+  .nb.primera { border-color: var(--menta); box-shadow: 0 0 0 3px var(--menta-suave); }
+  .nb.fuera { border-style: dashed; border-color: var(--ambar); }
+  .nb .puesto { position: absolute; top: 12px; right: 14px; font-size: 28px; font-weight: 750; color: var(--linea-2); }
+  .nb .nombre { font-size: 17px; font-weight: 700; margin: 0 0 6px; }
+  .datos { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 13px; margin-top: 10px; }
+  .datos dt { color: var(--apagado); }
+  .datos dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+  .alertas { list-style: none; padding: 0; margin: 10px 0 0; font-size: 13px; }
+  .alertas li { margin: 4px 0; display: flex; gap: 8px; align-items: baseline; }
+
+  /* Barras de grado (0 a 1) y de riesgo (0 a 100) */
+  .barra { margin-top: 10px; }
+  .barra .riel { height: 10px; background: var(--fondo); border-radius: 999px; position: relative; overflow: hidden; }
+  .barra .valor { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 999px; background: var(--menta); }
+  .barra .valor.rango { background: repeating-linear-gradient(45deg, var(--violeta), var(--violeta) 4px, #9C82CC 4px, #9C82CC 8px); }
+  .barra .valor.alto { background: var(--frambuesa); }
+  .barra .valor.medio { background: #E2A93B; }
+  .barra .leyenda { display: flex; justify-content: space-between; font-size: 12px; color: var(--apagado); margin-top: 3px; }
+  .barra .leyenda b { color: var(--texto); font-variant-numeric: tabular-nums; }
+
+  /* Tablas */
+  .tabla-cont { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th { text-align: left; color: var(--apagado); font-weight: 600; border-bottom: 1.5px solid var(--linea-2); padding: 6px 8px; }
+  td { border-bottom: 1px solid var(--linea); padding: 6px 8px; vertical-align: top; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Traza */
+  .pasos { list-style: none; padding: 0; margin: 0; position: relative; }
+  .pasos > li { position: relative; padding: 0 0 18px 34px; }
+  .pasos > li::before { content: ""; position: absolute; left: 10px; top: 22px; bottom: 0; width: 2px; background: var(--linea-2); }
+  .pasos > li:last-child::before { display: none; }
+  .pasos .marca { position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%;
+                  background: var(--berenjena-2); color: var(--blanco); font-size: 12px; display: flex;
+                  align-items: center; justify-content: center; font-weight: 700; }
+  .pasos .titulo { font-weight: 650; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .pasos .ms { font-size: 12px; color: var(--apagado); font-variant-numeric: tabular-nums; }
+  details { border: 1px solid var(--linea); border-radius: 10px; padding: 8px 12px; margin: 8px 0; background: #FCFBFE; }
+  details > summary { cursor: pointer; font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  details > summary::marker { color: var(--violeta); }
+  pre { font-family: var(--mono); font-size: 12px; background: var(--berenjena); color: #EDE6F7;
+        padding: 12px 14px; border-radius: 10px; overflow-x: auto; white-space: pre; margin: 8px 0; }
+  .json { background: #FCFBFE; color: var(--texto); border: 1px solid var(--linea); }
+
+  .oculto { display: none !important; }
+  .cargando { display: flex; align-items: center; gap: 12px; color: var(--apagado); }
+  .rueda { width: 18px; height: 18px; border: 3px solid var(--linea-2); border-top-color: var(--frambuesa);
+           border-radius: 50%; animation: gira 0.8s linear infinite; }
+  @keyframes gira { to { transform: rotate(360deg); } }
+  footer { text-align: center; color: var(--apagado); font-size: 12px; margin-top: 30px; }
+  @media (max-width: 720px) { .form { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Asistente de selección de notebooks</h1>
+    <div class="sub">Grupo 2 · UTN FRM · El grafo decide, el LLM interpreta y explica</div>
+  </div>
+  <div class="der">
+    <div class="salud" id="salud" title="Estado de los servicios (GET /salud)">
+      <span><i class="punto" id="s-neo4j"></i>Neo4j</span>
+      <span><i class="punto" id="s-ollama"></i><span id="s-modelo">Ollama</span></span>
+    </div>
+    <a href="/docs" target="_blank" rel="noopener">Swagger ↗</a>
+  </div>
+</header>
+
+<main>
+  <section class="tarjeta">
+    <h2><span class="num">?</span>Consulta en lenguaje natural</h2>
+    <form id="form" class="form">
+      <div>
+        <textarea id="texto" placeholder="Por ejemplo: Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?"></textarea>
+        <div class="contador" id="contador"></div>
+      </div>
+      <div class="lateral">
+        <div>
+          <label for="req">Pedido (opcional)</label>
+          <input id="req" list="pedidos" placeholder="req_01">
+          <datalist id="pedidos"><option value="req_01"><option value="req_02"><option value="req_03"></datalist>
+        </div>
+        <button type="submit" class="primario" id="enviar">Consultar</button>
+      </div>
+    </form>
+    <div class="chips" id="ejemplos"></div>
+  </section>
+
+  <section id="cargando" class="tarjeta oculto">
+    <div class="cargando"><div class="rueda"></div>
+      <div>Interpretando la consulta, consultando el grafo y redactando la explicación… <span id="reloj"></span></div>
+    </div>
+  </section>
+
+  <section id="error" class="tarjeta oculto"></section>
+  <div id="resultado"></div>
+
+  <footer>Usa el mismo endpoint que Swagger: <span class="codigo">POST /consultar</span>. Cada número sale de Neo4j y viene con su traza.</footer>
+</main>
+
+<script>
+"use strict";
+
+const MAX_CARACTERES = 1500;
+const EJEMPLOS = [
+  ["Recomendación", "Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?"],
+  ["Incertidumbre", "En req_01, ¿por qué la M quedó condicionada y la G indeterminada? ¿Qué riesgo de RAM tiene la G?"],
+  ["Excluyente", "En req_01, la E tiene casi el mismo puntaje que la B y la H, ¿por qué no la recomiendan? ¿Qué pasa con la virtualización?"],
+  ["Reglas", "En req_01, ¿qué reglas se activaron para la A, de dónde sale cada dato y qué riesgo de RAM tiene?"],
+  ["Movilidad", "Para req_01, ¿cuáles son las mejores en movilidad y cómo queda el costo-beneficio?"],
+  ["Pregunta pendiente", "Para req_02, ¿qué notebook me conviene?"],
+  ["Fuera de alcance", "¿Cuál es la capital de Francia?"],
+];
+
+const ORIGEN = {
+  llm: ["Redactada por el LLM con la evidencia del grafo", "menta"],
+  plantilla_fija: ["Plantilla fija (el LLM no pasó la verificación)", "violeta"],
+  validacion: ["Aclaración: falta un dato para responder", "ambar"],
+  fuera_de_alcance: ["Fuera del alcance del asistente", "gris"],
+  error: ["Error", "frambuesa"],
+};
+
+const NOMBRE_SM = {
+  SM1: "SM1 · Interpretación del pedido",
+  SM2: "SM2 · RAM y virtualización",
+  SM3: "SM3 · Fichas y búsqueda",
+  SM4: "SM4 · Recomendación",
+  GRUPO: "Grupo · Reglas y parámetros",
+};
+
+// ---------- utilidades de DOM (todo texto entra con textContent, nunca como HTML) ----------
+function h(tag, attrs, ...hijos) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "style") el.style.cssText = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v);
+  }
+  for (const c of hijos.flat()) {
+    if (c === null || c === undefined || c === false) continue;
+    el.append(c instanceof Node ? c : String(c));
+  }
+  return el;
+}
+const $ = (id) => document.getElementById(id);
+const esRango = (v) => v && typeof v === "object" && !Array.isArray(v) && "min" in v && "max" in v;
+const num = (v, d = 3) => (typeof v === "number" ? (Number.isInteger(v) ? String(v) : v.toFixed(d)).replace(".", ",") : v);
+function fmt(v, d = 3) {
+  if (v === null || v === undefined) return "—";
+  if (esRango(v)) return `[${num(v.min, d)} ; ${num(v.max, d)}]`;
+  if (typeof v === "boolean") return v ? "sí" : "no";
+  if (typeof v === "number") return num(v, d);
+  if (Array.isArray(v)) return v.length ? v.map((x) => fmt(x, d)).join(", ") : "—";
+  if (typeof v === "object") return JSON.stringify(v);
+  return String(v);
+}
+const usd = (v) => (typeof v === "number" ? `USD ${v.toLocaleString("es-AR")}` : fmt(v));
+const etq = (texto, color) => h("span", { class: `etq ${color || "gris"}` }, texto);
+const codigo = (c) => h("span", { class: "codigo" }, c);
+
+function colorEstado(estado) {
+  const e = String(estado || "");
+  if (e.startsWith("Recomendada (Alta)") || e.startsWith("Recomendada (Media)")) return "menta";
+  if (e.startsWith("Recomendada condicionada")) return "violeta";
+  if (e.startsWith("Indeterminada")) return "ambar";
+  if (e.startsWith("Descartada")) return "frambuesa";
+  return "gris";
+}
+
+// Barra para un grado 0..1 o un riesgo 0..100. Un rango {min,max} se dibuja como tramo rayado.
+function barra(v, { escala = 1, etiqueta = "Grado", clase = "" } = {}) {
+  if (v === null || v === undefined || (typeof v !== "number" && !esRango(v))) {
+    return h("div", { class: "barra" }, h("div", { class: "leyenda" }, h("span", {}, etiqueta), h("b", {}, fmt(v))));
+  }
+  const pct = (x) => Math.max(0, Math.min(100, (x / escala) * 100));
+  const rango = esRango(v);
+  const izq = rango ? pct(v.min) : 0;
+  const ancho = rango ? Math.max(pct(v.max) - pct(v.min), 1.5) : pct(v);
+  return h("div", { class: "barra" },
+    h("div", { class: "riel" },
+      h("div", { class: `valor ${rango ? "rango" : clase}`, style: `left:${izq}%;width:${ancho}%` })),
+    h("div", { class: "leyenda" },
+      h("span", {}, rango ? `${etiqueta} (rango: falta información)` : etiqueta),
+      h("b", {}, fmt(v, escala === 1 ? 3 : 2))));
+}
+
+function listaAlertas(alertas) {
+  if (!Array.isArray(alertas) || !alertas.length) return null;
+  return h("ul", { class: "alertas" },
+    alertas.map((a) => h("li", {}, a && a.codigo ? codigo(a.codigo) : null, h("span", {}, a && (a.texto || a.mensaje) || fmt(a)))));
+}
+
+// Render genérico para la evidencia que no tiene vista propia.
+function generico(v, prof = 0) {
+  if (v === null || v === undefined || typeof v !== "object" || esRango(v)) return h("span", {}, fmt(v));
+  if (Array.isArray(v)) {
+    if (!v.length) return h("span", { class: "apagado" }, "(vacío)");
+    if (v.every((x) => x && typeof x === "object" && !Array.isArray(x) && !esRango(x))) return tabla(v);
+    return h("span", {}, fmt(v));
+  }
+  if (prof > 2) return h("pre", { class: "json" }, JSON.stringify(v, null, 2));
+  return h("dl", { class: "datos", style: "grid-template-columns: max-content 1fr" },
+    Object.entries(v).flatMap(([k, x]) => [h("dt", {}, k), h("dd", { style: "text-align:left" }, generico(x, prof + 1))]));
+}
+
+function tabla(filas, max = 50) {
+  if (!filas || !filas.length) return h("div", { class: "apagado" }, "Sin filas.");
+  const cols = [...new Set(filas.flatMap((f) => Object.keys(f)))];
+  return h("div", { class: "tabla-cont" }, h("table", {},
+    h("thead", {}, h("tr", {}, cols.map((c) => h("th", {}, c)))),
+    h("tbody", {}, filas.slice(0, max).map((f) => h("tr", {}, cols.map((c) => {
+      const x = f[c];
+      return h("td", { class: typeof x === "number" ? "n" : "" },
+        x && typeof x === "object" && !esRango(x) ? JSON.stringify(x) : fmt(x));
+    }))))),
+    filas.length > max ? h("div", { class: "apagado" }, `… y ${filas.length - max} filas más (ver JSON completo).`) : null);
+}
+
+function tarjeta(n, titulo, ...hijos) {
+  return h("section", { class: "tarjeta" }, h("h2", {}, h("span", { class: "num" }, n), titulo), ...hijos);
+}
+
+// ---------- secciones ----------
+function vistaRespuesta(r) {
+  const [texto, color] = ORIGEN[r.origen_respuesta] || [r.origen_respuesta, "gris"];
+  const t = r.traza || {};
+  return tarjeta("1", "Respuesta del asistente",
+    h("div", { class: "apagado" }, "Consulta: ", h("i", {}, t.consulta_usuario || "")),
+    h("div", { class: "respuesta" }, r.respuesta || "(sin texto)"),
+    h("div", { class: "meta" },
+      etq(texto, color),
+      r.requerimiento_id ? etq(`Pedido ${r.requerimiento_id}`, "violeta") : null,
+      (r.submodulos_consultados || []).map((s) => etq(s, "gris")),
+      r.intento ? h("span", { class: "apagado" }, `intento ${r.intento} del explicador`) : null,
+      typeof t.segundos === "number" ? h("span", { class: "apagado" }, `· ${num(t.segundos, 1)} s`) : null),
+    t.evidencia && t.evidencia.advertencia ? h("div", { class: "aviso" }, "⚠ ", t.evidencia.advertencia) : null,
+    t.error ? h("div", { class: "error", style: "margin-top:12px" }, fmt(t.error)) : null);
+}
+
+function vistaPedido(p) {
+  if (!p) return null;
+  const perfiles = (p.perfiles || []).map((x) =>
+    h("div", { style: "margin-bottom:8px" },
+      h("div", { class: "meta" }, h("b", {}, x.perfil), x.impone_requisitos ? etq("impone requisitos", "menta") : null,
+        x.en_frontera ? etq("en la frontera", "ambar") : null),
+      barra(esRango(x.grado) ? x.grado : (x.grado ?? (x.grado_min != null ? { min: x.grado_min, max: x.grado_max } : null)),
+        { etiqueta: "Pertenencia difusa al perfil" })));
+  return tarjeta("2", "Cómo entendió el pedido (SM1)",
+    h("dl", { class: "datos", style: "grid-template-columns:max-content 1fr; max-width:520px" },
+      h("dt", {}, "Pedido"), h("dd", { style: "text-align:left" }, fmt(p.requerimiento)),
+      h("dt", {}, "Presupuesto"), h("dd", { style: "text-align:left" }, usd(p.presupuesto)),
+      h("dt", {}, "Prioridad"), h("dd", { style: "text-align:left" }, fmt(p.prioridad)),
+      h("dt", {}, "Perfil dominante"), h("dd", { style: "text-align:left" }, fmt(p.perfil_dominante),
+        p.perfil_dominante_provisional ? " (provisional)" : ""),
+      h("dt", {}, "Intensidad gráfica"), h("dd", { style: "text-align:left" }, `${fmt(p.intensidad)} (${fmt(p.intensidad_valor)})`),
+      p.estado_pedido ? [h("dt", {}, "Estado"), h("dd", { style: "text-align:left" }, fmt(p.estado_pedido))] : null),
+    perfiles.length ? h("h3", {}, "Perfiles (lógica difusa)") : null, perfiles,
+    (p.preguntas_pendientes || []).length
+      ? h("div", { class: "aviso" }, "Preguntas pendientes: ", p.preguntas_pendientes.join(" · ")) : null);
+}
+
+function tarjetaNotebook(nb, { primera = false, fuera = false } = {}) {
+  return h("div", { class: `nb ${primera ? "primera" : ""} ${fuera ? "fuera" : ""}` },
+    nb.puesto ? h("div", { class: "puesto" }, `#${nb.puesto}`) : null,
+    h("div", { class: "nombre" }, nb.notebook),
+    h("div", { class: "meta" }, etq(nb.estado, colorEstado(nb.estado)),
+      fuera ? etq(`fuera de presupuesto +${fmt(nb.excedente_presupuesto_pct)} %`, "ambar") : null),
+    barra(nb.grado, { etiqueta: "Grado de recomendación" }),
+    h("dl", { class: "datos" },
+      h("dt", {}, "Precio"), h("dd", {}, usd(nb.precio_usd)),
+      h("dt", {}, "Adecuación global"), h("dd", {}, fmt(nb.adecuacion_global)),
+      h("dt", {}, "Costo-beneficio"), h("dd", {}, fmt(nb.indice_costo_beneficio),
+        nb.indice_con_peor_caso ? " (peor caso)" : ""),
+      h("dt", {}, "Ampliabilidad RAM"), h("dd", {}, fmt(nb.ampliabilidad_ram))),
+    (nb.empata_con || []).length
+      ? h("div", { class: "apagado", style: "margin-top:8px" }, `Empata con ${nb.empata_con.join(", ")} (desempate por ampliabilidad)`) : null,
+    nb.motivo ? h("div", { style: "margin-top:8px; font-size:13px" }, nb.regla ? codigo(nb.regla) : null, " ", nb.motivo) : null,
+    listaAlertas(nb.alertas));
+}
+
+function vistaRecomendar(rec, n) {
+  if (!rec) return null;
+  const ranking = rec.ranking || [];
+  const noProp = rec.no_propuestas || [];
+  return tarjeta(n, `Recomendaciones (SM4)${rec.requerimiento_id ? " · " + rec.requerimiento_id : ""}`,
+    ranking.length ? h("div", { class: "ranking" }, ranking.map((nb, i) => tarjetaNotebook(nb, { primera: i === 0 })))
+      : h("div", { class: "apagado" }, "No hay notebooks propuestas para este pedido."),
+    rec.fuera_de_presupuesto ? [h("h3", {}, "Alternativa fuera de presupuesto"),
+      h("div", { class: "ranking" }, tarjetaNotebook(rec.fuera_de_presupuesto, { fuera: true }))] : null,
+    rec.sin_alternativa ? h("div", { class: "aviso" }, fmt(rec.sin_alternativa.mensaje || rec.sin_alternativa)) : null,
+    noProp.length ? [h("h3", {}, "No propuestas y por qué"),
+      h("div", { class: "tabla-cont" }, h("table", {},
+        h("thead", {}, h("tr", {}, ["Notebook", "Estado", "Grado", "Regla", "Motivo"].map((c) => h("th", {}, c)))),
+        h("tbody", {}, noProp.map((nb) => h("tr", {},
+          h("td", {}, h("b", {}, nb.notebook)),
+          h("td", {}, etq(nb.estado, colorEstado(nb.estado))),
+          h("td", { class: "n" }, fmt(nb.grado)),
+          h("td", {}, nb.regla ? codigo(nb.regla) : "—"),
+          h("td", {}, nb.motivo || "—", listaAlertas(nb.alertas)))))))] : null,
+    rec.criterio_desempate ? h("div", { class: "apagado", style: "margin-top:12px" },
+      "Criterio de desempate ", codigo(rec.criterio_desempate.regla || ""), " ", rec.criterio_desempate.enunciado || "",
+      rec.criterio_desempate.margen_empate != null ? ` (margen ${fmt(rec.criterio_desempate.margen_empate)}, ${rec.criterio_desempate.validacion || ""})` : "") : null);
+}
+
+function vistaRiesgoRam(rr, n) {
+  if (!rr || !Array.isArray(rr.notebooks)) return null;
+  return tarjeta(n, `Riesgo de RAM (SM2, lógica difusa)${rr.perfil ? " · perfil " + rr.perfil : ""}`,
+    h("div", { class: "apagado" }, `Escala ${rr.escala_riesgo || "0 a 100"}. Más alto es peor. Un tramo rayado es un rango porque falta un dato de la ficha.`),
+    h("div", { class: "ranking", style: "margin-top:10px" }, rr.notebooks.map((nb) => {
+      const clase = nb.etiqueta === "alto" ? "alto" : nb.etiqueta === "medio" ? "medio" : "";
+      const reglas = (nb.reglas || []).filter((r) => r.fuerza > 0);
+      return h("div", { class: "nb" },
+        h("div", { class: "nombre" }, nb.notebook),
+        h("div", { class: "meta" }, etq(`riesgo ${nb.etiqueta || "?"}`, nb.etiqueta === "alto" ? "frambuesa" : nb.etiqueta === "medio" ? "ambar" : "menta"),
+          h("span", { class: "apagado" }, `${fmt(nb.ram_gb)} GB · ${fmt(nb.tipo_ram)}`)),
+        barra(nb.riesgo, { escala: 100, etiqueta: "Riesgo", clase }),
+        h("dl", { class: "datos" },
+          h("dt", {}, "Suficiencia ρ"), h("dd", {}, fmt(nb.suficiencia_rho)),
+          h("dt", {}, "Índice de ampliabilidad"), h("dd", {}, fmt(nb.indice_ampliabilidad))),
+        reglas.length ? h("div", { class: "chips" }, reglas.map((r) =>
+          h("span", { class: "chip", title: `fuerza de disparo ${r.fuerza}${r.escenario ? ", escenario " + r.escenario : ""}` },
+            `${r.id} · ${fmt(r.fuerza)}${r.escenario ? " (" + r.escenario + ")" : ""}`))) : null,
+        listaAlertas(nb.alertas));
+    })));
+}
+
+function vistaEvidencia(ev) {
+  const secciones = [];
+  let n = 3;
+  if (!ev) return secciones;
+  const sm4 = ev.SM4 || {};
+  if (sm4.recomendar) secciones.push(vistaRecomendar(sm4.recomendar, n++));
+  const sm2 = ev.SM2 || {};
+  if (sm2.riesgo_ram) secciones.push(vistaRiesgoRam(sm2.riesgo_ram, n++));
+  // El resto de la evidencia, tal cual llega, agrupada por submódulo.
+  const resto = [];
+  for (const [sm, porIntencion] of Object.entries(ev)) {
+    if (sm === "pedido" || sm === "advertencia" || !porIntencion || typeof porIntencion !== "object") continue;
+    for (const [intencion, datos] of Object.entries(porIntencion)) {
+      if ((sm === "SM4" && intencion === "recomendar") || (sm === "SM2" && intencion === "riesgo_ram")) continue;
+      resto.push(h("details", { open: true },
+        h("summary", {}, h("b", {}, `${sm}.${intencion}`), h("span", { class: "apagado" }, NOMBRE_SM[sm] || "")),
+        generico(datos)));
+    }
+  }
+  if (resto.length) secciones.push(tarjeta(n++, "Más evidencia del grafo", resto));
+  return secciones;
+}
+
+function vistaTraza(t, n) {
+  const d = t.duracion_ms || {};
+  const plan = t.plan || {};
+  const val = t.validacion || {};
+  const consultas = t.consultas || [];
+  const intentos = t.intentos || [];
+  const ms = (x) => (typeof x === "number" ? h("span", { class: "ms" }, `${x} ms`) : null);
+  const paso = (i, titulo, extra, ...cuerpo) =>
+    h("li", {}, h("span", { class: "marca" }, i), h("div", { class: "titulo" }, titulo, extra), ...cuerpo);
+
+  const pasos = [
+    paso(1, "Interpretación de la consulta (router con LLM → plan JSON)", ms(d.plan),
+      h("div", { class: "chips" },
+        plan.requerimiento_id ? etq(`pedido ${plan.requerimiento_id}`, "violeta") : null,
+        (plan.consultas || []).map((c) => h("span", { class: "chip", title: JSON.stringify(c.parametros || {}) }, c.intencion)),
+        plan.fuera_de_alcance ? etq("fuera de alcance", "gris") : null,
+        plan.aclaracion ? etq("pide aclaración", "ambar") : null),
+      plan.aclaracion ? h("div", { class: "apagado" }, plan.aclaracion) : null,
+      h("details", {}, h("summary", {}, "Plan completo"), h("pre", { class: "json" }, JSON.stringify(plan, null, 2)))),
+    paso(2, "Validación del plan contra el catálogo y los pedidos", null,
+      (val.observaciones || []).length
+        ? h("ul", { class: "alertas" }, val.observaciones.map((o) => h("li", {}, "• ", fmt(o))))
+        : h("div", { class: "apagado" }, "Sin observaciones."),
+      val.aclaracion ? h("div", { class: "aviso" }, val.aclaracion) : null),
+    paso(3, `Consultas Cypher al grafo (${consultas.length})`, ms(d.consultas),
+      h("div", { class: "apagado" }, "Plantillas fijas: el LLM no escribe Cypher. Las cifras salen de estas filas."),
+      consultas.map((c) => h("details", {},
+        h("summary", {}, etq(c.sm || "?", "violeta"), h("b", {}, c.nombre || c.intencion),
+          h("span", { class: "apagado" }, `${(c.filas || []).length} filas`), ms(c.ms)),
+        c.cypher ? h("pre", {}, c.cypher) : null,
+        c.parametros ? h("div", { class: "apagado" }, "Parámetros: ", JSON.stringify(c.parametros)) : null,
+        c.filas ? tabla(c.filas) : null))),
+    paso(4, `Explicación (${intentos.length} intento${intentos.length === 1 ? "" : "s"} del LLM, verificados contra la evidencia)`, ms(d.explicacion),
+      intentos.map((it, i) => h("details", { open: i === intentos.length - 1 && (it.problemas || []).length > 0 },
+        h("summary", {}, `Intento ${i + 1}`,
+          (it.problemas || []).length ? etq(`${it.problemas.length} problema(s): rechazado`, "frambuesa") : etq("aceptado", "menta")),
+        h("div", { style: "white-space:pre-wrap; font-size:13px" }, it.texto || "(vacío)"),
+        (it.problemas || []).length ? h("ul", { class: "alertas" }, it.problemas.map((p) => h("li", {}, "• ", fmt(p)))) : null)),
+      !intentos.length ? h("div", { class: "apagado" }, "No se llegó a explicar (validación, fuera de alcance o error).") : null),
+    paso(5, "Respuesta final", typeof t.segundos === "number" ? h("span", { class: "ms" }, `total ${num(t.segundos, 2)} s`) : null,
+      h("div", { class: "meta" }, etq(t.origen_respuesta || "?", (ORIGEN[t.origen_respuesta] || [])[1] || "gris"),
+        t.fecha ? h("span", { class: "apagado" }, t.fecha) : null)),
+  ];
+
+  const descargar = h("button", { class: "chip secundario", type: "button", onclick: () => {
+    const blob = new Blob([JSON.stringify(t, null, 2)], { type: "application/json" });
+    const a = h("a", { href: URL.createObjectURL(blob), download: `traza_${(t.fecha || "consulta").replace(/[:T]/g, "-")}.json` });
+    document.body.append(a); a.click(); a.remove();
+  } }, "Descargar traza JSON");
+
+  return tarjeta(n, "Razonamiento paso a paso (traza)",
+    h("ol", { class: "pasos" }, pasos), h("div", { class: "chips" }, descargar));
+}
+
+function mostrar(r, nota) {
+  const cont = $("resultado");
+  cont.replaceChildren();
+  const t = r.traza || {};
+  if (nota) cont.append(h("div", { class: "aviso", style: "margin-bottom:18px" }, nota));
+  cont.append(vistaRespuesta(r));
+  const ev = t.evidencia || {};
+  const pedido = vistaPedido(ev.pedido);
+  if (pedido) cont.append(pedido);
+  const secciones = vistaEvidencia(ev);
+  secciones.forEach((s) => cont.append(s));
+  cont.append(vistaTraza(t, 3 + secciones.length));
+  cont.firstElementChild.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// ---------- llamadas a la API ----------
+let reloj = null;
+function cargando(si) {
+  $("cargando").classList.toggle("oculto", !si);
+  $("enviar").disabled = si;
+  clearInterval(reloj);
+  if (si) {
+    const t0 = Date.now();
+    $("reloj").textContent = "";
+    reloj = setInterval(() => { $("reloj").textContent = `${Math.round((Date.now() - t0) / 1000)} s`; }, 500);
+  }
+}
+function mostrarError(msg) {
+  const e = $("error");
+  e.replaceChildren(h("div", { class: "error" }, msg));
+  e.classList.remove("oculto");
+}
+
+async function consultar(texto, req) {
+  $("error").classList.add("oculto");
+  cargando(true);
+  try {
+    const cuerpo = { texto };
+    if (req) cuerpo.requerimiento_id = req;
+    const resp = await fetch("/consultar", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpo),
+    });
+    if (!resp.ok) {
+      const detalle = await resp.text();
+      throw new Error(`La API respondió ${resp.status}. ${detalle.slice(0, 400)}`);
+    }
+    mostrar(await resp.json());
+  } catch (err) {
+    mostrarError(`No se pudo completar la consulta: ${err.message}. Revisá que Neo4j y Ollama estén levantados (indicadores arriba) o probá con el ejemplo grabado.`);
+  } finally {
+    cargando(false);
+  }
+}
+
+async function ejemploGrabado() {
+  $("error").classList.add("oculto");
+  try {
+    const resp = await fetch("/ui/ejemplo");
+    if (!resp.ok) throw new Error(`respuesta ${resp.status}`);
+    mostrar(await resp.json(), "Ejemplo grabado: es la traza real de una consulta anterior (datos/traza_ejemplo.jsonl), no una consulta en vivo.");
+  } catch (err) {
+    mostrarError(`No se pudo cargar el ejemplo grabado: ${err.message}`);
+  }
+}
+
+async function salud() {
+  try {
+    const s = await (await fetch("/salud")).json();
+    $("s-neo4j").className = `punto ${s.neo4j && s.neo4j.ok ? "ok" : "mal"}`;
+    $("s-ollama").className = `punto ${s.ollama && s.ollama.ok ? "ok" : "mal"}`;
+    $("s-modelo").textContent = s.modelo ? `Ollama · ${s.modelo}` : "Ollama";
+    $("salud").title = JSON.stringify(s, null, 1);
+  } catch {
+    $("s-neo4j").className = "punto mal";
+    $("s-ollama").className = "punto mal";
+  }
+}
+
+// ---------- arranque ----------
+function contar() {
+  const n = $("texto").value.length;
+  $("contador").textContent = `${n} / ${MAX_CARACTERES}`;
+  $("contador").classList.toggle("pasado", n > MAX_CARACTERES);
+}
+$("texto").addEventListener("input", contar);
+$("texto").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) $("form").requestSubmit();
+});
+$("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const texto = $("texto").value.trim();
+  if (!texto) { $("texto").focus(); return; }
+  consultar(texto, $("req").value.trim());
+});
+$("ejemplos").append(
+  ...EJEMPLOS.map(([nombre, texto]) => h("button", { class: "chip", type: "button", title: texto,
+    onclick: () => { $("texto").value = texto; contar(); $("texto").focus(); } }, nombre)),
+  h("button", { class: "chip secundario", type: "button", onclick: ejemploGrabado }, "Ver ejemplo grabado"));
+contar();
+salud();
+</script>
+</body>
+</html>
