@@ -339,6 +339,7 @@ Qué pasa: Ollama lee el texto y saca un JSON con los usos, los juegos y el pres
 - **Si falta un dato** (por ejemplo, el presupuesto), el asistente lo pregunta. En el modo conversación, la API o la web, la respuesta siguiente («unos 1000 dólares») completa el mismo pedido; no se crea otro.
 - **Las preguntas siguientes** de la misma conversación («¿y cómo andan de RAM?») usan ese pedido sin nombrarlo. En la API, mandá el `sesion_id` que devolvió la primera respuesta.
 - **Límite:** SM4 solo puede rankear perfiles con salida de PI2 (hoy, virtualización). Si tu uso principal es otro (por ejemplo, ofimática), el pedido queda registrado, SM1 a SM3 responden, y SM4 avisa que no tiene evaluaciones para ese perfil.
+- **Si no entendió bien**, en la web hay un botón «¿No entendió bien? Corregir o completar el pedido» debajo de la respuesta. Abre un formulario con lo que entendió (usos, frecuencia, juegos y presupuesto) y marca lo que falta. «Armar pedido» abre el mismo formulario vacío. Lo que mandás desde ahí se registra como un pedido nuevo sin pasar por Ollama, y Python y Neo4j lo validan e infieren igual.
 - **Para dejar el grafo como estaba:** `python -m scripts.limpiar_pedidos` borra los pedidos creados desde consultas y deja `req_01` a `req_03`.
 
 ### Para controlar una respuesta contra el grafo

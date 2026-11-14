@@ -93,14 +93,21 @@ class Orquestador:
                                   {"intencion": "SM4.recomendar", "parametros": {}}]}
         return None
 
-    def _escribir(self, c: dict, t: dict, sesion: dict) -> dict:
+    def _escribir(self, c: dict, t: dict, sesion: dict, formulario: dict | None = None) -> dict:
         """registrar_pedido o aclarar_pedido: primero Ollama extrae el JSON del texto (asistente/extractor.py),
-        después SM1 lo valida, lo guarda y corre la inferencia para ese pedido."""
+        después SM1 lo valida, lo guarda y corre la inferencia para ese pedido.
+
+        `formulario`: el pedido que la persona armó o corrigió en la web, con el mismo esquema que el extractor.
+        En ese caso no se llama a Ollama, pero SM1 lo valida igual contra el texto."""
         texto = c["parametros"].get("texto") or c["parametros"].get("respuesta") or ""
         t0 = time.perf_counter()
-        vocabulario = self.grafo.vocabulario() if hasattr(self.grafo, "vocabulario") else {}
-        extraido = extractor.extraer(texto, self.llm, vocabulario)
-        t["extraccion"] = {"texto": texto, "json": extraido, "ms": _ms(t0)}
+        if formulario is not None:
+            extraido = formulario
+            t["extraccion"] = {"texto": texto, "json": extraido, "ms": 0, "origen": "formulario"}
+        else:
+            vocabulario = self.grafo.vocabulario() if hasattr(self.grafo, "vocabulario") else {}
+            extraido = extractor.extraer(texto, self.llm, vocabulario)
+            t["extraccion"] = {"texto": texto, "json": extraido, "ms": _ms(t0)}
         try:
             salida = self.despachador.invoke({**c, "parametros": {**c["parametros"], "pedido": extraido}})
         except Aclaracion as e:
@@ -114,9 +121,17 @@ class Orquestador:
         return salida
 
     # ------------------------------------------------------------------
-    def consultar(self, texto: str, requerimiento_id: str | None = None, sesion: dict | None = None) -> dict:
+    def consultar(self, texto: str, requerimiento_id: str | None = None, sesion: dict | None = None,
+                  pedido: dict | None = None) -> dict:
+        """`pedido`: armado con el formulario de la web («Armar pedido»). Registra un pedido nuevo sin pasar
+        por el router ni por el extractor; la validación de SM1 y la inferencia de Neo4j son las mismas."""
         inicio = time.perf_counter()
         sesion = sesion if sesion is not None else {}
+        if pedido is not None:
+            requerimiento_id = None
+            sesion.pop("requerimiento_id", None)
+            sesion.pop("preguntas_pendientes", None)
+            sesion.pop("borrador", None)
         if requerimiento_id:
             sesion["requerimiento_id"] = router.normalizar_pedido(requerimiento_id) or requerimiento_id
             sesion.pop("borrador", None)
@@ -132,10 +147,16 @@ class Orquestador:
 
             # 1. Plan (o la continuación de la sesión: completar un pedido o responder su pregunta)
             t0 = time.perf_counter()
-            valido = self._plan_de_sesion(texto, sesion)
-            if valido is not None:
-                t["plan"] = {"origen": "sesion", "consultas": valido["consultas"]}
+            if pedido is not None:      # «Armar pedido» de la web: registrar y recomendar, sin router
+                valido = {"requerimiento_id": None, "evidencia": [], "observaciones": ["pedido armado con el formulario"],
+                          "consultas": [{"intencion": "SM1.registrar_pedido", "parametros": {"texto": texto}},
+                                        {"intencion": "SM4.recomendar", "parametros": {}}]}
+                t["plan"] = {"origen": "formulario", "consultas": valido["consultas"]}
             else:
+                valido = self._plan_de_sesion(texto, sesion)
+                if valido is not None:
+                    t["plan"] = {"origen": "sesion", "consultas": valido["consultas"]}
+            if valido is None:
                 plan = self.planificar(texto, sesion, self.llm, catalogo=catalogo, pedidos=pedidos)
                 t["plan"] = plan
                 try:
@@ -153,7 +174,7 @@ class Orquestador:
             if escritura is not None:
                 c = {"intencion": escritura["intencion"],
                      "parametros": {**escritura["parametros"], "requerimiento_id": req}}
-                salida = self._escribir(c, t, sesion)
+                salida = self._escribir(c, t, sesion, formulario=pedido)
                 req = salida["evidencia"]["requerimiento_id"]
                 sesion["requerimiento_id"] = req      # el pedido ya está guardado, aunque falle algo después
                 pedido_nuevo = bool(salida["evidencia"].get("pedido_nuevo"))

@@ -31,7 +31,7 @@ RETURN c.id AS requerimiento, c.presupuesto_usd AS presupuesto, c.prioridad AS p
     "VOCABULARIO": """
 MATCH (e:ExpresionFrecuencia) WITH collect({texto:e.texto, horas:e.horas_ref}) AS expresiones
 MATCH (j:Juego) WITH expresiones, collect(j.nombre) AS juegos
-MATCH (n:Notebook) RETURN expresiones, juegos, collect(n.modelo) AS catalogo
+MATCH (n:Notebook) RETURN expresiones, juegos, collect(n.modelo) AS catalogo, min(n.precio_usd) AS precio_minimo
 """,
     "ULTIMO_ID": """
 MATCH (c:Requerimiento) WHERE c.id =~ 'req_[0-9]+'
@@ -180,7 +180,7 @@ def vocabulario(grafo) -> dict:
     f = filas[0] if filas else {}
     horas = {e["texto"]: e["horas"] for e in f.get("expresiones") or []}
     return {"expresiones": sorted(horas), "horas_expresion": horas, "juegos": sorted(f.get("juegos") or []),
-            "catalogo": sorted(f.get("catalogo") or [])}
+            "catalogo": sorted(f.get("catalogo") or []), "precio_minimo": f.get("precio_minimo")}
 
 
 def pedido(grafo, requerimiento_id: str):

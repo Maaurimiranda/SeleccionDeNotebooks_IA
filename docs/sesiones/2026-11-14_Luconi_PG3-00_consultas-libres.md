@@ -44,6 +44,20 @@ Ejemplo: «Quiero una notebook para programar y usar Docker, y a veces jugar al 
 4. **Neo4j escribe e infiere en una sola transacción.** Crea el `Requerimiento` `req_101` (los ids empiezan en 101 porque `req_04` y `req_05` están reservados para PG3-25) con sus actividades. Después corre las reglas de SM1 a SM4 filtradas por `$req = 'req_101'`. Los otros pedidos no se tocan (D-08).
 5. **SM4 recomienda y el explicador redacta**, igual que para `req_01`. La respuesta empieza con «Registré tu pedido como req_101.» y el pedido queda en la sesión para las preguntas siguientes («¿y de RAM?»).
 
+### Segunda vuelta: el pedido de la diseñadora y el botón «Armar pedido»
+Fam probó con Ollama real: «Soy diseñadora grafica, uso todos los dias varios programas de edicion en simultaneo. Me gusta jugar a los jueguitos cada tanto. Tengo un presupuesto de 100USD». El sistema registró solo «jugar» (perfil GAM). Perdió lo más importante por tres motivos:
+- **La cita reescrita.** `qwen2.5:3b` devolvió la cita «usar varios programas de edición en simultáneo», con «usar» en vez de «uso». No era literal, así que INT-R7 la descartó. Ahora `ubicar_cita` (en `sm1/servicio.py`) busca en el texto la frase que tiene al menos el 60 % de las palabras de la cita, comparadas por sus primeras 4 letras, y guarda **esa frase del texto**. La evidencia sigue siendo literal, porque nunca se guarda algo que la persona no escribió.
+- **El juego inventado.** El LLM puso `JUEGOS_CONOCIDOS` como juego. Ahora un juego que no está en el grafo y tampoco en el texto se ignora sin avisar. El prompt suma reglas para diseño y edición, para la profesión («soy diseñadora») y para «jueguitos», que no nombra ningún juego. También tiene un ejemplo nuevo.
+- **El presupuesto.** 100 USD está por debajo de la notebook más barata (650 USD). Ahora SM1 lo avisa con un dato del grafo.
+
+Con eso el pedido queda DIS (todos los días) + GAM (cada tanto). **Igual no hay ranking**, porque el grafo no tiene `SALIDA_PI2` para DIS (D-03, D-11).
+
+**«Armar pedido» (idea de Fam).** Es un formulario en la web, `asistente/web/index.html`, que se abre de dos formas:
+- con el botón «Armar pedido», que lo abre vacío;
+- con «¿No entendió bien? Corregir o completar el pedido», debajo de cada respuesta, que lo abre precargado con lo que entendió el asistente. Si el pedido se registró, usa el pedido validado; si quedó una repregunta, usa el JSON de Ollama.
+
+Los campos vacíos quedan marcados. Al enviar, la web arma un texto («Diseño gráfico: todos los dias. Presupuesto: 1000 USD.») y manda el pedido en `POST /consultar` con el campo nuevo `pedido`. El orquestador **no llama a Ollama** y registra el pedido. SM1 lo valida igual que siempre: cada frase del texto es la cita de su uso. Las opciones del formulario salen de `GET /ui/vocabulario`, que está fuera de Swagger como `/ui`.
+
 ## Decisiones y por qué
 - **El JSON lo valida Python y no el LLM.** Así se cumple «el LLM interpreta y explica, Neo4j decide»: un modelo de 3 B puede inventar un monto, y la validación contra el texto lo frena. Se descartó dejar que el LLM escriba Cypher, porque CLAUDE.md lo prohíbe.
 - **Filtro `$req` en vez de copiar los archivos de reglas.** Hay una sola versión de cada regla para la carga y para el pedido nuevo. Se verificó que con `req = NULL` el grafo queda igual que antes; la única diferencia es la marca de tiempo `generada`.
@@ -53,7 +67,7 @@ Ejemplo: «Quiero una notebook para programar y usar Docker, y a veces jugar al 
 
 ## Cómo probarlo
 ```powershell
-python -m unittest                                    # 233 OK, 5 salteadas (las de Ollama)
+python -m unittest                                    # 237 OK, 5 salteadas (las de Ollama)
 $env:PG3_TEST_LLM="1"; python -m unittest tests.test_pedido_nuevo   # con Ollama levantado
 python -m scripts.correr_e2e                          # incluye E2E-6
 python -m asistente.cli --traza "Quiero una notebook para programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dólares."

@@ -15,7 +15,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
-from asistente import config
+from asistente import config, extractor
+from asistente.contrato import ErrorGrafo
 
 DESCRIPCION = (
     "Asistente experto para elegir notebooks (Grupo 2, UTN FRM, PG3). El LLM interpreta la consulta y "
@@ -41,6 +42,10 @@ class ConsultaEntrada(BaseModel):
     sesion_id: str | None = Field(
         None, description="Conversación: devolvé el `sesion_id` de la respuesta anterior para seguir con el mismo "
                           "pedido (contestar una repregunta o preguntar algo más). Vacío: conversación nueva.")
+    pedido: dict | None = Field(
+        None, description="Pedido armado o corregido con el formulario de la web («Armar pedido»), con el esquema "
+                          "del extractor (asistente/extractor.py). Se registra como pedido nuevo sin llamar a Ollama; "
+                          "SM1 lo valida igual contra `texto` (cada cita tiene que estar en el texto, INT-R7).")
 
 
 class ConsultaSalida(BaseModel):
@@ -104,8 +109,19 @@ def crear_app(orquestador=None) -> FastAPI:
     @app.post("/consultar", response_model=ConsultaSalida, summary="Hacer una consulta al asistente")
     def consultar(entrada: ConsultaEntrada) -> ConsultaSalida:
         sesion_id, sesion = sesiones.obtener(entrada.sesion_id)
-        return ConsultaSalida(**orq().consultar(entrada.texto, entrada.requerimiento_id, sesion=sesion),
-                              sesion_id=sesion_id)
+        return ConsultaSalida(**orq().consultar(entrada.texto, entrada.requerimiento_id, sesion=sesion,
+                                                pedido=entrada.pedido), sesion_id=sesion_id)
+
+    @app.get("/ui/vocabulario", include_in_schema=False)
+    def ui_vocabulario() -> dict:
+        """Opciones del formulario «Armar pedido» de la web: el vocabulario cerrado del grafo (léxico de
+        frecuencia y juegos) y los tipos de uso del extractor. Fuera de Swagger, como /ui."""
+        try:
+            v = orq().grafo.vocabulario()
+        except ErrorGrafo as e:
+            raise HTTPException(503, str(e))
+        return {"tipos": extractor.TIPOS_ACTIVIDAD, "prioridades": extractor.PRIORIDADES,
+                "expresiones": v.get("expresiones") or [], "juegos": v.get("juegos") or []}
 
     @app.get("/salud", response_model=SaludSalida, summary="Estado de Neo4j, de Ollama y del modelo")
     def salud() -> SaludSalida:

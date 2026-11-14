@@ -103,6 +103,33 @@ def contiene(texto: str, fragmento: str) -> bool:
     return bool(fragmento and limpio(fragmento)) and limpio(fragmento) in limpio(texto)
 
 
+def _raiz(w: str) -> str:
+    return w[:4]
+
+
+def ubicar_cita(texto: str, cita: str) -> str | None:
+    """INT-R7 con tolerancia: devuelve el fragmento LITERAL del texto que corresponde a la cita.
+
+    Si la cita está tal cual, se devuelve igual. Si el LLM cambió la conjugación o el orden
+    («usar varios programas de edición» ↔ «uso todos los dias varios programas de edicion»), se busca
+    la frase del texto (separada por signos de puntuación) que tiene al menos el 60 % de las palabras de
+    la cita, comparadas por sus primeras 4 letras, y se devuelve esa frase. Nunca se devuelve algo que
+    no esté escrito en el texto.
+    """
+    if contiene(texto, cita):
+        return cita.strip()
+    clave = [_raiz(w) for w in limpio(cita).split() if w not in _STOP and len(w) > 2]
+    if len(clave) < 2:
+        return None
+    mejor, puntaje = None, 0.0
+    for frase in re.split(r"[.;:!?\n]+|,\s*(?:y\s+)?", texto or ""):
+        raices = {_raiz(w) for w in limpio(frase).split()}
+        p = sum(1 for r in clave if r in raices) / len(clave)
+        if p > puntaje:
+            mejor, puntaje = frase.strip(), p
+    return mejor if mejor and puntaje >= 0.6 else None
+
+
 def contiene_expresion(texto: str, expresion: str) -> bool:
     """La expresión del léxico vale si sus palabras de contenido están en el texto
     («la necesito para» ↔ «Necesito una notebook para»; «a veces» ↔ «a veces»)."""
@@ -189,7 +216,8 @@ def _juegos(nombres: list, texto_actividad: str, juegos_grafo: list[str], obs: l
                   or limpio(x) in limpio(n)), None)
         if j:
             encontrados.append(j)
-        elif n and limpio(n):
+        elif n and limpio(n) and limpio(n) in limpio(texto_actividad):
+            # Solo se informa un juego que la persona escribió; lo que el LLM inventó se ignora (INT-R7).
             obs.append(f"no tengo datos de exigencia gráfica de «{n}» en la base de conocimiento: "
                        "la intensidad gráfica se calcula solo con los juegos conocidos")
     return list(dict.fromkeys(encontrados))
@@ -279,15 +307,20 @@ def validar_pedido(texto: str, ext: dict, vocab: dict) -> tuple[PedidoValidado, 
     if usd is not None and not 0 < usd <= PRESUPUESTO_MAXIMO_USD:
         motivo = f"El presupuesto de {usd:g} USD no parece válido (INT-R1). ¿Cuánto podés invertir, en dólares?"
         usd = None
+    minimo = vocab.get("precio_minimo")
+    if usd is not None and minimo and usd < minimo:
+        obs.append(f"el presupuesto de {usd:g} USD está por debajo de la notebook más barata del catálogo "
+                   f"({minimo:g} USD): ninguna entra en el presupuesto")
 
     # Actividades (INT-R7, INT-R11)
     crudas = [a for a in ext.get("actividades") or [] if isinstance(a, dict)]
     validas = []
     for a in crudas:
-        if not contiene(texto, a.get("evidencia") or ""):
+        cita = ubicar_cita(texto, a.get("evidencia") or "")
+        if cita is None:
             obs.append(f"actividad «{a.get('descripcion')}» descartada: su cita no está en el texto (INT-R7)")
             continue
-        validas.append(a)
+        validas.append({**a, "evidencia": cita})
     hay_virtualizacion = any(a.get("tipo") == "virtualizar" for a in validas)
     actividades, sin_dedicacion = [], []
     juegos_grafo = vocab.get("juegos") or []
@@ -336,7 +369,7 @@ def _entendido(datos: dict) -> dict:
     return {
         "presupuesto_usd": datos.get("presupuesto_usd"), "moneda_original": datos.get("moneda_original"),
         "prioridad": datos.get("prioridad"), "notebook_consultada": datos.get("notebook_consultada"),
-        "actividades": [{"descripcion": a["descripcion"], "perfil": a["perfil"], "cita": a["fragmento"],
+        "actividades": [{"descripcion": a["descripcion"], "tipo": a["tipo"], "perfil": a["perfil"], "cita": a["fragmento"],
                          "frecuencia": a["expresion"], "horas_semana": a["horas"], "juegos": a["juegos"]}
                         for a in datos.get("actividades") or []],
         "preguntas_pendientes": datos.get("preguntas") or [],

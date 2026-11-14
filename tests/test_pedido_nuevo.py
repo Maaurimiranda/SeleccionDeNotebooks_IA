@@ -133,6 +133,40 @@ class TestValidacion(unittest.TestCase):
         self.assertEqual(datos["actividades"][0]["juegos"], [])
         self.assertTrue(any("Valorant" in o for o in datos["observaciones"]))
 
+    def test_cita_reescrita_por_el_llm_se_ubica_en_el_texto(self):
+        # Caso real con qwen2.5:3b: cambió «uso» por «usar» y le puso tildes a la cita.
+        texto = ("Soy diseñadora grafica, uso todos los dias varios programas de edicion en simultaneo. "
+                 "Me gusta jugar a los jueguitos cada tanto. Tengo un presupuesto de 100USD")
+        e = ext(100, "USD", [act("editar", "disenar", "usar varios programas de edición en simultáneo"),
+                             act("jugar", "jugar", "jugar a los jueguitos cada tanto", "cada tanto",
+                                 juegos=["JUEGOS_CONOCIDOS"])])
+        datos, faltan, motivo = servicio.validar_pedido(texto, e, {**VOCAB, "precio_minimo": 650.0})
+        a1, a2 = datos["actividades"]
+        self.assertEqual((a1["perfil"], a1["expresion"]), ("DIS", "todos los dias"))
+        self.assertEqual(a1["fragmento"], "uso todos los dias varios programas de edicion en simultaneo")
+        self.assertIn(servicio.limpio(a1["fragmento"]), servicio.limpio(texto))   # la cita es literal del texto
+        self.assertEqual((a2["perfil"], a2["juegos"]), ("GAM", []))
+        self.assertFalse(any("JUEGOS_CONOCIDOS" in o for o in datos["observaciones"]))   # lo inventado no se informa
+        self.assertTrue(any("más barata del catálogo" in o for o in datos["observaciones"]))
+        self.assertEqual((faltan, motivo), ([], None))
+
+    def test_ubicar_cita_no_inventa(self):
+        texto = "Uso Photoshop todos los días. Tengo 900 USD."
+        self.assertIsNone(servicio.ubicar_cita(texto, "programar en Python con Docker"))
+        self.assertIsNone(servicio.ubicar_cita(texto, "jugar"))
+        self.assertEqual(servicio.ubicar_cita(texto, "usar Photoshop todos los días"), "Uso Photoshop todos los días")
+
+    def test_pedido_del_formulario_pasa_la_validacion(self):
+        texto = ("Pedido armado con el formulario. Diseño gráfico: todos los dias. Jugar (Fortnite): 5 horas por "
+                 "semana. Presupuesto: 1000 USD. Prioridad: grafica.")
+        e = ext(1000, "USD", [act("Diseño gráfico", "disenar", "Diseño gráfico: todos los dias", "todos los dias"),
+                              act("Jugar", "jugar", "Jugar (Fortnite): 5 horas por semana", horas=5, periodo="semana",
+                                  juegos=["Fortnite"])], prioridad="grafica")
+        datos, faltan, motivo = servicio.validar_pedido(texto, e, VOCAB)
+        self.assertEqual([(a["perfil"], a["expresion"], a["horas"], a["juegos"]) for a in datos["actividades"]],
+                         [("DIS", "todos los dias", None, []), ("GAM", None, 5.0, ["Fortnite"])])
+        self.assertEqual((datos["presupuesto_usd"], datos["prioridad"], faltan, motivo), (1000.0, "grafica", [], None))
+
     def test_horas_declaradas_las_calcula_python(self):
         e = ext(700, "USD", [act("ofimatica", "ofimatica", "3 horas por día para Word", None, 21, "semana")])
         datos, _, _ = servicio.validar_pedido("La uso 3 horas por día para Word, tengo 700 USD", e, VOCAB)
@@ -265,6 +299,16 @@ class TestOrquestadorPedidoNuevo(unittest.TestCase):
         self.assertIn("Registré tu pedido como req_101.", r["respuesta"])
         intenciones = [i for i, _ in self.sm1.llamadas]
         self.assertEqual(intenciones, ["SM1.registrar_pedido", "SM1.interpretacion_pedido"])   # L1 después del alta
+
+    def test_pedido_del_formulario_no_pasa_por_ollama(self):
+        sesion = {"requerimiento_id": "req_01", "preguntas_pendientes": ["x"]}
+        r = self.orq.consultar(TEXTO_VIRT, sesion=sesion, pedido=EXT_VIRT)
+        self.assertEqual((r["requerimiento_id"], r["pedido_nuevo"]), ("req_101", True))
+        self.assertEqual(self.llm.textos_extraidos, [])                     # no se llamó al extractor
+        self.assertEqual(r["traza"]["plan"]["origen"], "formulario")
+        self.assertEqual(r["traza"]["extraccion"]["origen"], "formulario")
+        self.assertEqual(self.sm1.llamadas[0], ("SM1.registrar_pedido",
+                                                {"texto": TEXTO_VIRT, "requerimiento_id": None, "pedido": EXT_VIRT}))
 
     def test_repregunta_y_completa_el_mismo_pedido(self):
         sesion = {}
