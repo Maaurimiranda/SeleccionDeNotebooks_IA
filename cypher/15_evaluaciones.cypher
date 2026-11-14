@@ -1,5 +1,8 @@
 // =====================================================================
 // cypher/15_evaluaciones.cypher
+// Inferencia filtrada por el parametro req (D-08). Se carga con: python -m scripts.cargar_grafo
+// En Neo4j Browser, antes de pegar este archivo, correr  :param req => null  (todos los pedidos)
+// o  :param req => 'req_101'  (uno solo). Sin ese parametro Neo4j da el error "Expected parameter(s): req".
 // Bloques del canonico: 10.c (encabezado) · 10.c.0
 // Duenio: Miranda
 // Origen: docs/cypher/Grupo_2_PG2_U1_corregido.cypher, cortado sin cambiar el contenido (PG3-02).
@@ -16,6 +19,7 @@
 // salidas crisp de PI2 se copian del par notebook-perfil; sin ellas la
 // notebook no se evalua para ese perfil (limitacion 5 del informe).
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (n:Notebook)-[s:SALIDA_PI2]->(pf)
 WHERE NOT EXISTS { MATCH (c)-[:CONSULTA_POR]->(:Notebook) }
    OR EXISTS { MATCH (c)-[:CONSULTA_POR]->(n) }

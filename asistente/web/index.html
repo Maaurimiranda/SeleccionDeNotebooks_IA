@@ -34,11 +34,16 @@
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--fondo); color: var(--texto);
-    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
+  /* Nada se sale de su casillero: los textos largos (JSON, citas, ids) cortan línea en vez de empujar la caja. */
+  main, main * { overflow-wrap: break-word; }
+  main * { min-width: 0; }
+  ::selection { background: var(--frambuesa-suave); }
   header {
-    background: var(--berenjena); color: var(--blanco);
-    padding: 18px 28px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    background: linear-gradient(120deg, var(--berenjena) 0%, var(--berenjena-2) 100%); color: var(--blanco);
+    padding: 18px 28px; box-shadow: 0 2px 12px rgba(36, 21, 48, .18); display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   }
   header h1 { font-size: 20px; margin: 0; font-weight: 650; letter-spacing: .2px; }
   header .sub { color: #CBBFDD; font-size: 13px; }
@@ -54,8 +59,9 @@
 
   main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 60px; }
   .tarjeta { background: var(--blanco); border: 1px solid var(--linea); border-radius: var(--radio);
-             padding: 20px 22px; margin-bottom: 18px; }
-  h2 { font-size: 16px; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+             padding: 20px 22px; margin-bottom: 18px; box-shadow: 0 1px 2px rgba(36, 21, 48, .04), 0 4px 16px rgba(36, 21, 48, .04);
+             overflow: hidden; }
+  h2 { font-size: 16.5px; margin: 0 0 14px; letter-spacing: .1px; display: flex; align-items: center; gap: 10px; }
   h2 .num { background: var(--berenjena); color: var(--blanco); width: 26px; height: 26px; border-radius: 50%;
             display: inline-flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
   h3 { font-size: 14px; margin: 16px 0 8px; color: var(--berenjena-2); }
@@ -65,17 +71,20 @@
   .form { display: grid; grid-template-columns: 1fr 170px; gap: 12px; }
   textarea { width: 100%; min-height: 84px; resize: vertical; border: 1.5px solid var(--linea-2);
              border-radius: 10px; padding: 12px; font: inherit; color: inherit; }
-  textarea:focus, input:focus { outline: none; border-color: var(--violeta); }
+  textarea:focus, input:focus, select:focus { outline: none; border-color: var(--violeta); box-shadow: 0 0 0 3px #ECE5F7; }
   .lateral { display: flex; flex-direction: column; gap: 10px; }
   label { font-size: 12px; color: var(--apagado); display: block; margin-bottom: 4px; }
   input { width: 100%; border: 1.5px solid var(--linea-2); border-radius: 10px; padding: 9px 10px; font: inherit; }
   button { font: inherit; cursor: pointer; border-radius: 10px; border: none; }
-  .primario { background: var(--frambuesa); color: var(--blanco); padding: 11px 14px; font-weight: 600; }
+  .primario { background: var(--frambuesa); color: var(--blanco); padding: 11px 16px; font-weight: 600;
+              box-shadow: 0 2px 8px rgba(214, 51, 108, .25); transition: background .15s, transform .05s; }
+  .primario:active { transform: translateY(1px); }
   .primario:hover { background: #BF2A5E; }
   .primario:disabled { background: #E7A3BC; cursor: wait; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
   .chip { background: var(--fondo); color: var(--berenjena-2); border: 1px solid var(--linea-2);
-          padding: 5px 11px; border-radius: 999px; font-size: 13px; }
+          padding: 5px 12px; border-radius: 999px; font-size: 13px; transition: border-color .15s, background .15s; }
+  button.chip:hover { background: #ECE5F7; }
   button.chip:hover { border-color: var(--violeta); }
   .chip.secundario { background: var(--blanco); border-style: dashed; }
   .contador { text-align: right; font-size: 12px; color: var(--apagado); }
@@ -94,7 +103,7 @@
 
   /* Respuesta */
   .respuesta { font-size: 16px; white-space: pre-wrap; border-left: 4px solid var(--frambuesa);
-               padding: 4px 0 4px 16px; margin: 6px 0 14px; }
+               background: #FDF8FB; border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 8px 0 14px; }
   .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .aviso { background: var(--ambar-suave); color: #6E4C00; border-radius: 10px; padding: 10px 14px;
            font-size: 13px; margin-top: 12px; }
@@ -102,16 +111,20 @@
 
   /* Ranking */
   .ranking { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-  .nb { border: 1.5px solid var(--linea); border-radius: 12px; padding: 14px 16px; position: relative; }
+  .nb { border: 1.5px solid var(--linea); border-radius: 12px; padding: 14px 16px; position: relative;
+        transition: box-shadow .15s; }
+  .nb:hover { box-shadow: 0 4px 14px rgba(36, 21, 48, .08); }
   .nb.primera { border-color: var(--menta); box-shadow: 0 0 0 3px var(--menta-suave); }
   .nb.fuera { border-style: dashed; border-color: var(--ambar); }
   .nb .puesto { position: absolute; top: 12px; right: 14px; font-size: 28px; font-weight: 750; color: var(--linea-2); }
   .nb .nombre { font-size: 17px; font-weight: 700; margin: 0 0 6px; }
   .datos { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 13px; margin-top: 10px; }
   .datos dt { color: var(--apagado); }
-  .datos dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+  .datos dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; min-width: 0; }
   .alertas { list-style: none; padding: 0; margin: 10px 0 0; font-size: 13px; }
   .alertas li { margin: 4px 0; display: flex; gap: 8px; align-items: baseline; }
+  .alertas li > * { flex: none; }
+  .alertas li > :last-child { flex: 1 1 auto; }
 
   /* Barras de grado (0 a 1) y de riesgo (0 a 100) */
   .barra { margin-top: 10px; }
@@ -121,13 +134,31 @@
   .barra .valor.alto { background: var(--frambuesa); }
   .barra .valor.medio { background: #E2A93B; }
   .barra .leyenda { display: flex; justify-content: space-between; font-size: 12px; color: var(--apagado); margin-top: 3px; }
-  .barra .leyenda b { color: var(--texto); font-variant-numeric: tabular-nums; }
+  .barra .leyenda { gap: 8px; }
+  .barra .leyenda b { color: var(--texto); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .nota-rango { font-size: 11.5px; color: var(--violeta); margin-top: 2px; }
+  /* Una etiqueta larga («Recomendada condicionada por falta de informacion») corta línea dentro de la tarjeta. */
+  .nb .etq, .tabla-cont .etq { white-space: normal; max-width: 100%; }
+  .nb .meta { padding-right: 46px; }
+  .nb .nombre { padding-right: 46px; }
 
   /* Tablas */
-  .tabla-cont { overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; font-size: 13px; }
-  th { text-align: left; color: var(--apagado); font-weight: 600; border-bottom: 1.5px solid var(--linea-2); padding: 6px 8px; }
-  td { border-bottom: 1px solid var(--linea); padding: 6px 8px; vertical-align: top; }
+  /* Las tablas anchas se desplazan dentro de su caja (con sombra al costado), nunca empujan la tarjeta. */
+  .tabla-cont { overflow-x: auto; max-width: 100%; border: 1px solid var(--linea); border-radius: 10px; margin: 8px 0;
+                background:
+                  linear-gradient(to right, #fff 30%, rgba(255,255,255,0)) left / 24px 100% no-repeat local,
+                  linear-gradient(to left, #fff 30%, rgba(255,255,255,0)) right / 24px 100% no-repeat local,
+                  radial-gradient(farthest-side at 0 50%, rgba(36,21,48,.14), transparent) left / 10px 100% no-repeat scroll,
+                  radial-gradient(farthest-side at 100% 50%, rgba(36,21,48,.14), transparent) right / 10px 100% no-repeat scroll; }
+  table { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 13px; }
+  th { text-align: left; color: var(--apagado); font-weight: 600; border-bottom: 1.5px solid var(--linea-2); padding: 8px 10px;
+       background: #FAF8FD; white-space: nowrap; position: sticky; top: 0; }
+  td { border-bottom: 1px solid var(--linea); padding: 7px 10px; vertical-align: top; max-width: 360px; }
+  td:has(.json-celda) { max-width: 520px; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:nth-child(even) td { background: #FCFBFE; }
+  tbody tr:hover td { background: #F6F1FC; }
+  td code, .json-celda { font-family: var(--mono); font-size: 11.5px; color: var(--berenjena-2); overflow-wrap: anywhere; }
   td.n { text-align: right; font-variant-numeric: tabular-nums; }
 
   /* Traza */
@@ -140,14 +171,38 @@
                   align-items: center; justify-content: center; font-weight: 700; }
   .pasos .titulo { font-weight: 650; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .pasos .ms { font-size: 12px; color: var(--apagado); font-variant-numeric: tabular-nums; }
-  details { border: 1px solid var(--linea); border-radius: 10px; padding: 8px 12px; margin: 8px 0; background: #FCFBFE; }
+  details { border: 1px solid var(--linea); border-radius: 10px; padding: 8px 12px; margin: 8px 0; background: #FCFBFE;
+            max-width: 100%; }
+  details[open] { background: var(--blanco); box-shadow: 0 2px 10px rgba(36, 21, 48, .05); }
   details > summary { cursor: pointer; font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   details > summary::marker { color: var(--violeta); }
   pre { font-family: var(--mono); font-size: 12px; background: var(--berenjena); color: #EDE6F7;
-        padding: 12px 14px; border-radius: 10px; overflow-x: auto; white-space: pre; margin: 8px 0; }
+        padding: 12px 14px; border-radius: 10px; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+        margin: 8px 0; max-width: 100%; max-height: 420px; overflow-y: auto; }
   .json { background: #FCFBFE; color: var(--texto); border: 1px solid var(--linea); }
 
   .oculto { display: none !important; }
+  select { border: 1.5px solid var(--linea-2); border-radius: 10px; padding: 8px 10px; font: inherit; background: var(--blanco); }
+  .armado-fila { display: grid; grid-template-columns: 1.3fr 1.3fr 140px auto; gap: 10px; align-items: end;
+                 padding: 10px 0; border-bottom: 1px dashed var(--linea); }
+  .armado-fila > button { justify-self: end; align-self: end; width: auto; }
+  .armado-fila .juegos { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; }
+  .armado-fila .juegos label { display: inline-flex; gap: 4px; align-items: center; margin: 0; color: var(--texto); font-size: 13px; }
+  .armado-fila .juegos input { width: auto; }
+  .armado-cabecera { display: grid; grid-template-columns: 160px 1fr; gap: 12px; max-width: 520px; }
+  .falta { border-color: var(--frambuesa) !important; background: #FFF5F8; }
+  .armado-fila select, .armado-cabecera select { width: 100%; }
+
+  /* Pantallas angostas: el formulario y las filas del pedido se apilan */
+  @media (max-width: 760px) {
+    header { padding: 14px 16px; }
+    main { padding: 16px 12px 40px; }
+    .tarjeta { padding: 16px 14px; }
+    .form { grid-template-columns: 1fr; }
+    .armado-fila { grid-template-columns: 1fr 1fr; }
+    .armado-cabecera { grid-template-columns: 1fr 1fr; }
+    .ranking { grid-template-columns: 1fr; }
+  }
   .cargando { display: flex; align-items: center; gap: 12px; color: var(--apagado); }
   .rueda { width: 18px; height: 18px; border: 3px solid var(--linea-2); border-top-color: var(--frambuesa);
            border-radius: 50%; animation: gira 0.8s linear infinite; }
@@ -176,19 +231,38 @@
     <h2><span class="num">?</span>Consulta en lenguaje natural</h2>
     <form id="form" class="form">
       <div>
-        <textarea id="texto" placeholder="Por ejemplo: Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?"></textarea>
+        <textarea id="texto" placeholder="Contá para qué querés la notebook y cuánto querés gastar. Por ejemplo: Quiero programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dólares."></textarea>
         <div class="contador" id="contador"></div>
       </div>
       <div class="lateral">
         <div>
-          <label for="req">Pedido (opcional)</label>
-          <input id="req" list="pedidos" placeholder="req_01">
+          <label for="req">Pedido cargado (opcional)</label>
+          <input id="req" list="pedidos" placeholder="vacío = pedido nuevo">
           <datalist id="pedidos"><option value="req_01"><option value="req_02"><option value="req_03"></datalist>
         </div>
         <button type="submit" class="primario" id="enviar">Consultar</button>
+        <button type="button" class="chip secundario" id="armar" title="Armá el pedido con un formulario: elegís los usos, la frecuencia, los juegos y el presupuesto">Armar pedido</button>
+        <button type="button" class="chip secundario" id="nueva" title="Empieza otra conversación: olvida el pedido y la repregunta en curso">Nueva conversación</button>
+        <div class="apagado" id="conversacion"></div>
       </div>
     </form>
     <div class="chips" id="ejemplos"></div>
+  </section>
+
+  <section id="armado" class="tarjeta oculto">
+    <h2><span class="num">✎</span>Armar o corregir el pedido</h2>
+    <div class="apagado" id="armado-origen">Completá los campos marcados. Se registra como un pedido nuevo: Python lo valida y Neo4j calcula perfiles y ranking, igual que con una consulta escrita.</div>
+    <div class="armado-cabecera" style="margin-top:12px">
+      <div><label for="a-presupuesto">Presupuesto (USD)</label><input id="a-presupuesto" type="number" min="1" max="20000" step="1"></div>
+      <div><label for="a-prioridad">Lo que más te importa</label><select id="a-prioridad"></select></div>
+    </div>
+    <div id="a-actividades"></div>
+    <div class="chips">
+      <button type="button" class="chip secundario" id="a-agregar">+ Agregar uso</button>
+      <button type="button" class="primario" id="a-enviar">Registrar este pedido</button>
+      <button type="button" class="chip" id="a-cerrar">Cerrar</button>
+    </div>
+    <div class="aviso oculto" id="a-aviso" style="margin-top:10px"></div>
   </section>
 
   <section id="cargando" class="tarjeta oculto">
@@ -208,6 +282,8 @@
 
 const MAX_CARACTERES = 1500;
 const EJEMPLOS = [
+  ["Pedido nuevo", "Quiero una notebook para programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dólares."],
+  ["Pedido incompleto", "Necesito usar máquinas virtuales todos los días."],
   ["Recomendación", "Para req_01, ¿qué notebook me recomendás? ¿Cómo andan de RAM y de gráfica?"],
   ["Incertidumbre", "En req_01, ¿por qué la M quedó condicionada y la G indeterminada? ¿Qué riesgo de RAM tiene la G?"],
   ["Excluyente", "En req_01, la E tiene casi el mismo puntaje que la B y la H, ¿por qué no la recomiendan? ¿Qué pasa con la virtualización?"],
@@ -287,8 +363,9 @@ function barra(v, { escala = 1, etiqueta = "Grado", clase = "" } = {}) {
     h("div", { class: "riel" },
       h("div", { class: `valor ${rango ? "rango" : clase}`, style: `left:${izq}%;width:${ancho}%` })),
     h("div", { class: "leyenda" },
-      h("span", {}, rango ? `${etiqueta} (rango: falta información)` : etiqueta),
-      h("b", {}, fmt(v, escala === 1 ? 3 : 2))));
+      h("span", {}, etiqueta),
+      h("b", {}, rango ? `${num(v.min, escala === 1 ? 3 : 2)} – ${num(v.max, escala === 1 ? 3 : 2)}` : fmt(v, escala === 1 ? 3 : 2))),
+    rango ? h("div", { class: "nota-rango" }, "Rango: falta un dato en la ficha") : null);
 }
 
 function listaAlertas(alertas) {
@@ -318,7 +395,7 @@ function tabla(filas, max = 50) {
     h("tbody", {}, filas.slice(0, max).map((f) => h("tr", {}, cols.map((c) => {
       const x = f[c];
       return h("td", { class: typeof x === "number" ? "n" : "" },
-        x && typeof x === "object" && !esRango(x) ? JSON.stringify(x) : fmt(x));
+        x && typeof x === "object" && !esRango(x) ? h("span", { class: "json-celda" }, JSON.stringify(x)) : fmt(x));
     }))))),
     filas.length > max ? h("div", { class: "apagado" }, `… y ${filas.length - max} filas más (ver JSON completo).`) : null);
 }
@@ -340,6 +417,8 @@ function vistaRespuesta(r) {
       (r.submodulos_consultados || []).map((s) => etq(s, "gris")),
       r.intento ? h("span", { class: "apagado" }, `intento ${r.intento} del explicador`) : null,
       typeof t.segundos === "number" ? h("span", { class: "apagado" }, `· ${num(t.segundos, 1)} s`) : null),
+    r.repregunta ? h("div", { class: "aviso" }, "Falta un dato para registrar tu pedido. Respondé en el cuadro de "
+      + "arriba y tocá Consultar: se completa el mismo pedido.") : null,
     t.evidencia && t.evidencia.advertencia ? h("div", { class: "aviso" }, "⚠ ", t.evidencia.advertencia) : null,
     t.error ? h("div", { class: "error", style: "margin-top:12px" }, fmt(t.error)) : null);
 }
@@ -371,7 +450,7 @@ function tarjetaNotebook(nb, { primera = false, fuera = false } = {}) {
     nb.puesto ? h("div", { class: "puesto" }, `#${nb.puesto}`) : null,
     h("div", { class: "nombre" }, nb.notebook),
     h("div", { class: "meta" }, etq(nb.estado, colorEstado(nb.estado)),
-      fuera ? etq(`fuera de presupuesto +${fmt(nb.excedente_presupuesto_pct)} %`, "ambar") : null),
+      fuera ? etq(`fuera de presupuesto +${fmt(nb.excedente_presupuesto_pct, 1)} %`, "ambar") : null),
     barra(nb.grado, { etiqueta: "Grado de recomendación" }),
     h("dl", { class: "datos" },
       h("dt", {}, "Precio"), h("dd", {}, usd(nb.precio_usd)),
@@ -484,7 +563,7 @@ function vistaTraza(t, n) {
         h("summary", {}, etq(c.sm || "?", "violeta"), h("b", {}, c.nombre || c.intencion),
           h("span", { class: "apagado" }, `${(c.filas || []).length} filas`), ms(c.ms)),
         c.cypher ? h("pre", {}, c.cypher) : null,
-        c.parametros ? h("div", { class: "apagado" }, "Parámetros: ", JSON.stringify(c.parametros)) : null,
+        c.parametros ? h("div", { class: "apagado" }, "Parámetros: ", h("span", { class: "json-celda" }, JSON.stringify(c.parametros))) : null,
         c.filas ? tabla(c.filas) : null))),
     paso(4, `Explicación (${intentos.length} intento${intentos.length === 1 ? "" : "s"} del LLM, verificados contra la evidencia)`, ms(d.explicacion),
       intentos.map((it, i) => h("details", { open: i === intentos.length - 1 && (it.problemas || []).length > 0 },
@@ -508,12 +587,42 @@ function vistaTraza(t, n) {
     h("ol", { class: "pasos" }, pasos), h("div", { class: "chips" }, descargar));
 }
 
+function vistaPedidoNuevo(r) {
+  const p = r.pedido;
+  if (!p) return null;
+  const filas = (p.actividades || []).map((a) => ({
+    actividad: a.descripcion, perfil: a.perfil, "dice el texto": `«${a.cita}»`,
+    frecuencia: a.horas_semana != null ? `${fmt(a.horas_semana)} h/semana` : (a.frecuencia || "desconocida"),
+    juegos: (a.juegos || []).join(", ") || "—",
+  }));
+  return tarjeta("+", r.pedido_nuevo ? `Pedido nuevo registrado: ${r.requerimiento_id}` : `Pedido actualizado: ${r.requerimiento_id}`,
+    h("div", { class: "apagado" }, (((r.traza || {}).extraccion || {}).origen === "formulario"
+      ? "Esto armaste en el formulario y validó Python." : "Esto extrajo Ollama de tu texto y validó Python.")
+      + " Los grados, el perfil dominante y el ranking los calculó Neo4j para este pedido."),
+    h("dl", { class: "datos", style: "grid-template-columns:max-content 1fr; max-width:520px" },
+      h("dt", {}, "Presupuesto"), h("dd", { style: "text-align:left" },
+        p.presupuesto_usd != null ? `${fmt(p.presupuesto_usd)} USD` : "sin cambios"),
+      h("dt", {}, "Prioridad"), h("dd", { style: "text-align:left" }, fmt(p.prioridad)),
+      p.notebook_consultada ? [h("dt", {}, "Consulta por"), h("dd", { style: "text-align:left" }, p.notebook_consultada)] : null,
+      p.horas_semana_completadas != null ? [h("dt", {}, "Horas completadas"),
+        h("dd", { style: "text-align:left" }, `${fmt(p.horas_semana_completadas)} h/semana`)] : null),
+    filas.length ? tabla(filas) : null,
+    (p.preguntas_pendientes || []).length ? h("div", { class: "aviso" }, "Pendiente: ", p.preguntas_pendientes.join(" ")) : null);
+}
+
 function mostrar(r, nota) {
   const cont = $("resultado");
   cont.replaceChildren();
   const t = r.traza || {};
   if (nota) cont.append(h("div", { class: "aviso", style: "margin-bottom:18px" }, nota));
   cont.append(vistaRespuesta(r));
+  if (r.pedido || (t.extraccion && t.extraccion.json)) {
+    cont.append(h("div", { class: "chips", style: "margin:-6px 0 18px" },
+      h("button", { class: "chip secundario", type: "button", onclick: () => abrirArmado(r) },
+        r.repregunta ? "Completar el pedido con el formulario" : "¿No entendió bien? Corregir o completar el pedido")));
+  }
+  const nuevo = vistaPedidoNuevo(r);
+  if (nuevo) cont.append(nuevo);
   const ev = t.evidencia || {};
   const pedido = vistaPedido(ev.pedido);
   if (pedido) cont.append(pedido);
@@ -541,12 +650,21 @@ function mostrarError(msg) {
   e.classList.remove("oculto");
 }
 
-async function consultar(texto, req) {
+// La conversación: el servidor recuerda el pedido creado y la repregunta en curso con este id.
+let sesionId = null;
+function mostrarConversacion(r) {
+  $("conversacion").textContent = r && r.requerimiento_id ? `Conversación sobre ${r.requerimiento_id}`
+    : (r && r.repregunta ? "Pedido a medio cargar: respondé la repregunta" : "");
+}
+
+async function consultar(texto, req, pedido) {
   $("error").classList.add("oculto");
   cargando(true);
   try {
     const cuerpo = { texto };
     if (req) cuerpo.requerimiento_id = req;
+    if (pedido) cuerpo.pedido = pedido;
+    if (sesionId) cuerpo.sesion_id = sesionId;
     const resp = await fetch("/consultar", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpo),
     });
@@ -554,7 +672,14 @@ async function consultar(texto, req) {
       const detalle = await resp.text();
       throw new Error(`La API respondió ${resp.status}. ${detalle.slice(0, 400)}`);
     }
-    mostrar(await resp.json());
+    const r = await resp.json();
+    sesionId = r.sesion_id || sesionId;
+    mostrarConversacion(r);
+    if (r.repregunta || r.pedido_nuevo) $("texto").value = "";
+    contar();
+    if (pedido) $("armado").classList.add("oculto");
+    ultima = r;
+    mostrar(r);
   } catch (err) {
     mostrarError(`No se pudo completar la consulta: ${err.message}. Revisá que Neo4j y Ollama estén levantados (indicadores arriba) o probá con el ejemplo grabado.`);
   } finally {
@@ -586,6 +711,129 @@ async function salud() {
   }
 }
 
+// ---------- «Armar pedido»: formulario precargado con lo que entendió el asistente ----------
+// Se manda a POST /consultar como `pedido` (mismo esquema que el extractor) junto con un texto armado acá:
+// cada uso es una frase del texto y esa frase es su cita, así la validación de SM1 (INT-R7) es la misma.
+const TIPO_USO = {
+  programar: "Programar", virtualizar: "Docker o máquinas virtuales", jugar: "Jugar", disenar: "Diseño gráfico",
+  editar_video: "Editar video", modelar_3d: "Modelado 3D", analizar_datos: "Analizar datos",
+  ofimatica: "Ofimática y navegador", estudiar: "Estudiar", otra: "Otro uso",
+};
+const TIPO_POR_PERFIL = { VIRT: "virtualizar", DEV: "programar", GAM: "jugar", DIS: "disenar", VID3D: "editar_video",
+  DATOS: "analizar_datos", OFI: "ofimatica" };
+let ultima = null;
+let vocab = null;
+
+async function cargarVocabulario() {
+  if (vocab) return vocab;
+  const resp = await fetch("/ui/vocabulario");
+  if (!resp.ok) throw new Error(`/ui/vocabulario respondió ${resp.status}`);
+  vocab = await resp.json();
+  $("a-prioridad").replaceChildren(...vocab.prioridades.map((p) => h("option", { value: p }, p)));
+  return vocab;
+}
+
+function marcar(el, vacio) { el.classList.toggle("falta", vacio); }
+
+function filaUso(u = {}) {
+  const tipo = h("select", {}, h("option", { value: "" }, "— elegí el uso —"),
+    ...vocab.tipos.map((t) => h("option", { value: t }, TIPO_USO[t] || t)));
+  const frec = h("select", {}, h("option", { value: "" }, "— ¿con qué frecuencia? —"),
+    ...vocab.expresiones.map((e) => h("option", { value: e }, e)), h("option", { value: "horas" }, "horas por semana…"));
+  const horas = h("input", { type: "number", min: "1", max: "168", step: "1", placeholder: "h/semana" });
+  const juegos = h("div", { class: "juegos" }, h("span", { class: "apagado" }, "Juegos:"),
+    ...vocab.juegos.map((j) => h("label", {}, h("input", { type: "checkbox", value: j }), j)));
+  const quitar = h("button", { type: "button", class: "chip", title: "Quitar este uso" }, "✕");
+  const fila = h("div", { class: "armado-fila" },
+    h("div", {}, h("label", {}, "Uso"), tipo), h("div", {}, h("label", {}, "Frecuencia"), frec),
+    h("div", {}, h("label", {}, "Horas por semana"), horas), quitar, juegos);
+  tipo.value = u.tipo && vocab.tipos.includes(u.tipo) ? u.tipo : "";
+  if (u.horas) { frec.value = "horas"; horas.value = Math.round(u.horas); }
+  else frec.value = u.frecuencia && vocab.expresiones.includes(u.frecuencia) ? u.frecuencia : "";
+  for (const c of juegos.querySelectorAll("input")) c.checked = (u.juegos || []).includes(c.value);
+  const refrescar = () => {
+    horas.disabled = frec.value !== "horas";
+    juegos.classList.toggle("oculto", tipo.value !== "jugar");
+    marcar(tipo, !tipo.value);
+    marcar(frec, !frec.value);
+    marcar(horas, frec.value === "horas" && !(Number(horas.value) > 0));
+  };
+  [tipo, frec, horas].forEach((el) => el.addEventListener("input", refrescar));
+  quitar.addEventListener("click", () => fila.remove());
+  fila.leer = () => ({ tipo: tipo.value, frecuencia: frec.value === "horas" ? null : frec.value || null,
+    horas: frec.value === "horas" ? Number(horas.value) || null : null,
+    juegos: [...juegos.querySelectorAll("input:checked")].map((c) => c.value) });
+  refrescar();
+  return fila;
+}
+
+// Lo que entendió el asistente: el pedido validado si se registró; si no, el JSON que extrajo Ollama.
+function usosDe(r) {
+  if (r && r.pedido) {
+    return { presupuesto: r.pedido.presupuesto_usd, prioridad: r.pedido.prioridad,
+      usos: (r.pedido.actividades || []).map((a) => ({ tipo: a.tipo || TIPO_POR_PERFIL[a.perfil], frecuencia: a.frecuencia,
+        horas: a.horas_semana, juegos: a.juegos })) };
+  }
+  const x = r && r.traza && r.traza.extraccion && r.traza.extraccion.json;
+  if (x) {
+    const p = x.presupuesto || {};
+    const porSemana = { dia: 7, semana: 1, mes: 0.25 };
+    return { presupuesto: p.moneda === "USD" ? p.monto : null, prioridad: x.prioridad,
+      usos: (x.actividades || []).map((a) => ({ tipo: a.tipo, frecuencia: a.expresion_frecuencia, juegos: a.juegos,
+        horas: a.cantidad_horas && porSemana[a.periodo_horas] ? a.cantidad_horas * porSemana[a.periodo_horas] : null })) };
+  }
+  return { presupuesto: null, prioridad: "ninguna", usos: [] };
+}
+
+async function abrirArmado(r) {
+  try { await cargarVocabulario(); } catch (err) { mostrarError(`No se pudo abrir el formulario: ${err.message}`); return; }
+  const d = usosDe(r);
+  $("armado-origen").textContent = r ? "Esto es lo que entendió el asistente. Corregí lo que esté mal y completá los campos marcados. "
+    + "Se registra como un pedido nuevo: Python lo valida y Neo4j calcula perfiles y ranking."
+    : "Elegí los usos, la frecuencia y el presupuesto. Se registra como un pedido nuevo: Python lo valida y Neo4j calcula perfiles y ranking.";
+  $("a-presupuesto").value = d.presupuesto ? Math.round(d.presupuesto) : "";
+  marcar($("a-presupuesto"), !d.presupuesto);
+  $("a-prioridad").value = vocab.prioridades.includes(d.prioridad) ? d.prioridad : "ninguna";
+  const usos = d.usos.length ? d.usos : [{}];
+  $("a-actividades").replaceChildren(...usos.map(filaUso));
+  $("a-aviso").classList.add("oculto");
+  $("armado").classList.remove("oculto");
+  $("armado").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function enviarArmado() {
+  const monto = Number($("a-presupuesto").value);
+  const usos = [...$("a-actividades").children].map((f) => f.leer()).filter((u) => u.tipo);
+  const faltan = [];
+  if (!(monto > 0)) faltan.push("el presupuesto");
+  if (!usos.length) faltan.push("al menos un uso");
+  if (usos.some((u) => !u.frecuencia && !u.horas)) faltan.push("la frecuencia de cada uso");
+  if (faltan.length) {
+    $("a-aviso").textContent = `Falta ${faltan.join(", ")}.`;
+    $("a-aviso").classList.remove("oculto");
+    return;
+  }
+  const prioridad = $("a-prioridad").value || "ninguna";
+  const actividades = usos.map((u) => {
+    const nombre = TIPO_USO[u.tipo] + (u.juegos.length ? ` (${u.juegos.join(", ")})` : "");
+    const cuando = u.horas ? `${u.horas} horas por semana` : u.frecuencia;
+    return { descripcion: TIPO_USO[u.tipo], tipo: u.tipo, evidencia: `${nombre}: ${cuando}`,
+      expresion_frecuencia: u.frecuencia, cantidad_horas: u.horas, periodo_horas: u.horas ? "semana" : null, juegos: u.juegos };
+  });
+  const texto = "Pedido armado con el formulario. " + actividades.map((a) => a.evidencia).join(". ")
+    + `. Presupuesto: ${monto} USD.` + (prioridad !== "ninguna" ? ` Prioridad: ${prioridad}.` : "");
+  const pedido = { es_pedido_notebook: true, prioridad, usa_monitor_externo: false, notebook_consultada: null,
+    presupuesto: { monto, moneda: "USD", evidencia: `Presupuesto: ${monto} USD` }, actividades };
+  $("req").value = "";
+  consultar(texto, "", pedido);
+}
+
+$("armar").addEventListener("click", () => abrirArmado(ultima && (ultima.pedido || ultima.repregunta) ? ultima : null));
+$("a-presupuesto").addEventListener("input", () => marcar($("a-presupuesto"), !(Number($("a-presupuesto").value) > 0)));
+$("a-agregar").addEventListener("click", () => $("a-actividades").append(filaUso()));
+$("a-enviar").addEventListener("click", enviarArmado);
+$("a-cerrar").addEventListener("click", () => $("armado").classList.add("oculto"));
+
 // ---------- arranque ----------
 function contar() {
   const n = $("texto").value.length;
@@ -601,6 +849,17 @@ $("form").addEventListener("submit", (e) => {
   const texto = $("texto").value.trim();
   if (!texto) { $("texto").focus(); return; }
   consultar(texto, $("req").value.trim());
+});
+$("nueva").addEventListener("click", () => {
+  sesionId = null;
+  ultima = null;
+  $("armado").classList.add("oculto");
+  $("req").value = "";
+  $("texto").value = "";
+  mostrarConversacion(null);
+  $("resultado").replaceChildren();
+  contar();
+  $("texto").focus();
 });
 $("ejemplos").append(
   ...EJEMPLOS.map(([nombre, texto]) => h("button", { class: "chip", type: "button", title: texto,

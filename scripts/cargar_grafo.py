@@ -1,6 +1,6 @@
 """Carga el grafo canónico dividido por dueño (PG3-02, ARQUITECTURA §5).
 
-Ejecuta cypher/NN_*.cypher en orden numérico, sentencia por sentencia. Una sentencia
+Ejecuta cypher/NN_*.cypher en orden numérico, sentencia por sentencia, con $req = null (todos los pedidos). Una sentencia
 termina en ';' al final de la línea; las líneas que empiezan con '//' se ignoran.
 cypher/90_verificacion.cypher no se carga: son consultas (C1 escribe INCUMPLE y se
 deja para la demostración) y las corre scripts/verificar_grafo.py.
@@ -17,31 +17,12 @@ from pathlib import Path
 from neo4j import GraphDatabase
 
 from asistente import config
+from asistente.inferencia import sentencias  # noqa: F401  (se reexporta: lo usan contar_grafo y los tests)
 
 DIR_CYPHER = Path(__file__).resolve().parent.parent / "cypher"
 NO_SE_CARGAN = {"90_verificacion.cypher"}
 CANONICO = DIR_CYPHER.parent / "docs" / "cypher" / "Grupo_2_PG2_U1_corregido.cypher"
 INICIO_CONSULTAS = "// 11. CONSULTAS"   # del bloque 11 en adelante son consultas; C1 escribe INCUMPLE
-
-
-def sentencias(ruta: Path):
-    """Devuelve [(linea_inicial, texto)] de las sentencias del archivo."""
-    resultado, actual, inicio = [], [], None
-    for n, linea in enumerate(ruta.read_text(encoding="utf-8").splitlines(), start=1):
-        if not actual and (not linea.strip() or linea.strip().startswith("//")):
-            continue
-        if linea.strip().startswith("//"):
-            continue
-        if inicio is None:
-            inicio = n
-        actual.append(linea)
-        if linea.rstrip().endswith(";"):
-            texto = "\n".join(actual).rstrip().rstrip(";")
-            resultado.append((inicio, texto))
-            actual, inicio = [], None
-    if actual:
-        resultado.append((inicio, "\n".join(actual)))
-    return resultado
 
 
 def archivos(hasta: int | None = None):
@@ -74,7 +55,7 @@ def comprobar_archivos(canonico: bool = False, hasta: int | None = None) -> list
 def _ejecutar(s, nombre: str, lista: list, verbose: bool) -> int:
     for linea, texto in lista:
         try:
-            s.run(texto).consume()
+            s.run(texto, req=None).consume()   # $req nulo: la inferencia corre para todos los pedidos
         except Exception as e:
             raise SystemExit(f"ERROR en {nombre}, línea {linea}: {type(e).__name__}: {e}")
     if verbose:

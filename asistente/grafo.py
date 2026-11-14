@@ -55,10 +55,41 @@ class Grafo:
         self._catalogo = self._pedidos = None
         return self._correr(WRITE_ACCESS, cypher, parametros)
 
+    def escribir_lote(self, lote: list[tuple[str, str]], parametros: dict | None = None) -> None:
+        """Varias sentencias de escritura en UNA transacción: si una falla, no queda nada a medias.
+
+        `lote` es [(nombre, cypher)]; el nombre (archivo:línea) va en el error. Solo para
+        SM1.registrar_pedido y SM1.aclarar_pedido (alta del pedido + inferencia, D-08).
+        """
+        self._catalogo = self._pedidos = None
+
+        def trabajo(tx):
+            for nombre, cypher in lote:
+                try:
+                    tx.run(cypher, **(parametros or {})).consume()
+                except Exception as e:
+                    raise ErrorGrafo(f"Falló la sentencia {nombre} ({type(e).__name__}): {e}") from e
+        try:
+            with self._drv().session(database=self.base, default_access_mode=WRITE_ACCESS) as s:
+                s.execute_write(trabajo)
+        except ErrorGrafo:
+            raise
+        except Exception as e:
+            raise ErrorGrafo(f"No se pudo escribir en Neo4j ({type(e).__name__}): {e}") from e
+
     def catalogo(self) -> list[str]:
         if self._catalogo is None:
             self._catalogo = [f["v"] for f in self.leer("MATCH (n:Notebook) RETURN n.modelo AS v ORDER BY v")]
         return self._catalogo
+
+    def vocabulario(self) -> dict:
+        """Léxico de frecuencia y juegos del grafo: el vocabulario cerrado del prompt de extracción (D-08)."""
+        if getattr(self, "_vocabulario", None) is None:
+            f = self.leer("MATCH (e:ExpresionFrecuencia) WITH collect(e.texto) AS expresiones "
+                          "MATCH (j:Juego) RETURN expresiones, collect(j.nombre) AS juegos")
+            self._vocabulario = {"expresiones": sorted(f[0]["expresiones"]), "juegos": sorted(f[0]["juegos"])} \
+                if f else {"expresiones": [], "juegos": []}
+        return self._vocabulario
 
     def pedidos(self) -> list[str]:
         if self._pedidos is None:

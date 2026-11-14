@@ -9,7 +9,7 @@
 1. [Requisitos](#1-requisitos)
 2. [Instalación](#2-instalación)
 3. [Cargar y verificar el grafo](#3-cargar-y-verificar-el-grafo)
-4. [Usar el asistente](#4-usar-el-asistente)
+4. [Usar el asistente](#4-usar-el-asistente) (y [ver los cambios que subió el grupo](#411-ver-los-cambios-que-subió-el-grupo))
 5. [Consultas de ejemplo](#5-consultas-de-ejemplo)
 6. [Cómo leer una respuesta](#6-cómo-leer-una-respuesta)
 7. [Ver la traza](#7-ver-la-traza)
@@ -137,6 +137,7 @@ notepad .env
 | `MAX_CARACTERES` | Largo máximo de una consulta | `1500` |
 | `MAX_REGENERACIONES` | Veces que el explicador reintenta antes de usar la plantilla fija | `2` |
 | `DIR_TRAZAS` | Carpeta donde se guarda la traza | `trazas` |
+| `COTIZACION_ARS_USD` | Pesos por dólar, para pasar a USD un presupuesto en pesos (INT-R10). Vacía: el asistente pregunta el monto en dólares | (vacía) |
 
 Escribí los valores sin comillas. **El `.env` no se sube nunca a Git** (está en `.gitignore`: el repositorio es público) y no se comparte.
 
@@ -167,6 +168,12 @@ Cargando el grafo en bolt://localhost:7687 ... (BORRA todo lo que haya en la bas
 Listo: 101 sentencias.
 ```
 
+**¿Hace falta correr los scripts en Neo4j Browser y después pasar los cambios a Python?** No. `cargar_grafo` hace lo mismo que pegar los `.cypher` en el Browser, en el orden correcto. El asistente no tiene una copia de los datos: cada consulta lee Neo4j en vivo, y lo mismo pasa con el catálogo, las expresiones de frecuencia y los juegos que usa Ollama. Para evitar inconsistencias:
+- **Los archivos de `cypher/` son la fuente de verdad.** Si cambiás una regla probándola en el Browser, copiá el cambio al `.cypher` y volvé a correr `cargar_grafo`.
+- **En el Browser, `10_sm1` a `40_sm4` necesitan un parámetro.** Antes de pegarlos, corré `:param req => null`. Si no, Neo4j da el error «Expected parameter(s): req».
+- **Después de recargar el grafo, reiniciá `uvicorn`** (o la consola), porque el vocabulario queda guardado mientras el proceso está abierto.
+- **Lo único escrito en Python** son los tipos de uso y su perfil (`PERFIL_POR_TIPO` en `asistente/submodulos/sm1/servicio.py`). Si se agrega un perfil nuevo al grafo, hay que sumarlo ahí.
+
 Después, la verificación:
 
 ```powershell
@@ -195,6 +202,31 @@ Get-Content .env | Where-Object { $_ -match '^\s*[^#\s][^=]*=' } | ForEach-Objec
 ```
 
 Con eso quedan activos el entorno de Python y las variables del `.env`. Ollama y Neo4j tienen que estar corriendo.
+
+### 4.1.1 Ver los cambios que subió el grupo
+
+Cada vez que alguien sube cambios a la rama, hacé estos pasos en la terminal preparada (§4.1), desde la carpeta raíz del proyecto:
+
+```powershell
+git checkout <rama>                         # por ejemplo, main o cl-consultas-libres
+git pull                                    # trae los cambios
+python -m pip install -r requirements.txt   # solo si cambió requirements.txt
+python -m scripts.cargar_grafo              # solo si cambió algo en cypher/ (BORRA y recarga la base)
+python -m scripts.verificar_grafo           # tiene que dar 11/11 OK
+uvicorn asistente.api:app                   # si ya estaba corriendo, cortalo antes con Ctrl+C
+```
+
+Después abrí `http://localhost:8000/ui` y apretá **Ctrl+F5**, para que el navegador no muestre la página vieja que tenía guardada.
+
+| Qué cambió | Qué hay que hacer |
+| --- | --- |
+| Solo `asistente/web/index.html` (la web) | Ctrl+F5 en el navegador. No hace falta reiniciar `uvicorn` |
+| Código Python (`asistente/`, `prompts/`) | Reiniciar `uvicorn` o la consola |
+| `cypher/` | `cargar_grafo`, `verificar_grafo` y reiniciar `uvicorn` |
+| `requirements.txt` | `pip install -r requirements.txt` y reiniciar |
+| `.env.example` | Revisar si hay una variable nueva y copiarla a tu `.env` |
+
+Para ver qué archivos cambiaron con el último `git pull`: `git diff --stat HEAD@{1} HEAD`.
 
 ### 4.2 La consola
 
@@ -233,7 +265,7 @@ Pedido de la sesión: req_01
 [req_01] > ¿Qué me recomendás?
 ```
 
-Comandos del modo conversación: `/pedido req_01` fija el pedido y `/salir` termina (también `/exit`, `/q`, Ctrl+C o Ctrl+Z y Enter). Cualquier otra línea es una consulta. En la consola, el pedido de la sesión queda guardado mientras no salgas.
+Comandos del modo conversación: `/pedido req_01` fija el pedido, `/nuevo` empieza otra conversación sin pedido y `/salir` termina (también `/exit`, `/q`, Ctrl+C o Ctrl+Z y Enter). Cualquier otra línea es una consulta. En la consola, el pedido de la sesión queda guardado mientras no salgas.
 
 ### 4.3 La API
 
@@ -324,6 +356,22 @@ python -m asistente.cli "Para req_02, ¿qué notebook me conviene?"
 `req_02` tiene el perfil `indeterminado`: el sistema **no asume** ningún perfil, no evalúa ninguna notebook y repite la pregunta pendiente («¿Qué programas o actividades va a usar con la notebook?»).
 
 Los submódulos de la columna son los que tiene que consultar el router; la línea `[origen: … · submódulos: …]` de la consola muestra los que realmente se consultaron. `SM1` aparece siempre que hay un pedido, porque el sistema lo agrega para llevar el perfil y el presupuesto en la evidencia.
+
+### Una consulta libre (pedido nuevo)
+
+No hace falta nombrar `req_01`: se puede contar la necesidad con tus palabras.
+
+```powershell
+python -m asistente.cli --traza "Quiero una notebook para programar y usar Docker, y a veces jugar al Fortnite. Tengo 900 dólares."
+```
+
+Qué pasa: Ollama lee el texto y saca un JSON con los usos, los juegos y el presupuesto (se ve en la traza como «pedido entendido»). SM1 lo valida contra el texto y el grafo, lo guarda como `req_101` (o el siguiente libre) y Neo4j corre las reglas de SM1 a SM4 **solo para ese pedido**. La respuesta empieza con «Registré tu pedido como req_101» y trae la recomendación (caso E2E-6: perfil dominante VIRT, `Notebook_B` primera, todas dentro de 900 USD).
+
+- **Si falta un dato** (por ejemplo, el presupuesto), el asistente lo pregunta. En el modo conversación, la API o la web, la respuesta siguiente («unos 1000 dólares») completa el mismo pedido; no se crea otro.
+- **Las preguntas siguientes** de la misma conversación («¿y cómo andan de RAM?») usan ese pedido sin nombrarlo. En la API, mandá el `sesion_id` que devolvió la primera respuesta.
+- **Límite:** SM4 solo puede rankear perfiles con salida de PI2 (hoy, virtualización). Si tu uso principal es otro (por ejemplo, ofimática), el pedido queda registrado, SM1 a SM3 responden, y SM4 avisa que no tiene evaluaciones para ese perfil.
+- **Si no entendió bien**, en la web hay un botón «¿No entendió bien? Corregir o completar el pedido» debajo de la respuesta. Abre un formulario con lo que entendió (usos, frecuencia, juegos y presupuesto) y marca lo que falta. «Armar pedido» abre el mismo formulario vacío. Lo que mandás desde ahí se registra como un pedido nuevo sin pasar por Ollama, y Python y Neo4j lo validan e infieren igual.
+- **Para dejar el grafo como estaba:** `python -m scripts.limpiar_pedidos` borra los pedidos creados desde consultas y deja `req_01` a `req_03`.
 
 ### Para controlar una respuesta contra el grafo
 

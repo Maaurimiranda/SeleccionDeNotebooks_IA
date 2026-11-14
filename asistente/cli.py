@@ -3,8 +3,9 @@
 Uso:
   python -m asistente.cli                       # bucle interactivo
   python -m asistente.cli "¿Qué me recomendás para req_01?"   # una sola consulta
+  python -m asistente.cli "Quiero programar y usar Docker, tengo 900 USD"   # consulta libre: registra un pedido
   python -m asistente.cli --traza ...           # muestra la traza de cada respuesta
-Comandos del bucle: /pedido req_01 · /salir
+Comandos del bucle: /pedido req_01 · /nuevo · /salir
 """
 import argparse
 import json
@@ -17,8 +18,12 @@ def mostrar(res: dict, con_traza: bool):
     print(f"\n{res['respuesta']}\n")
     print(f"  [origen: {res['origen_respuesta']} · pedido: {res['requerimiento_id'] or '-'} · "
           f"submódulos: {', '.join(res['submodulos_consultados']) or '-'}]")
+    if res.get("pedido_nuevo"):
+        print(f"  [pedido nuevo registrado en Neo4j: {res['requerimiento_id']}]")
     if con_traza:
         t = res["traza"]
+        if t.get("extraccion"):
+            print("  JSON extraído por Ollama:", json.dumps(t["extraccion"]["json"], ensure_ascii=False))
         print("  plan:", json.dumps(t["plan"], ensure_ascii=False))
         if t["validacion"]["observaciones"]:
             print("  observaciones:", "; ".join(t["validacion"]["observaciones"]))
@@ -42,7 +47,8 @@ def main():
     if args.texto:
         mostrar(orq.consultar(" ".join(args.texto), sesion=sesion), args.traza)
         return
-    print("Asistente de notebooks · /pedido req_01 fija el pedido · /salir termina")
+    print("Asistente de notebooks · contá para qué querés la notebook y cuánto querés gastar, o /pedido req_01 "
+          "para un pedido cargado · /nuevo empieza otra conversación · /salir termina")
     while True:
         try:
             linea = input(f"\n[{sesion.get('requerimiento_id') or 'sin pedido'}] > ").strip()
@@ -52,6 +58,10 @@ def main():
             continue
         if linea in ("/salir", "/exit", "/q"):
             break
+        if linea == "/nuevo":
+            sesion.clear()
+            print("Conversación nueva: sin pedido.")
+            continue
         if linea.startswith("/pedido"):
             req = normalizar_pedido(linea.removeprefix("/pedido"))
             if req:

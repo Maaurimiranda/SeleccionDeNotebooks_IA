@@ -1,5 +1,8 @@
 // =====================================================================
 // cypher/20_sm2.cypher
+// Inferencia filtrada por el parametro req (D-08). Se carga con: python -m scripts.cargar_grafo
+// En Neo4j Browser, antes de pegar este archivo, correr  :param req => null  (todos los pedidos)
+// o  :param req => 'req_101'  (uno solo). Sin ese parametro Neo4j da el error "Expected parameter(s): req".
 // Bloques del canonico: 10.c.1 · 10.c.2
 // Duenio: Miranda
 // Origen: docs/cypher/Grupo_2_PG2_U1_corregido.cypher, cortado sin cambiar el contenido (PG3-02).
@@ -10,6 +13,7 @@
 // margen hasta el maximo sobre la RAM recomendada (vacio si se desconoce)
 MATCH (wr:Parametro {nombre:'P_PESO_RANURAS_AMPLIABILIDAD'}), (rr:Parametro {nombre:'P_RANURAS_REFERENCIA'})
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(r:RAM)
 SET ev.suficiencia_rho = CASE WHEN r.ram_gb / toFloat(pf.ram_min) > 3.0 THEN 3.0
                               ELSE r.ram_gb / toFloat(pf.ram_min) END,
@@ -217,6 +221,7 @@ MERGE (n)-[:GENERA]->(:Alerta {tipo:'Ampliabilidad no verificada', submodulo_ori
 // (no se descarta por la RAM; el costo del modulo sale del catalogo)
 MATCH (cm:Parametro {nombre:'P_COSTO_MODULO_RAM_USD'})
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(r:RAM)
 WHERE r.ram_gb < pf.ram_min AND r.ampliabilidad = 'ampliable'
 MERGE (ev)-[:GENERA]->(:Alerta {tipo:'Condicionado a ampliacion', submodulo_origen:'SM2',

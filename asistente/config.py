@@ -15,3 +15,6 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
 MAX_CARACTERES = int(os.getenv("MAX_CARACTERES", "1500"))
 MAX_REGENERACIONES = int(os.getenv("MAX_REGENERACIONES", "2"))
 DIR_TRAZAS = os.getenv("DIR_TRAZAS", "trazas")
+
+# INT-R10 (SM1): pesos por dólar para convertir un presupuesto en ARS. Si falta, se le pide el monto en USD.
+COTIZACION_ARS_USD = float(os.getenv("COTIZACION_ARS_USD") or 0) or None

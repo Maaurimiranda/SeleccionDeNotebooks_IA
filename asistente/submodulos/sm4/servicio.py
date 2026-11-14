@@ -15,7 +15,9 @@ from asistente.submodulos.sm4.esquemas import (EvidenciaComparar, EvidenciaCosto
 
 def _sin_evaluaciones(requerimiento_id: str) -> Aclaracion:
     return Aclaracion(f"El pedido {requerimiento_id} no tiene notebooks evaluadas que recomendar. "
-                      "Si el perfil quedó indeterminado, primero hay que responder la pregunta pendiente.")
+                      "Si el perfil quedó indeterminado, primero hay que responder la pregunta pendiente. Si no, "
+                      "la base de conocimiento todavía no tiene los datos de rendimiento de las notebooks "
+                      "(SALIDA_PI2) para el perfil dominante del pedido.")
 
 
 def _notebook(f: dict) -> dict:

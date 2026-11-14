@@ -335,7 +335,7 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 
 **Decisiones:** una lista única de intenciones con prefijo de submódulo, una forma de traza y de evidencia con espacio de nombres por submódulo (lo proponen SM1 §12.3 y SM2 §15.1), un prompt de explicación común (SM4 §7.2 lo ofrece), audiencia, tono, longitud y política de pedido por defecto.
 
-### D-08 · Pedidos nuevos: escritura e inferencia incremental — **RESUELTA (09/11/2026, opción recomendada)**
+### D-08 · Pedidos nuevos: escritura e inferencia incremental — **RESUELTA (09/11/2026, opción recomendada) · IMPLEMENTADA (14/11/2026, issues #12 a #24)**
 
 > **Decisión:**
 > - **El script se separa en tres:** carga (bloques 0 a 8), inferencia (9 y 10) y consultas (11 a 13).
@@ -343,6 +343,7 @@ Rehacer C-A sobre A (opción b) tocaría los bloques 10.c a 10.f, las consultas 
 > - **Escritura solo para registrar o aclarar:** `SM1.registrar_pedido` y `SM1.aclarar_pedido` abren la única sesión de escritura (D-07 §10); el resto es `READ_ACCESS`.
 > - **Una aclaración actualiza el mismo `Requerimiento`:** se completan las actividades o la dedicación, la `Pregunta` pasa a `estado: 'respondida'` y se vuelve a inferir ese pedido. No se crea un pedido nuevo (SM1 13-G).
 > - **El `DETACH DELETE` inicial** queda solo en el script de carga.
+> - **Implementación (14/11):** la consulta libre pasa primero por Ollama, que extrae un JSON (`asistente/extractor.py`); SM1 lo valida y escribe el pedido (ids desde `req_101`) y la inferencia de `cypher/10` a `40` con el filtro `($req IS NULL OR c.id = $req)` en una sola transacción (`asistente/inferencia.py`, `Grafo.escribir_lote`). La carga completa sigue pasando `req = NULL`.
 >
 > Lo de abajo describe la situación previa.
 

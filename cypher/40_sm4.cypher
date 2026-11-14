@@ -1,5 +1,8 @@
 // =====================================================================
 // cypher/40_sm4.cypher
+// Inferencia filtrada por el parametro req (D-08). Se carga con: python -m scripts.cargar_grafo
+// En Neo4j Browser, antes de pegar este archivo, correr  :param req => null  (todos los pedidos)
+// o  :param req => 'req_101'  (uno solo). Sin ese parametro Neo4j da el error "Expected parameter(s): req".
 // Bloques del canonico: 10.f
 // Duenio: Luconi
 // Origen: docs/cypher/Grupo_2_PG2_U1_corregido.cypher, cortado sin cambiar el contenido (PG3-02).
@@ -11,6 +14,7 @@
 // Pesos del perfil con el incremento por prioridad (REC-R4, REC-R5)
 MATCH (ip:Parametro {nombre:'P_INCREMENTO_PRIORIDAD'})
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)
 WITH ev,
      pf.peso_rendimiento + (CASE WHEN c.prioridad = 'rendimiento' THEN ip.valor ELSE 0.0 END) AS br,
@@ -27,7 +31,8 @@ MERGE (ev)-[:ACTIVA]->(q5);
 
 // Adecuacion global y excedente de presupuesto
 MATCH (c:Requerimiento)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)
-WHERE ev.adecuacion_grafica IS NOT NULL AND n.adecuacion_movilidad IS NOT NULL
+WHERE ($req IS NULL OR c.id = $req)
+  AND ev.adecuacion_grafica IS NOT NULL AND n.adecuacion_movilidad IS NOT NULL
 SET ev.adecuacion_global = round(ev.peso_rendimiento * ev.adecuacion_rendimiento
                                + ev.peso_grafica     * ev.adecuacion_grafica
                                + ev.peso_movilidad   * n.adecuacion_movilidad, 3),
@@ -41,7 +46,8 @@ SET ev.adecuacion_global = round(ev.peso_rendimiento * ev.adecuacion_rendimiento
 // adecuacion global minima (grado faltante = 0) y maxima (= 1) y se infiere
 // el grado de recomendacion en los dos escenarios, como dos lecturas.
 MATCH (c:Requerimiento)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)
-WHERE ev.adecuacion_grafica IS NOT NULL AND n.adecuacion_movilidad IS NULL
+WHERE ($req IS NULL OR c.id = $req)
+  AND ev.adecuacion_grafica IS NOT NULL AND n.adecuacion_movilidad IS NULL
 WITH c, ev, n,
      ev.peso_rendimiento * ev.adecuacion_rendimiento + ev.peso_grafica * ev.adecuacion_grafica AS base,
      round(CASE WHEN n.precio_usd <= c.presupuesto_usd THEN 0.0
@@ -176,6 +182,7 @@ MERGE (ev)-[:ACTIVA]->(q);
 
 // Alertas de infra y sobredimensionamiento (REC-R7, REC-R13), por evaluacion
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(r:RAM)
 WHERE r.ram_gb < pf.ram_min
 MERGE (ev)-[:GENERA]->(:Alerta {tipo:'Infradimensionamiento', submodulo_origen:'SM4',
@@ -183,6 +190,7 @@ MERGE (ev)-[:GENERA]->(:Alerta {tipo:'Infradimensionamiento', submodulo_origen:'
   mensaje:'La RAM (' + toString(r.ram_gb) + ' GB) no llega al minimo del perfil (' + toString(pf.ram_min) + ' GB)'});
 
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(r:RAM)
 WHERE pf.ram_sobra IS NOT NULL AND r.ram_gb >= pf.ram_sobra
 MERGE (ev)-[:GENERA]->(:Alerta {tipo:'Sobredimensionamiento', submodulo_origen:'SM4',
@@ -191,7 +199,7 @@ MERGE (ev)-[:GENERA]->(:Alerta {tipo:'Sobredimensionamiento', submodulo_origen:'
 
 // GM-R11: alerta de autonomia insuficiente
 MATCH (al:Parametro {nombre:'P_ALFA_ALERTA_AUTONOMIA'})
-MATCH (c:Requerimiento) WHERE c.prioridad = 'autonomia'
+MATCH (c:Requerimiento) WHERE ($req IS NULL OR c.id = $req) AND c.prioridad = 'autonomia'
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(b:Bateria)
 MATCH (b)-[f:PERTENECE_A]->(e:EtiquetaDifusa {variable:'autonomia_h', nombre:'baja'})
 WHERE f.grado >= al.valor
@@ -203,7 +211,8 @@ MERGE (ev)-[:GENERA]->(:Alerta {tipo:'Autonomia insuficiente', submodulo_origen:
 // Una consulta puntual (req_03) no arma ranking: su respuesta es la evaluacion.
 MATCH (mx:Parametro {nombre:'P_MAX_RECOMENDADAS'}), (me:Parametro {nombre:'P_MARGEN_EMPATE'})
 MATCH (c:Requerimiento)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(r:RAM)
-WHERE ev.estado STARTS WITH 'Recomendada' AND ev.excedente_presupuesto = 0.0
+WHERE ($req IS NULL OR c.id = $req)
+  AND ev.estado STARTS WITH 'Recomendada' AND ev.excedente_presupuesto = 0.0
   AND NOT EXISTS { MATCH (c)-[:CONSULTA_POR]->(:Notebook) }
 WITH c, mx, me, ev, n, r,
      CASE r.nivel_ampliabilidad WHEN 'alta' THEN 3 WHEN 'media' THEN 2
@@ -232,12 +241,14 @@ MERGE (rec)-[:ACTIVA]->(q);
 // REC-R9 en la traza: la recomendacion de un pedido con prioridad 'precio'
 // queda ligada a la regla que cambio su criterio de orden (correccion PG3).
 MATCH (c:Requerimiento {prioridad:'precio'})-[:RECIBE]->(rec:Recomendacion), (q:Regla {id:'REC-R9'})
+WHERE ($req IS NULL OR c.id = $req)
 MERGE (rec)-[:ACTIVA]->(q);
 
 // Alternativa fuera de presupuesto (frame Recomendacion de PG1: maximo 1).
 // Con REC-RD3 una notebook muy adecuada que se pasa un poco no desaparece:
 // baja a "considerar" y se ofrece aparte, nunca entre las tres primeras.
 MATCH (c:Requerimiento)-[:RECIBE]->(rec:Recomendacion)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)
 WHERE ev.estado STARTS WITH 'Recomendada' AND ev.excedente_presupuesto > 0.0
 WITH rec, ev, n ORDER BY ev.grado_recomendacion DESC
@@ -251,7 +262,8 @@ SET p.grado_recomendacion = ev.grado_recomendacion,
 // (un requerimiento con perfil indeterminado no recibe "sin alternativa":
 //  no es que no haya notebook adecuada, es que todavia no se sabe para que)
 MATCH (c:Requerimiento)
-WHERE c.perfil_dominante <> 'indeterminado'
+WHERE ($req IS NULL OR c.id = $req)
+  AND c.perfil_dominante <> 'indeterminado'
   AND NOT EXISTS { MATCH (c)-[:CONSULTA_POR]->(:Notebook) }
   AND NOT EXISTS { MATCH (c)-[:RECIBE]->(:Recomendacion) }
 MERGE (c)-[:RECIBE]->(s:SinAlternativaAdecuada {requerimiento:c.id,

@@ -1,5 +1,8 @@
 // =====================================================================
 // cypher/30_sm3.cypher
+// Inferencia filtrada por el parametro req (D-08). Se carga con: python -m scripts.cargar_grafo
+// En Neo4j Browser, antes de pegar este archivo, correr  :param req => null  (todos los pedidos)
+// o  :param req => 'req_101'  (uno solo). Sin ese parametro Neo4j da el error "Expected parameter(s): req".
 // Bloques del canonico: 9.c · 9.d · 9.e · 10.d · 10.e
 // Duenio: de Coninck
 // Origen: docs/cypher/Grupo_2_PG2_U1_corregido.cypher, cortado sin cambiar el contenido (PG3-02).
@@ -93,6 +96,7 @@ SET n.adecuacion_movilidad = round(y0, 3),
 // 10.e SM3 - GM-RD4 a GM-RD6: grado de la GPU dedicada, por evaluacion
 // (el margen de gama se mide contra el perfil de cada pedido)
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(g:GPU)-[:ES_DE_GAMA]->(gg:GamaGPU)
 WHERE g.dedicada AND g.potencia_relativa IS NOT NULL AND pf.gama_gpu_min - gg.indice <= 1
 WITH ev, g, pf.gama_gpu_min - gg.indice AS brecha
@@ -146,6 +150,7 @@ SET ev.grado_gpu = round(g0, 3),
 
 // Las GPU integradas que cumplen la gama del perfil no pasan por S2 (GM-R3)
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(n:Notebook)-[:POSEE]->(g:GPU)-[:ES_DE_GAMA]->(gg:GamaGPU)
 WHERE NOT g.dedicada AND gg.indice >= pf.gama_gpu_min
 SET ev.grado_gpu = 1.0,
@@ -160,6 +165,7 @@ MERGE (ev)-[:ACTIVA]->(q);
 // ningun perfil pide mas que la gama de la dedicada del catalogo (4).
 MATCH (u:Parametro {nombre:'P_GRADO_GPU_UN_NIVEL_ABAJO'})
 MATCH (c:Requerimiento)-[:TIENE_PERFIL_DOMINANTE]->(pf:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (c)-[:EVALUA]->(ev:Evaluacion)-[:SOBRE]->(:Notebook)-[:POSEE]->(g:GPU)-[:ES_DE_GAMA]->(gg:GamaGPU)
 WITH u, ev, g, pf.gama_gpu_min - gg.indice AS brecha
 WHERE (NOT g.dedicada AND brecha >= 1) OR (g.dedicada AND brecha >= 2)

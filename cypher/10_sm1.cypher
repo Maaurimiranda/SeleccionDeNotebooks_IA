@@ -1,5 +1,8 @@
 // =====================================================================
 // cypher/10_sm1.cypher
+// Inferencia filtrada por el parametro req (D-08). Se carga con: python -m scripts.cargar_grafo
+// En Neo4j Browser, antes de pegar este archivo, correr  :param req => null  (todos los pedidos)
+// o  :param req => 'req_101'  (uno solo). Sin ese parametro Neo4j da el error "Expected parameter(s): req".
 // Bloques del canonico: 9 (encabezado) · 9.a · 9.b · 10 (encabezado) · 10.a · 10.b
 // Duenio: Olea
 // Origen: docs/cypher/Grupo_2_PG2_U1_corregido.cypher, cortado sin cambiar el contenido (PG3-02).
@@ -75,7 +78,8 @@ SET a.grado = CASE WHEN den = 0 THEN null ELSE round(num / den, 3) END;
 // Grado del perfil = MAX entre sus actividades; alfa-corte INT-R5
 MATCH (u:Parametro {nombre:'umbral_exigencia'}), (bf:Parametro {nombre:'banda_frontera'})
 MATCH (c:Requerimiento)-[:INCLUYE]->(a:Actividad)-[:APUNTA_A]->(p:Perfil)
-WHERE a.grado IS NOT NULL
+WHERE ($req IS NULL OR c.id = $req)
+  AND a.grado IS NOT NULL
 WITH u, bf, c, p, max(a.grado) AS grado
 MERGE (c)-[r:PERTENECE]->(p)
 SET r.grado = grado, r.origen = 'actividad declarada',
@@ -84,6 +88,7 @@ SET r.grado = grado, r.origen = 'actividad declarada',
 
 // Perfil dominante (INT-R11 a R13: el de mayor grado; empate -> mas exigente)
 MATCH (c:Requerimiento)-[r:PERTENECE]->(p:Perfil)
+WHERE ($req IS NULL OR c.id = $req)
 WITH c, p, r ORDER BY r.grado DESC, p.ram_min DESC
 WITH c, collect(p)[0] AS dom, collect(r)[0] AS rdom
 SET c.perfil_dominante = dom.codigo, c.grado_perfil_dominante = rdom.grado
@@ -101,7 +106,8 @@ FOREACH (_ IN CASE WHEN empatados > 1 THEN [1] ELSE [] END | MERGE (c)-[:ACTIVA]
 // cambiaria que notebook se recomienda. El requerimiento no se evalua contra
 // el catalogo hasta que se complete; se registra la alerta y la pregunta.
 MATCH (c:Requerimiento)
-WHERE NOT EXISTS { MATCH (c)-[:PERTENECE]->(:Perfil) }
+WHERE ($req IS NULL OR c.id = $req)
+  AND NOT EXISTS { MATCH (c)-[:PERTENECE]->(:Perfil) }
   AND c.aclaracion = 'sin respuesta'
 SET c.perfil_dominante = 'indeterminado', c.grado_perfil_dominante = null
 MERGE (c)-[:GENERA]->(:Alerta {tipo:'Perfil indeterminado', submodulo_origen:'SM1',
@@ -115,6 +121,7 @@ MERGE (c)-[:ACTIVA]->(q);
 
 // 10.b SM1 - INT-RD4 a INT-RD7: intensidad grafica requerida
 MATCH (c:Requerimiento)-[:INCLUYE]->(a:Actividad)-[:USA]->(j:Juego)
+WHERE ($req IS NULL OR c.id = $req)
 MATCH (a)-[fd:PERTENECE_A]->(ed:EtiquetaDifusa {variable:'dedicacion_h'})
 WITH c, a, j, collect({et:ed.nombre, mu:fd.grado}) AS D
 MATCH (j)-[fe:PERTENECE_A]->(ee:EtiquetaDifusa {variable:'exigencia_grafica'})
